@@ -1,0 +1,62 @@
+﻿<localctl:BaseWindow x:Class="AutoGame.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AutoGame"
+        xmlns:localctl="clr-namespace:AutoGame.Controls"
+        xmlns:localvm="clr-namespace:AutoGame.ViewModels"
+        mc:Ignorable="d"
+        Title="Auto Game"
+        WindowState="{Binding WindowState, Mode=TwoWay}"
+        ShowWindow="{Binding ShowWindow, Mode=TwoWay}"
+        NotifyIconVisible="{Binding NotifyIconVisible, Mode=TwoWay}"
+        Height="200" Width="350">
+    <Window.DataContext>
+        <localvm:MainWindowViewModel />
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <StackPanel Margin="5" Orientation="Horizontal">
+                    <Label Content="Preferred game launcher:" />
+                    <ComboBox
+                        ItemsSource="{x:Static local:Constants.GameLaunchers}"
+                        DisplayMemberPath="Value"
+                        SelectedValuePath="Key" 
+                        SelectedValue="{Binding Config.GameLauncher, Mode=TwoWay}" />
+                </StackPanel>
+                <CheckBox 
+                    Margin="5"
+                    Content="Launch when a gamepad is connected"
+                    IsChecked="{Binding Config.LaunchWhenGamepadConnected, Mode=TwoWay}" />
+                <CheckBox 
+                    Margin="5"
+                    Content="Launch when a parsec connection is established"
+                    IsChecked="{Binding Config.LaunchWhenParsecConnected, Mode=TwoWay}" />
+            </StackPanel>
+        </ScrollViewer>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Margin" Value="5" />
+                    <Setter Property="MinWidth" Value="75" />
+                </Style>
+            </StackPanel.Resources>
+            <Button 
+                Content="OK" 
+                Command="{Binding OKCommand}" />
+            <Button 
+                Content="Cancel" 
+                Command="{Binding CancelCommand}" />
+            <Button 
+                Content="Apply" 
+                Command="{Binding ApplyCommand}"
+                IsEnabled="{Binding Config.IsDirty}"/>
+        </StackPanel>
+    </Grid>
+</localctl:BaseWindow>

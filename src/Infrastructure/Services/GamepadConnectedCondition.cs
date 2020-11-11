@@ -1,18 +1,15 @@
 ﻿using AutoGame.Infrastructure.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Security.Principal;
-using System.Text;
 using Windows.Gaming.Input;
 
 namespace AutoGame.Infrastructure.Services
 {
-    public class GamepadConnectedLaunchCondition : ILaunchCondition
+    public class GamepadConnectedCondition : ILaunchCondition
     {
         private readonly object checkConditionLock = new object();
 
-        public GamepadConnectedLaunchCondition()
+        public GamepadConnectedCondition()
         {
         }
 
@@ -24,7 +21,7 @@ namespace AutoGame.Infrastructure.Services
             this.CheckConditionMet();
         }
 
-        private void Gamepad_GamepadAdded(object sender, Windows.Gaming.Input.Gamepad e)
+        private void Gamepad_GamepadAdded(object sender, Gamepad e)
         {
             this.CheckConditionMet();
         }

@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace AutoGame.Infrastructure.Helper
 {
     // From: https://gist.github.com/cheynewallace/5971686
-    static class NetStatPortsAndProcessNames
+    internal static class NetStatPortsAndProcessNames
     {
         public static IList<Port> GetNetStatPorts()
         {

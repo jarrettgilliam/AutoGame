@@ -1,14 +1,14 @@
 ﻿using AutoGame.Infrastructure.Helper;
 using AutoGame.Infrastructure.Interfaces;
+using NAudio.CoreAudioApi;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using NAudio.CoreAudioApi;
 
 namespace AutoGame.Infrastructure.Services
 {
-    public class ParsecConnectedLaunchCondition : ILaunchCondition
+    public class ParsecConnectedCondition : ILaunchCondition
     {
         private readonly object checkConditionLock = new object();
 
@@ -18,7 +18,7 @@ namespace AutoGame.Infrastructure.Services
         private MMDeviceEnumerator mmDeviceEnumerator;
         private MMDevice mmDevice;
 
-        public ParsecConnectedLaunchCondition()
+        public ParsecConnectedCondition()
         {
         }
 
