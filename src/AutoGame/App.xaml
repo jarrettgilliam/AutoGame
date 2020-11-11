@@ -1,7 +1,7 @@
-﻿<Application x:Class="Parscript.App"
+﻿<Application x:Class="AutoGame.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Parscript"
+             xmlns:local="clr-namespace:AutoGame"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

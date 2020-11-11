@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Parscript.Infrastructure.Helper
+namespace AutoGame.Infrastructure.Helper
 {
     // From: https://gist.github.com/cheynewallace/5971686
     static class NetStatPortsAndProcessNames

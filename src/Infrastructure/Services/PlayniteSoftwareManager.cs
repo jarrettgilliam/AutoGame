@@ -1,4 +1,5 @@
-﻿using Parscript.Infrastructure.Interfaces;
+﻿using AutoGame.Infrastructure.Helper;
+using AutoGame.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Parscript.Infrastructure.Services
+namespace AutoGame.Infrastructure.Services
 {
     public class PlayniteSoftwareManager : ISoftwareManager
     {
@@ -16,11 +17,8 @@ namespace Parscript.Infrastructure.Services
 
         public void Start()
         {
-            Process.Start(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $@"Playnite\{PlayniteFullscreen}.exe"));
-        }
-
-        public void Stop()
-        {
+            Process p = Process.Start(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Playnite", $"{PlayniteFullscreen}.exe"));
+            ////NativeMethods.SetForegroundWindow(p.MainWindowHandle);
         }
     }
 }

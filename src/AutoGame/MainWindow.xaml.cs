@@ -17,7 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Parscript
+namespace AutoGame
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -32,55 +32,50 @@ namespace Parscript
             this.Loaded += this.MainWindow_Loaded;
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.SetWindowState(WindowState.Minimized);
-        }
+        private MainWindowViewModel ViewModel => this.DataContext as MainWindowViewModel;
 
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
 
             this.notifyIcon = new System.Windows.Forms.NotifyIcon();
-            this.notifyIcon.Click += this.notifyIcon_Click;
-            this.notifyIcon.Icon = new System.Drawing.Icon(@"Icons\Parscript.ico");
-
-            this.StateChanged += this.OnStateChanged;
+            this.notifyIcon.Click += this.NotifyIcon_Click;
+            this.notifyIcon.Icon = new Icon(@"Icons\AutoGame.ico");
         }
 
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
             this.Loaded -= this.MainWindow_Loaded;
-            this.notifyIcon.Click -= this.notifyIcon_Click;
+            this.notifyIcon.Click -= this.NotifyIcon_Click;
             this.notifyIcon.Dispose();
             this.notifyIcon = null;
-            ((MainWindowViewModel)this.DataContext).Dispose();
+            this.ViewModel?.Dispose();
         }
 
-        private void notifyIcon_Click(object sender, EventArgs e)
-        {
-            this.SetWindowState(WindowState.Normal);
-        }
-
-        private void SetWindowState(WindowState state)
-        {
-            this.WindowState = state;
-            this.OnStateChanged(this, EventArgs.Empty);
-        }
-
-        private void OnStateChanged(object sender, EventArgs e)
+        protected override void OnStateChanged(EventArgs e)
         {
             if (this.WindowState == WindowState.Minimized)
             {
-                this.ShowInTaskbar = false;
+                this.Hide();
                 this.notifyIcon.Visible = true;
             }
-            else
-            {
-                this.notifyIcon.Visible = false;
-                this.ShowInTaskbar = true;
-            }
+
+            base.OnStateChanged(e);
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.Loaded -= this.MainWindow_Loaded;
+            this.WindowState = WindowState.Minimized;
+            this.ViewModel?.LoadedCommand?.Execute(null);
+        }
+
+        private void NotifyIcon_Click(object sender, EventArgs e)
+        {
+            this.Show();
+            this.notifyIcon.Visible = false;
+            this.WindowState = WindowState.Normal;
         }
     }
 }
