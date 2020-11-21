@@ -88,7 +88,11 @@ namespace AutoGame.ViewModels
 
         private void OnOK()
         {
-            this.OnApply();
+            if (this.Config.IsDirty)
+            {
+                this.OnApply();
+            }
+
             this.WindowState = WindowState.Minimized;
         }
 
