@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace AutoGame.Infrastructure.Services
 {
-    public class PlayniteManager : ILauncherManager
+    public class PlayniteFullscreenManager : ISoftwareManager
 
     {
         private const string PlayniteFullscreen = "Playnite.FullscreenApp";

@@ -1,6 +1,6 @@
 ﻿namespace AutoGame.Infrastructure.Interfaces
 {
-    public interface ILauncherManager
+    public interface ISoftwareManager
     {
         bool IsRunning { get; }
 

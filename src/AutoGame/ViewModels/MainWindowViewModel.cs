@@ -15,7 +15,7 @@ namespace AutoGame.ViewModels
     {
         private readonly ConfigService configService;
 
-        private ILauncherManager software;
+        private ISoftwareManager software;
         private IList<ILaunchCondition> launchConditions;
         private Config config;
 
@@ -112,7 +112,7 @@ namespace AutoGame.ViewModels
         {
             if (this.Config.GameLauncher == Constants.Playnite)
             {
-                this.software = new PlayniteManager();
+                this.software = new PlayniteFullscreenManager();
             }
             else
             {

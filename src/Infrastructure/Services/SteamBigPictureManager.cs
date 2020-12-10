@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace AutoGame.Infrastructure.Services
 {
-    public class SteamBigPictureManager : ILauncherManager
+    public class SteamBigPictureManager : ISoftwareManager
     {
         // From: https://www.displayfusion.com/ScriptedFunctions/View/?ID=b21d08ca-438a-41e5-8b9d-0125b07a2abc
         public bool IsRunning => WindowHelper.FindWindow("CUIEngineWin32", "Steam") != IntPtr.Zero;
