@@ -12,7 +12,7 @@ namespace AutoGame.Infrastructure.Services
 
         public void Start()
         {
-            Process.Start(@"C:\Program Files (x86)\Steam\Steam.exe", "-start steam://open/bigpicture");
+            Process.Start(@"C:\Program Files (x86)\Steam\Steam.exe", "-start steam://open/bigpicture -fulldesktopres");
         }
     }
 }
