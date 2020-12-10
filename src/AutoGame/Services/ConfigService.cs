@@ -13,7 +13,7 @@ namespace AutoGame.Services
                 nameof(AutoGame),
                 nameof(Config) + ".json");
 
-        public Config Load()
+        public Config Load(Func<Config> defaultConfigFactory)
         {
             Config config;
 
@@ -29,7 +29,7 @@ namespace AutoGame.Services
                 ex is FileNotFoundException ||
                 ex is DirectoryNotFoundException)
             {
-                config = new Config();
+                config = defaultConfigFactory.Invoke();
             }
 
             config.IsDirty = false;
@@ -44,6 +44,7 @@ namespace AutoGame.Services
             using (StreamWriter sw = new StreamWriter(this.configPath))
             using (JsonTextWriter writer = new JsonTextWriter(sw))
             {
+                writer.Formatting = Formatting.Indented;
                 JsonSerializer.CreateDefault().Serialize(writer, config);
             }
 

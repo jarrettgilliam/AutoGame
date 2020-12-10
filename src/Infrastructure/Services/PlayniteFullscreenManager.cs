@@ -8,16 +8,24 @@ using System.Linq;
 namespace AutoGame.Infrastructure.Services
 {
     public class PlayniteFullscreenManager : ISoftwareManager
-
     {
-        private const string PlayniteFullscreen = "Playnite.FullscreenApp";
+        private const string PLAYNITE_FULLSCREEN_APP = "Playnite.FullscreenApp";
 
-        public bool IsRunning => Process.GetProcessesByName(PlayniteFullscreen)?.Any() == true;
+        public string Key { get; } = "PlayniteFullscreen";
 
-        public void Start()
+        public string Description { get; } = "Playnite Fullscreen";
+
+        public bool IsRunning => Process.GetProcessesByName(PLAYNITE_FULLSCREEN_APP)?.Any() == true;
+
+        public void Start(string softwarePath)
         {
-            Process.Start(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Playnite", $"{PlayniteFullscreen}.exe"));
+            Process.Start(softwarePath);
             WindowHelper.RepeatTryForceForegroundWindowByTitle("Playnite", TimeSpan.FromSeconds(5));
+        }
+
+        public string FindSoftwarePathOrDefault()
+        {
+            return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Playnite", $"{PLAYNITE_FULLSCREEN_APP}.exe");
         }
     }
 }

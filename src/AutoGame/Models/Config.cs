@@ -1,23 +1,19 @@
 ﻿using Newtonsoft.Json;
 using Prism.Mvvm;
 using System.ComponentModel;
-using System.Linq;
 
 namespace AutoGame.Models
 {
     public class Config : BindableBase
     {
         private bool isDirty;
-        private string gameLauncher;
+        private string softwareKey;
+        private string softwarePath;
         private bool launchWhenGamepadConnected;
         private bool launchWhenParsecConnected;
 
         public Config()
         {
-            this.GameLauncher = Constants.GameLaunchers.FirstOrDefault().Key;
-            this.LaunchWhenGamepadConnected = true;
-            this.LaunchWhenParsecConnected = true;
-
             this.PropertyChanged += this.SetIsDirty;
         }
 
@@ -28,10 +24,16 @@ namespace AutoGame.Models
             set => this.SetProperty(ref this.isDirty, value);
         }
 
-        public string GameLauncher
+        public string SoftwareKey
         {
-            get => this.gameLauncher;
-            set => this.SetProperty(ref this.gameLauncher, value);
+            get => this.softwareKey;
+            set => this.SetProperty(ref this.softwareKey, value);
+        }
+
+        public string SoftwarePath
+        {
+            get => this.softwarePath;
+            set => this.SetProperty(ref this.softwarePath, value);
         }
 
         public bool LaunchWhenGamepadConnected

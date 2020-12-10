@@ -2,10 +2,14 @@
 using AutoGame.Infrastructure.Services;
 using AutoGame.Models;
 using AutoGame.Services;
+using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -15,7 +19,7 @@ namespace AutoGame.ViewModels
     {
         private readonly ConfigService configService;
 
-        private ISoftwareManager software;
+        private ISoftwareManager appliedSoftware;
         private IList<ILaunchCondition> launchConditions;
         private Config config;
 
@@ -28,6 +32,7 @@ namespace AutoGame.ViewModels
             this.configService = new ConfigService();
             this.LoadedCommand = new DelegateCommand(this.OnLoaded);
             this.NotifyIconClickCommand = new DelegateCommand(this.OnNotifyIconClick);
+            this.BrowseSoftwarePathCommand = new DelegateCommand(this.OnBrowseSoftwarePath);
             this.OKCommand = new DelegateCommand(this.OnOK);
             this.CancelCommand = new DelegateCommand(this.OnCancel);
             this.ApplyCommand = new DelegateCommand(this.OnApply);
@@ -37,16 +42,40 @@ namespace AutoGame.ViewModels
 
         public ICommand NotifyIconClickCommand { get; }
 
+        public ICommand BrowseSoftwarePathCommand { get; }
+
         public ICommand OKCommand { get; }
 
         public ICommand CancelCommand { get; }
 
         public ICommand ApplyCommand { get; }
 
+        public IList<ISoftwareManager> AvailableSoftware { get; } = new ISoftwareManager[]
+        {
+            new SteamBigPictureManager(),
+            new PlayniteFullscreenManager()
+        };
+
         public Config Config
         {
             get => this.config;
-            set => this.SetProperty(ref this.config, value);
+
+            set
+            {
+                var oldValue = this.config;
+                if (this.SetProperty(ref this.config, value))
+                {
+                    if (oldValue != null)
+                    {
+                        oldValue.PropertyChanged -= this.OnConfigSoftwareKeyChanged;
+                    }
+
+                    if (value != null)
+                    {
+                        value.PropertyChanged += this.OnConfigSoftwareKeyChanged;
+                    }
+                }
+            }
         }
 
         public WindowState WindowState
@@ -70,13 +99,13 @@ namespace AutoGame.ViewModels
         public void Dispose()
         {
             this.DisposeLaunchConditions();
-            this.software = null;
+            this.appliedSoftware = null;
         }
 
         private void OnLoaded()
         {
             this.WindowState = WindowState.Minimized;
-            this.Config = this.configService.Load();
+            this.Config = this.configService.Load(this.CreateDefaultConfig);
             this.ApplyConfiguration();
         }
 
@@ -84,6 +113,31 @@ namespace AutoGame.ViewModels
         {
             this.ShowWindow = true;
             this.WindowState = WindowState.Normal;
+        }
+
+        private void OnBrowseSoftwarePath()
+        {
+            ISoftwareManager software = this.GetSoftwareByKey(this.Config.SoftwareKey);
+            string defaultPath = software.FindSoftwarePathOrDefault();
+            string executable = Path.GetFileName(defaultPath);
+
+            var dialog = new OpenFileDialog()
+            {
+                FileName = executable,
+                InitialDirectory = Path.GetDirectoryName(this.Config.SoftwarePath)
+            };
+
+            if (string.IsNullOrEmpty(dialog.InitialDirectory))
+            {
+                dialog.InitialDirectory = Path.GetDirectoryName(defaultPath);
+            }
+
+            dialog.Filter = $"{software.Description}|{executable}";
+
+            if (dialog.ShowDialog() == true)
+            {
+                this.Config.SoftwarePath = dialog.FileName;
+            }
         }
 
         private void OnOK()
@@ -98,7 +152,7 @@ namespace AutoGame.ViewModels
 
         private void OnCancel()
         {
-            this.Config = this.configService.Load();
+            this.Config = this.configService.Load(this.CreateDefaultConfig);
             this.WindowState = WindowState.Minimized;
         }
 
@@ -108,16 +162,31 @@ namespace AutoGame.ViewModels
             this.ApplyConfiguration();
         }
 
+        private Config CreateDefaultConfig()
+        {
+            ISoftwareManager s = this.AvailableSoftware.First();
+
+            return new Config()
+            {
+                SoftwareKey = s.Key,
+                SoftwarePath = s.FindSoftwarePathOrDefault(),
+                LaunchWhenGamepadConnected = true,
+                LaunchWhenParsecConnected = true
+            };
+        }
+
+        private void OnConfigSoftwareKeyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(this.Config.SoftwareKey) && sender is Config config)
+            {
+                ISoftwareManager s = this.GetSoftwareByKey(config.SoftwareKey);
+                config.SoftwarePath = s.FindSoftwarePathOrDefault();
+            }
+        }
+
         private void ApplyConfiguration()
         {
-            if (this.Config.GameLauncher == Constants.Playnite)
-            {
-                this.software = new PlayniteFullscreenManager();
-            }
-            else
-            {
-                this.software = new SteamBigPictureManager();
-            }
+            this.appliedSoftware = this.GetSoftwareByKey(this.Config.SoftwareKey);
 
             this.DisposeLaunchConditions();
 
@@ -138,6 +207,12 @@ namespace AutoGame.ViewModels
                 condition.ConditionMet += this.OnLaunchConditionMet;
                 condition.StartCheckingConditions();
             }
+        }
+
+        private ISoftwareManager GetSoftwareByKey(string softwareKey)
+        {
+            return this.AvailableSoftware.FirstOrDefault(s => s.Key == softwareKey) ??
+                   this.AvailableSoftware.FirstOrDefault();
         }
 
         private void OnWindowStateChanged()
@@ -169,9 +244,9 @@ namespace AutoGame.ViewModels
 
         private void OnLaunchConditionMet(object sender, EventArgs e)
         {
-            if (!this.software.IsRunning)
+            if (!this.appliedSoftware.IsRunning)
             {
-                this.software.Start();
+                this.appliedSoftware.Start(this.Config.SoftwarePath);
             }
         }
     }
