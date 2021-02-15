@@ -1,27 +1,20 @@
-﻿using AutoGame.Infrastructure.Interfaces;
-using AutoGame.Infrastructure.LaunchConditions;
+﻿using System;
+using System.ComponentModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Input;
+using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.Models;
 using AutoGame.Infrastructure.Services;
-using AutoGame.Infrastructure.SoftwareManager;
 using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Mvvm;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Windows;
-using System.Windows.Input;
 
 namespace AutoGame.ViewModels
 {
     internal class MainWindowViewModel : BindableBase, IDisposable
     {
-        private readonly ConfigService configService;
 
-        private ISoftwareManager appliedSoftware;
-        private IList<ILaunchCondition> launchConditions;
         private Config config;
 
         private WindowState windowState;
@@ -30,7 +23,8 @@ namespace AutoGame.ViewModels
 
         public MainWindowViewModel()
         {
-            this.configService = new ConfigService();
+            this.ConfigService = new ConfigService();
+            this.AutoGameService = new AutoGameService();
             this.LoadedCommand = new DelegateCommand(this.OnLoaded);
             this.NotifyIconClickCommand = new DelegateCommand(this.OnNotifyIconClick);
             this.BrowseSoftwarePathCommand = new DelegateCommand(this.OnBrowseSoftwarePath);
@@ -38,6 +32,10 @@ namespace AutoGame.ViewModels
             this.CancelCommand = new DelegateCommand(this.OnCancel);
             this.ApplyCommand = new DelegateCommand(this.OnApply);
         }
+
+        private IConfigService ConfigService { get; }
+
+        public IAutoGameService AutoGameService { get; }
 
         public ICommand LoadedCommand { get; }
 
@@ -50,12 +48,6 @@ namespace AutoGame.ViewModels
         public ICommand CancelCommand { get; }
 
         public ICommand ApplyCommand { get; }
-
-        public IList<ISoftwareManager> AvailableSoftware { get; } = new ISoftwareManager[]
-        {
-            new SteamBigPictureManager(),
-            new PlayniteFullscreenManager()
-        };
 
         public Config Config
         {
@@ -82,7 +74,7 @@ namespace AutoGame.ViewModels
         public WindowState WindowState
         {
             get => this.windowState;
-            set => this.SetProperty(ref this.windowState, value, this.OnWindowStateChanged);
+            set => this.SetProperty(ref this.windowState, value);
         }
 
         public bool ShowWindow
@@ -99,26 +91,24 @@ namespace AutoGame.ViewModels
 
         public void Dispose()
         {
-            this.DisposeLaunchConditions();
-            this.appliedSoftware = null;
+            this.AutoGameService.Dispose();
         }
 
         private void OnLoaded()
         {
-            this.WindowState = WindowState.Minimized;
-            this.Config = this.configService.Load(this.CreateDefaultConfig);
-            this.ApplyConfiguration();
+            this.SetWindowState(WindowState.Minimized);
+            this.Config = this.ConfigService.Load(this.AutoGameService.CreateDefaultConfiguration);
+            this.AutoGameService.ApplyConfiguration(this.Config);
         }
 
         private void OnNotifyIconClick()
         {
-            this.ShowWindow = true;
-            this.WindowState = WindowState.Normal;
+            this.SetWindowState(WindowState.Normal);
         }
 
         private void OnBrowseSoftwarePath()
         {
-            ISoftwareManager software = this.GetSoftwareByKey(this.Config.SoftwareKey);
+            ISoftwareManager software = this.AutoGameService.GetSoftwareByKey(this.Config.SoftwareKey);
             string defaultPath = software.FindSoftwarePathOrDefault();
             string executable = Path.GetFileName(defaultPath);
 
@@ -148,106 +138,48 @@ namespace AutoGame.ViewModels
                 this.OnApply();
             }
 
-            this.WindowState = WindowState.Minimized;
+            this.SetWindowState(WindowState.Minimized);
         }
 
         private void OnCancel()
         {
-            this.Config = this.configService.Load(this.CreateDefaultConfig);
-            this.WindowState = WindowState.Minimized;
+            this.Config = this.ConfigService.Load(this.AutoGameService.CreateDefaultConfiguration);
+            this.SetWindowState(WindowState.Minimized);
         }
 
         private void OnApply()
         {
-            this.configService.Save(this.Config);
-            this.ApplyConfiguration();
-        }
-
-        private Config CreateDefaultConfig()
-        {
-            ISoftwareManager s = this.AvailableSoftware.First();
-
-            return new Config()
-            {
-                SoftwareKey = s.Key,
-                SoftwarePath = s.FindSoftwarePathOrDefault(),
-                LaunchWhenGamepadConnected = true,
-                LaunchWhenParsecConnected = true
-            };
+            this.ConfigService.Save(this.Config);
+            this.AutoGameService.ApplyConfiguration(this.Config);
         }
 
         private void OnConfigSoftwareKeyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(this.Config.SoftwareKey) && sender is Config config)
             {
-                ISoftwareManager s = this.GetSoftwareByKey(config.SoftwareKey);
+                ISoftwareManager s = this.AutoGameService.GetSoftwareByKey(config.SoftwareKey);
                 config.SoftwarePath = s.FindSoftwarePathOrDefault();
             }
         }
 
-        private void ApplyConfiguration()
+        private void SetWindowState(WindowState windowState)
         {
-            this.appliedSoftware = this.GetSoftwareByKey(this.Config.SoftwareKey);
-
-            this.DisposeLaunchConditions();
-
-            this.launchConditions = new List<ILaunchCondition>();
-
-            if (this.Config.LaunchWhenGamepadConnected)
+            if (this.WindowState == windowState)
             {
-                this.launchConditions.Add(new GamepadConnectedCondition());
+                return;
             }
 
-            if (this.Config.LaunchWhenParsecConnected)
+            if (windowState == WindowState.Minimized)
             {
-                this.launchConditions.Add(new ParsecConnectedCondition());
-            }
-
-            foreach (ILaunchCondition condition in this.launchConditions)
-            {
-                condition.ConditionMet += this.OnLaunchConditionMet;
-                condition.StartCheckingConditions();
-            }
-        }
-
-        private ISoftwareManager GetSoftwareByKey(string softwareKey)
-        {
-            return this.AvailableSoftware.FirstOrDefault(s => s.Key == softwareKey) ??
-                   this.AvailableSoftware.FirstOrDefault();
-        }
-
-        private void OnWindowStateChanged()
-        {
-            if (this.WindowState == WindowState.Minimized)
-            {
+                this.WindowState = windowState;
                 this.ShowWindow = false;
                 this.NotifyIconVisible = true;
             }
             else
             {
                 this.NotifyIconVisible = false;
-            }
-        }
-
-        private void DisposeLaunchConditions()
-        {
-            if (this.launchConditions != null)
-            {
-                foreach (ILaunchCondition condition in this.launchConditions)
-                {
-                    condition.ConditionMet -= this.OnLaunchConditionMet;
-                    condition.Dispose();
-                }
-
-                this.launchConditions = null;
-            }
-        }
-
-        private void OnLaunchConditionMet(object sender, EventArgs e)
-        {
-            if (!this.appliedSoftware.IsRunning)
-            {
-                this.appliedSoftware.Start(this.Config.SoftwarePath);
+                this.ShowWindow = true;
+                this.WindowState = windowState;
             }
         }
     }

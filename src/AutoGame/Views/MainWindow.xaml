@@ -35,7 +35,7 @@
                 <Label Grid.Row="0" Grid.Column="0" Margin="5 0 0 0" Content="Software to launch:" VerticalAlignment="Center" />
                 <ComboBox
                     Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="5"
-                    ItemsSource="{Binding AvailableSoftware}"
+                    ItemsSource="{Binding AutoGameService.AvailableSoftware}"
                     DisplayMemberPath="Description"
                     SelectedValuePath="Key"
                     SelectedValue="{Binding Config.SoftwareKey, Mode=TwoWay}"
