@@ -19,6 +19,12 @@ namespace AutoGame.Infrastructure.Models
 
         public static bool TryParse(string s, out Port port)
         {
+            if (string.IsNullOrEmpty(s))
+            {
+                port = null;
+                return false;
+            }
+
             var tokens = new Stack<string>(Regex.Split(s, "\\s+").Reverse());
 
             if (string.IsNullOrEmpty(tokens.Peek()))
