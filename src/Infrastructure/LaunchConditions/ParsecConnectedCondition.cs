@@ -1,12 +1,12 @@
-﻿using AutoGame.Infrastructure.Helper;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using AutoGame.Infrastructure.Helper;
 using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.Models;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace AutoGame.Infrastructure.LaunchConditions
 {
@@ -26,7 +26,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         public event EventHandler ConditionMet;
 
-        public void StartCheckingConditions()
+        public void StartMonitoring()
         {
             // Listen for display setting changes
             Microsoft.Win32.SystemEvents.DisplaySettingsChanged += this.SystemEvents_DisplaySettingsChanged;
@@ -70,7 +70,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
             }
         }
 
-        public void Dispose()
+        public void StopMonitoring()
         {
             Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= this.SystemEvents_DisplaySettingsChanged;
 

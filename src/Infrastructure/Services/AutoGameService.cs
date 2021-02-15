@@ -3,28 +3,31 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AutoGame.Infrastructure.Interfaces;
-using AutoGame.Infrastructure.LaunchConditions;
 using AutoGame.Infrastructure.Models;
-using AutoGame.Infrastructure.SoftwareManager;
 
 namespace AutoGame.Infrastructure.Services
 {
     public sealed class AutoGameService : IAutoGameService
     {
-        private IList<ILaunchCondition> launchConditions;
         private ISoftwareManager appliedSoftware;
         private string appliedSoftwarePath;
+        private IList<ILaunchCondition> appliedLaunchConditions;
 
-        public AutoGameService()
+        public AutoGameService(
+            IList<ISoftwareManager> availableSoftware,
+            ILaunchCondition gamepadConnectedCondition,
+            ILaunchCondition parsecConnectedCondition)
         {
-            this.AvailableSoftware = new ISoftwareManager[]
-            {
-                new SteamBigPictureManager(),
-                new PlayniteFullscreenManager()
-            };
+            this.AvailableSoftware = availableSoftware;
+            this.GamepadConnectedCondition = gamepadConnectedCondition;
+            this.ParsecConnectedCondition = parsecConnectedCondition;
         }
 
         public IList<ISoftwareManager> AvailableSoftware { get; }
+
+        private ILaunchCondition GamepadConnectedCondition { get; }
+
+        private ILaunchCondition ParsecConnectedCondition { get; }
 
         public void ApplyConfiguration(Config config)
         {
@@ -33,24 +36,24 @@ namespace AutoGame.Infrastructure.Services
             this.appliedSoftware = this.GetSoftwareByKey(config.SoftwareKey);
             this.appliedSoftwarePath = config.SoftwarePath;
 
-            this.DisposeLaunchConditions();
+            this.StopMonitoringAllLaunchConditions();
 
-            this.launchConditions = new List<ILaunchCondition>();
+            this.appliedLaunchConditions = new List<ILaunchCondition>();
 
             if (config.LaunchWhenGamepadConnected)
             {
-                this.launchConditions.Add(new GamepadConnectedCondition());
+                this.appliedLaunchConditions.Add(this.GamepadConnectedCondition);
             }
 
             if (config.LaunchWhenParsecConnected)
             {
-                this.launchConditions.Add(new ParsecConnectedCondition());
+                this.appliedLaunchConditions.Add(this.ParsecConnectedCondition);
             }
 
-            foreach (ILaunchCondition condition in this.launchConditions)
+            foreach (ILaunchCondition condition in this.appliedLaunchConditions)
             {
                 condition.ConditionMet += this.OnLaunchConditionMet;
-                condition.StartCheckingConditions();
+                condition.StartMonitoring();
             }
         }
 
@@ -75,22 +78,22 @@ namespace AutoGame.Infrastructure.Services
 
         public void Dispose()
         {
-            this.DisposeLaunchConditions();
+            this.StopMonitoringAllLaunchConditions();
             this.appliedSoftware = null;
             this.appliedSoftwarePath = null;
         }
 
-        private void DisposeLaunchConditions()
+        private void StopMonitoringAllLaunchConditions()
         {
-            if (this.launchConditions != null)
+            if (this.appliedLaunchConditions != null)
             {
-                foreach (ILaunchCondition condition in this.launchConditions)
+                foreach (ILaunchCondition condition in this.appliedLaunchConditions)
                 {
                     condition.ConditionMet -= this.OnLaunchConditionMet;
-                    condition.Dispose();
+                    condition.StopMonitoring();
                 }
 
-                this.launchConditions = null;
+                this.appliedLaunchConditions = null;
             }
         }
 

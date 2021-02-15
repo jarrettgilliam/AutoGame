@@ -1,6 +1,6 @@
-﻿using AutoGame.Infrastructure.Interfaces;
-using System;
+﻿using System;
 using System.Linq;
+using AutoGame.Infrastructure.Interfaces;
 using Windows.Gaming.Input;
 
 namespace AutoGame.Infrastructure.LaunchConditions
@@ -15,7 +15,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         public event EventHandler ConditionMet;
 
-        public void StartCheckingConditions()
+        public void StartMonitoring()
         {
             Gamepad.GamepadAdded += this.Gamepad_GamepadAdded;
             this.CheckConditionMet();
@@ -26,7 +26,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
             this.CheckConditionMet();
         }
 
-        public void Dispose()
+        public void StopMonitoring()
         {
             Gamepad.GamepadAdded -= this.Gamepad_GamepadAdded;
         }

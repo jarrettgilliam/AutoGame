@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Input;
 using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.Models;
-using AutoGame.Infrastructure.Services;
 using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -14,17 +13,16 @@ namespace AutoGame.ViewModels
 {
     internal class MainWindowViewModel : BindableBase, IDisposable
     {
-
         private Config config;
-
         private WindowState windowState;
         private bool showWindow = true;
         private bool notifyIconVisible;
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(IConfigService configService, IAutoGameService autoGameService)
         {
-            this.ConfigService = new ConfigService();
-            this.AutoGameService = new AutoGameService();
+            this.ConfigService = configService;
+            this.AutoGameService = autoGameService;
+
             this.LoadedCommand = new DelegateCommand(this.OnLoaded);
             this.NotifyIconClickCommand = new DelegateCommand(this.OnNotifyIconClick);
             this.BrowseSoftwarePathCommand = new DelegateCommand(this.OnBrowseSoftwarePath);

@@ -2,10 +2,12 @@
 
 namespace AutoGame.Infrastructure.Interfaces
 {
-    public interface ILaunchCondition : IDisposable
+    public interface ILaunchCondition
     {
         event EventHandler ConditionMet;
 
-        void StartCheckingConditions();
+        void StartMonitoring();
+
+        void StopMonitoring();
     }
 }

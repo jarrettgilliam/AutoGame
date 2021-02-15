@@ -12,9 +12,6 @@
         ShowWindow="{Binding ShowWindow, Mode=TwoWay}"
         NotifyIconVisible="{Binding NotifyIconVisible, Mode=TwoWay}"
         Height="200" Width="530" ResizeMode="NoResize">
-    <Window.DataContext>
-        <localvm:MainWindowViewModel />
-    </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
