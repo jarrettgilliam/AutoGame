@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace AutoGame.Infrastructure.Services
+namespace AutoGame.Infrastructure.SoftwareManager
 {
     public class PlayniteFullscreenManager : ISoftwareManager
     {

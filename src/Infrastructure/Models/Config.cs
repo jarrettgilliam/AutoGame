@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using Prism.Mvvm;
+﻿using Prism.Mvvm;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
-namespace AutoGame.Models
+namespace AutoGame.Infrastructure.Models
 {
     public class Config : BindableBase
     {

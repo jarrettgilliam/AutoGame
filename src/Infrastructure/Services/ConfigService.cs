@@ -1,11 +1,11 @@
-﻿using AutoGame.Models;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.IO;
+using AutoGame.Infrastructure.Models;
+using Newtonsoft.Json;
 
-namespace AutoGame.Services
+namespace AutoGame.Infrastructure.Services
 {
-    internal class ConfigService
+    public class ConfigService
     {
         private readonly string configPath =
             Path.Join(

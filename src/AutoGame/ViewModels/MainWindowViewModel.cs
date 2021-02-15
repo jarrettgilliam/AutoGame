@@ -1,7 +1,8 @@
 ﻿using AutoGame.Infrastructure.Interfaces;
+using AutoGame.Infrastructure.LaunchConditions;
+using AutoGame.Infrastructure.Models;
 using AutoGame.Infrastructure.Services;
-using AutoGame.Models;
-using AutoGame.Services;
+using AutoGame.Infrastructure.SoftwareManager;
 using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Mvvm;

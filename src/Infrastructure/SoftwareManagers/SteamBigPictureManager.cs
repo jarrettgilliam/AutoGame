@@ -3,7 +3,7 @@ using AutoGame.Infrastructure.Interfaces;
 using System;
 using System.Diagnostics;
 
-namespace AutoGame.Infrastructure.Services
+namespace AutoGame.Infrastructure.SoftwareManager
 {
     public class SteamBigPictureManager : ISoftwareManager
     {

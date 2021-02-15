@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using Windows.Gaming.Input;
 
-namespace AutoGame.Infrastructure.Services
+namespace AutoGame.Infrastructure.LaunchConditions
 {
     public class GamepadConnectedCondition : ILaunchCondition
     {

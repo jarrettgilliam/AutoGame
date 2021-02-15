@@ -1,10 +1,10 @@
-﻿namespace AutoGame.Infrastructure.Models
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
+namespace AutoGame.Infrastructure.Models
+{
     public class Port
     {
         public string Protocol;

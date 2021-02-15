@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace AutoGame.Infrastructure.Services
+namespace AutoGame.Infrastructure.LaunchConditions
 {
     public class ParsecConnectedCondition : ILaunchCondition
     {
