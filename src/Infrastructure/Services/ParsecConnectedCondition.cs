@@ -1,5 +1,6 @@
 ﻿using AutoGame.Infrastructure.Helper;
 using AutoGame.Infrastructure.Interfaces;
+using AutoGame.Infrastructure.Models;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using System;
@@ -97,12 +98,12 @@ namespace AutoGame.Infrastructure.Services
 
         private bool HasAnyActiveUDPPorts(Process[] parsecProcs)
         {
-            IList<NetStatPorts.Port> ports = NetStatPorts.GetNetStatPorts();
+            IList<Port> ports = NetStatPorts.GetNetStatPorts();
 
             return ports.Any(p => this.IsParsecUDPPort(p, parsecProcs));
         }
 
-        private bool IsParsecUDPPort(NetStatPorts.Port port, Process[] parsecProcs)
+        private bool IsParsecUDPPort(Port port, Process[] parsecProcs)
         {
             if (port.Protocol != "UDP")
             {
