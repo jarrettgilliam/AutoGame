@@ -1,6 +1,7 @@
 ﻿using AutoGame.Infrastructure.Helper;
 using AutoGame.Infrastructure.Interfaces;
 using NAudio.CoreAudioApi;
+using NAudio.CoreAudioApi.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -90,23 +91,45 @@ namespace AutoGame.Infrastructure.Services
         {
             Process[] parsecProcs = Process.GetProcessesByName("parsecd");
 
-            IList<NetStatPortsAndProcessNames.Port> ports = NetStatPortsAndProcessNames.GetNetStatPorts();
+            return this.HasAnyActiveUDPPorts(parsecProcs) &&
+                this.HasAnyActiveAudioSessions(parsecProcs);
+        }
+
+        private bool HasAnyActiveUDPPorts(Process[] parsecProcs)
+        {
+            IList<NetStatPorts.Port> ports = NetStatPorts.GetNetStatPorts();
 
             return ports.Any(p => this.IsParsecUDPPort(p, parsecProcs));
         }
 
-        private bool IsParsecUDPPort(NetStatPortsAndProcessNames.Port port, Process[] parsecProcs)
+        private bool IsParsecUDPPort(NetStatPorts.Port port, Process[] parsecProcs)
         {
-            if (port?.Protocol?.StartsWith("UDP") != true)
+            if (port.Protocol != "UDP")
             {
                 return false;
             }
 
-            foreach (Process proc in parsecProcs)
+            if (!parsecProcs.Any(proc => proc.Id == port.ProcessId))
             {
-                if (proc.Id == port.ProcessId)
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool HasAnyActiveAudioSessions(Process[] parsecProcs)
+        {
+            foreach (MMDevice mmDevice in this.mmDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+            {
+                for (int i = 0; i < mmDevice.AudioSessionManager.Sessions.Count; i++)
                 {
-                    return true;
+                    AudioSessionControl session = mmDevice.AudioSessionManager.Sessions[i];
+
+                    if (session.State == AudioSessionState.AudioSessionStateActive &&
+                        parsecProcs.Any(proc => proc.Id == session.GetProcessID))
+                    {
+                        return true;
+                    }
                 }
             }
 
