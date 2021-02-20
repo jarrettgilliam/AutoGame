@@ -62,14 +62,6 @@ namespace AutoGame.Infrastructure.Tests.Services
             Assert.Throws<ArgumentNullException>("config", () => autoGameService.ApplyConfiguration(null));
         }
 
-        [Fact]
-        public void ApplyConfiguration__Throws()
-        {
-            this.ArrangeAutoGameService(out _, out _, out var autoGameService);
-
-            Assert.Throws<ArgumentNullException>("config", () => autoGameService.ApplyConfiguration(null));
-        }
-
         private void ArrangeAutoGameService(
             out Mock<ISoftwareManager> software1,
             out Mock<ISoftwareManager> software2,
