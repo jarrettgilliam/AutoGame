@@ -45,6 +45,9 @@ try {
     # Rename the output *.msi file
     Rename-Item "$installerReleaseDir\AutoGame_Setup.msi" "AutoGame_Setup_$version.msi"
 
+    Write-Host "Build complete"
+    Write-Host "$installerReleaseDir\AutoGame_Setup_$version.msi"
+
     # Reset version changes
     git checkout -- .
 }
