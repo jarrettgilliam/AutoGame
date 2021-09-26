@@ -49,7 +49,7 @@ try {
     Write-Host "$installerReleaseDir\AutoGame_Setup_$version.msi"
 
     # Reset version changes
-    git checkout -- .
+    git reset --hard HEAD
 }
 catch [System.Exception] {
     Write-Error $_.ToString()
