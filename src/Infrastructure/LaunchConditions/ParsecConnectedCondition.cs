@@ -13,15 +13,19 @@ namespace AutoGame.Infrastructure.LaunchConditions
     public class ParsecConnectedCondition : ILaunchCondition
     {
         private readonly object checkConditionLock = new object();
+        private readonly object audioSessionLock = new object();
 
         private bool wasConnected;
         private bool wasMuted;
 
         private MMDeviceEnumerator mmDeviceEnumerator;
         private MMDevice mmDevice;
+        private AudioSessionControl audioSession;
+        private IAudioSessionEventsHandler audioEventClient;
 
         public ParsecConnectedCondition()
         {
+            this.audioEventClient = new ParsecAudioSessionEventsHandler(this.CheckConditionMet);
         }
 
         public event EventHandler ConditionMet;
@@ -38,6 +42,10 @@ namespace AutoGame.Infrastructure.LaunchConditions
             this.mmDevice.AudioEndpointVolume.OnVolumeNotification += this.AudioEndpointVolume_OnVolumeNotification;
             this.wasMuted = this.mmDevice.AudioEndpointVolume.Mute;
 
+            // Listen for Parsec audio session state changes
+            this.mmDevice.AudioSessionManager.OnSessionCreated += this.AudioSessionManager_OnSessionCreated;
+            this.SetParsecAudioSession(this.GetAudioSessionOrDefault(this.GetParsecdProcesses()));
+
             this.CheckConditionMet();
         }
 
@@ -52,6 +60,28 @@ namespace AutoGame.Infrastructure.LaunchConditions
             {
                 this.CheckConditionMet();
                 this.wasMuted = data.Muted;
+            }
+        }
+
+        private void AudioSessionManager_OnSessionCreated(object sender, IAudioSessionControl newSession)
+        {
+            var session = new AudioSessionControl(newSession);
+            Process[] parsecProcs = this.GetParsecdProcesses();
+
+            if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
+            {
+                this.SetParsecAudioSession(session);
+                this.CheckConditionMet();
+            }
+        }
+
+        private void SetParsecAudioSession(AudioSessionControl session)
+        {
+            lock (this.audioSessionLock)
+            {
+                this.audioSession?.UnRegisterEventClient(this.audioEventClient);
+                this.audioSession = session;
+                this.audioSession?.RegisterEventClient(this.audioEventClient);
             }
         }
 
@@ -77,6 +107,8 @@ namespace AutoGame.Infrastructure.LaunchConditions
             if (this.mmDevice != null)
             {
                 this.mmDevice.AudioEndpointVolume.OnVolumeNotification -= this.AudioEndpointVolume_OnVolumeNotification;
+                this.mmDevice.AudioSessionManager.OnSessionCreated -= this.AudioSessionManager_OnSessionCreated;
+                this.SetParsecAudioSession(null);
                 this.mmDevice.Dispose();
                 this.mmDevice = null;
             }
@@ -90,11 +122,11 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         private bool GetIsConnected()
         {
-            Process[] parsecProcs = Process.GetProcessesByName("parsecd");
-
-            return this.HasAnyActiveUDPPorts(parsecProcs) &&
-                this.HasAnyActiveAudioSessions(parsecProcs);
+            return this.HasAnyActiveUDPPorts(this.GetParsecdProcesses()) &&
+                this.audioSession?.State == AudioSessionState.AudioSessionStateActive;
         }
+
+        private Process[] GetParsecdProcesses() => Process.GetProcessesByName("parsecd");
 
         private bool HasAnyActiveUDPPorts(Process[] parsecProcs)
         {
@@ -118,7 +150,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
             return true;
         }
 
-        private bool HasAnyActiveAudioSessions(Process[] parsecProcs)
+        private AudioSessionControl GetAudioSessionOrDefault(Process[] parsecProcs)
         {
             foreach (MMDevice mmDevice in this.mmDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
             {
@@ -126,15 +158,53 @@ namespace AutoGame.Infrastructure.LaunchConditions
                 {
                     AudioSessionControl session = mmDevice.AudioSessionManager.Sessions[i];
 
-                    if (session.State == AudioSessionState.AudioSessionStateActive &&
-                        parsecProcs.Any(proc => proc.Id == session.GetProcessID))
+                    if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
                     {
-                        return true;
+                        return session;
                     }
                 }
             }
 
-            return false;
+            return null;
+        }
+
+        private class ParsecAudioSessionEventsHandler : IAudioSessionEventsHandler
+        {
+            private readonly Action checkConditionMet;
+
+            public ParsecAudioSessionEventsHandler(Action checkConditionMet)
+            {
+                this.checkConditionMet = checkConditionMet ?? throw new ArgumentNullException(nameof(checkConditionMet));
+            }
+
+            public void OnChannelVolumeChanged(uint channelCount, IntPtr newVolumes, uint channelIndex)
+            {
+            }
+
+            public void OnDisplayNameChanged(string displayName)
+            {
+            }
+
+            public void OnGroupingParamChanged(ref Guid groupingId)
+            {
+            }
+
+            public void OnIconPathChanged(string iconPath)
+            {
+            }
+
+            public void OnSessionDisconnected(AudioSessionDisconnectReason disconnectReason)
+            {
+            }
+
+            public void OnStateChanged(AudioSessionState state)
+            {
+                this.checkConditionMet();
+            }
+
+            public void OnVolumeChanged(float volume, bool isMuted)
+            {
+            }
         }
     }
 }
