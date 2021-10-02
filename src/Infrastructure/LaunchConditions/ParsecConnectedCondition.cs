@@ -23,12 +23,15 @@ namespace AutoGame.Infrastructure.LaunchConditions
         private AudioSessionControl audioSession;
         private IAudioSessionEventsHandler audioEventClient;
 
-        public ParsecConnectedCondition()
+        public ParsecConnectedCondition(ILoggingService loggingService)
         {
-            this.audioEventClient = new ParsecAudioSessionEventsHandler(this.CheckConditionMet);
+            this.LoggingService = loggingService;
+            this.audioEventClient = new ParsecAudioSessionEventsHandler(loggingService, this.CheckConditionMet);
         }
 
         public event EventHandler ConditionMet;
+
+        private ILoggingService LoggingService { get; }
 
         public void StartMonitoring()
         {
@@ -51,27 +54,48 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         private void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
         {
-            this.CheckConditionMet();
+            try
+            {
+                this.CheckConditionMet();
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling display settings changed", ex);
+            }
         }
 
         private void AudioEndpointVolume_OnVolumeNotification(AudioVolumeNotificationData data)
         {
-            if (this.wasMuted != data.Muted)
+            try
             {
-                this.CheckConditionMet();
-                this.wasMuted = data.Muted;
+                if (this.wasMuted != data.Muted)
+                {
+                    this.CheckConditionMet();
+                    this.wasMuted = data.Muted;
+                }
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling volume notification", ex);
             }
         }
 
         private void AudioSessionManager_OnSessionCreated(object sender, IAudioSessionControl newSession)
         {
-            var session = new AudioSessionControl(newSession);
-            Process[] parsecProcs = this.GetParsecdProcesses();
-
-            if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
+            try
             {
-                this.SetParsecAudioSession(session);
-                this.CheckConditionMet();
+                var session = new AudioSessionControl(newSession);
+                Process[] parsecProcs = this.GetParsecdProcesses();
+
+                if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
+                {
+                    this.SetParsecAudioSession(session);
+                    this.CheckConditionMet();
+                }
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling audio session created", ex);
             }
         }
 
@@ -170,12 +194,18 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         private class ParsecAudioSessionEventsHandler : IAudioSessionEventsHandler
         {
-            private readonly Action checkConditionMet;
 
-            public ParsecAudioSessionEventsHandler(Action checkConditionMet)
+            public ParsecAudioSessionEventsHandler(
+                ILoggingService loggingService,
+                Action checkConditionMet)
             {
-                this.checkConditionMet = checkConditionMet ?? throw new ArgumentNullException(nameof(checkConditionMet));
+                this.LoggingService = loggingService ?? throw new ArgumentNullException(nameof(loggingService));
+                this.CheckConditionMet = checkConditionMet ?? throw new ArgumentNullException(nameof(checkConditionMet));
             }
+
+            private ILoggingService LoggingService { get; }
+            
+            private Action CheckConditionMet { get; }
 
             public void OnChannelVolumeChanged(uint channelCount, IntPtr newVolumes, uint channelIndex)
             {
@@ -199,7 +229,14 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
             public void OnStateChanged(AudioSessionState state)
             {
-                this.checkConditionMet();
+                try
+                {
+                    this.CheckConditionMet();
+                }
+                catch (Exception ex)
+                {
+                    this.LoggingService.LogException("handling audio session state changed", ex);
+                }
             }
 
             public void OnVolumeChanged(float volume, bool isMuted)

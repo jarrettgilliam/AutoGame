@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.LaunchConditions;
 using AutoGame.Infrastructure.Services;
@@ -13,25 +14,48 @@ namespace AutoGame
     /// </summary>
     public partial class App : Application
     {
+        private ILoggingService LoggingService { get; } = new LoggingService();
+
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
-
-            var window = new MainWindow()
+            try
             {
-                DataContext = new MainWindowViewModel(
-                    new ConfigService(),
-                    new AutoGameService(
-                        new ISoftwareManager[]
-                        {
+                base.OnStartup(e);
+
+                Application.Current.DispatcherUnhandledException += this.Current_DispatcherUnhandledException;
+
+                var window = new MainWindow()
+                {
+                    DataContext = new MainWindowViewModel(
+                        this.LoggingService,
+                        new ConfigService(),
+                        new AutoGameService(
+                            this.LoggingService,
+                            new ISoftwareManager[]
+                            {
                             new SteamBigPictureManager(),
                             new PlayniteFullscreenManager()
-                        },
-                        new GamepadConnectedCondition(),
-                        new ParsecConnectedCondition()))
-            };
+                            },
+                            new GamepadConnectedCondition(this.LoggingService),
+                            new ParsecConnectedCondition(this.LoggingService)))
+                };
 
-            window.Show();
+                window.Show();
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling startup", ex);
+            }
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            Application.Current.DispatcherUnhandledException -= this.Current_DispatcherUnhandledException;
+        }
+
+        private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            this.LoggingService.LogException("unhandled exception", e.Exception);
         }
     }
 }

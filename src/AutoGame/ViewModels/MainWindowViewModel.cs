@@ -18,8 +18,12 @@ namespace AutoGame.ViewModels
         private bool showWindow = true;
         private bool notifyIconVisible;
 
-        public MainWindowViewModel(IConfigService configService, IAutoGameService autoGameService)
+        public MainWindowViewModel(
+            ILoggingService loggingService,
+            IConfigService configService,
+            IAutoGameService autoGameService)
         {
+            this.LoggingService = loggingService;
             this.ConfigService = configService;
             this.AutoGameService = autoGameService;
 
@@ -30,6 +34,8 @@ namespace AutoGame.ViewModels
             this.CancelCommand = new DelegateCommand(this.OnCancel);
             this.ApplyCommand = new DelegateCommand(this.OnApply);
         }
+
+        private ILoggingService LoggingService { get; }
 
         private IConfigService ConfigService { get; }
 
@@ -89,74 +95,132 @@ namespace AutoGame.ViewModels
 
         public void Dispose()
         {
-            this.AutoGameService.Dispose();
+            try
+            {
+                this.AutoGameService.Dispose();
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("disposing main window view model", ex);
+            }
+
+            this.LoggingService.Dispose();
         }
 
         private void OnLoaded()
         {
-            this.SetWindowState(WindowState.Minimized);
-            this.Config = this.ConfigService.Load(this.AutoGameService.CreateDefaultConfiguration);
-            this.AutoGameService.ApplyConfiguration(this.Config);
+            try
+            {
+                this.SetWindowState(WindowState.Minimized);
+                this.Config = this.ConfigService.Load(this.AutoGameService.CreateDefaultConfiguration);
+                this.AutoGameService.ApplyConfiguration(this.Config);
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling application loaded", ex);
+            }
         }
 
         private void OnNotifyIconClick()
         {
-            this.SetWindowState(WindowState.Normal);
+            try
+            {
+                this.SetWindowState(WindowState.Normal);
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling tray icon click", ex);
+            }
         }
 
         private void OnBrowseSoftwarePath()
         {
-            ISoftwareManager software = this.AutoGameService.GetSoftwareByKey(this.Config.SoftwareKey);
-            string defaultPath = software.FindSoftwarePathOrDefault();
-            string executable = Path.GetFileName(defaultPath);
-
-            var dialog = new OpenFileDialog()
+            try
             {
-                FileName = executable,
-                InitialDirectory = Path.GetDirectoryName(this.Config.SoftwarePath)
-            };
+                ISoftwareManager software = this.AutoGameService.GetSoftwareByKey(this.Config.SoftwareKey);
+                string defaultPath = software.FindSoftwarePathOrDefault();
+                string executable = Path.GetFileName(defaultPath);
 
-            if (string.IsNullOrEmpty(dialog.InitialDirectory))
-            {
-                dialog.InitialDirectory = Path.GetDirectoryName(defaultPath);
+                var dialog = new OpenFileDialog()
+                {
+                    FileName = executable,
+                    InitialDirectory = Path.GetDirectoryName(this.Config.SoftwarePath)
+                };
+
+                if (string.IsNullOrEmpty(dialog.InitialDirectory))
+                {
+                    dialog.InitialDirectory = Path.GetDirectoryName(defaultPath);
+                }
+
+                dialog.Filter = $"{software.Description}|{executable}";
+
+                if (dialog.ShowDialog() == true)
+                {
+                    this.Config.SoftwarePath = dialog.FileName;
+                }
             }
-
-            dialog.Filter = $"{software.Description}|{executable}";
-
-            if (dialog.ShowDialog() == true)
+            catch (Exception ex)
             {
-                this.Config.SoftwarePath = dialog.FileName;
+                this.LoggingService.LogException("browsing for a software path", ex);
             }
         }
 
         private void OnOK()
         {
-            if (this.Config.IsDirty)
+            try
             {
-                this.OnApply();
-            }
+                if (this.Config.IsDirty)
+                {
+                    this.OnApply();
+                }
 
-            this.SetWindowState(WindowState.Minimized);
+                this.SetWindowState(WindowState.Minimized);
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling OK", ex);
+            }
         }
 
         private void OnCancel()
         {
-            this.Config = this.ConfigService.Load(this.AutoGameService.CreateDefaultConfiguration);
-            this.SetWindowState(WindowState.Minimized);
+            try
+            {
+                this.Config = this.ConfigService.Load(this.AutoGameService.CreateDefaultConfiguration);
+                this.SetWindowState(WindowState.Minimized);
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling Cancel", ex);
+            }
         }
 
         private void OnApply()
         {
-            this.ConfigService.Save(this.Config);
-            this.AutoGameService.ApplyConfiguration(this.Config);
+            try
+            {
+                this.ConfigService.Save(this.Config);
+                this.AutoGameService.ApplyConfiguration(this.Config);
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling Apply", ex);
+            }
         }
 
         private void OnConfigSoftwareKeyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(this.Config.SoftwareKey) && sender is Config config)
+            try
             {
-                ISoftwareManager s = this.AutoGameService.GetSoftwareByKey(config.SoftwareKey);
-                config.SoftwarePath = s.FindSoftwarePathOrDefault();
+                if (e.PropertyName == nameof(this.Config.SoftwareKey) && sender is Config config)
+                {
+                    ISoftwareManager s = this.AutoGameService.GetSoftwareByKey(config.SoftwareKey);
+                    config.SoftwarePath = s.FindSoftwarePathOrDefault();
+                }
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling config software key changed", ex);
             }
         }
 

@@ -14,14 +14,18 @@ namespace AutoGame.Infrastructure.Services
         private IList<ILaunchCondition> appliedLaunchConditions;
 
         public AutoGameService(
+            ILoggingService loggingService,
             IList<ISoftwareManager> availableSoftware,
             ILaunchCondition gamepadConnectedCondition,
             ILaunchCondition parsecConnectedCondition)
         {
+            this.LoggingService = loggingService;
             this.AvailableSoftware = availableSoftware;
             this.GamepadConnectedCondition = gamepadConnectedCondition;
             this.ParsecConnectedCondition = parsecConnectedCondition;
         }
+
+        public ILoggingService LoggingService { get; }
 
         public IList<ISoftwareManager> AvailableSoftware { get; }
 
@@ -99,9 +103,16 @@ namespace AutoGame.Infrastructure.Services
 
         private void OnLaunchConditionMet(object sender, EventArgs e)
         {
-            if (!this.appliedSoftware.IsRunning)
+            try
             {
-                this.appliedSoftware.Start(this.appliedSoftwarePath);
+                if (!this.appliedSoftware.IsRunning)
+                {
+                    this.appliedSoftware.Start(this.appliedSoftwarePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling launch condition met", ex);
             }
         }
 

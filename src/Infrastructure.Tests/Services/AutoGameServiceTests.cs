@@ -67,6 +67,8 @@ namespace AutoGame.Infrastructure.Tests.Services
             out Mock<ISoftwareManager> software2,
             out IAutoGameService autoGameService)
         {
+            var loggingService = new Mock<ILoggingService>();
+
             software1 = new Mock<ISoftwareManager>();
             software1.SetupGet(x => x.Key).Returns("key1");
 
@@ -74,6 +76,7 @@ namespace AutoGame.Infrastructure.Tests.Services
             software2.SetupGet(x => x.Key).Returns("key2");
 
             autoGameService = new AutoGameService(
+                loggingService.Object,
                 new ISoftwareManager[] {
                     software1.Object,
                     software2.Object

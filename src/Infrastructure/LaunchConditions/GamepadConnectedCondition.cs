@@ -9,11 +9,14 @@ namespace AutoGame.Infrastructure.LaunchConditions
     {
         private readonly object checkConditionLock = new object();
 
-        public GamepadConnectedCondition()
+        public GamepadConnectedCondition(ILoggingService loggingService)
         {
+            this.LoggingService = loggingService;
         }
 
         public event EventHandler ConditionMet;
+
+        public ILoggingService LoggingService { get; }
 
         public void StartMonitoring()
         {
@@ -23,7 +26,14 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         private void Gamepad_GamepadAdded(object sender, Gamepad e)
         {
-            this.CheckConditionMet();
+            try
+            {
+                this.CheckConditionMet();
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("handling gamepad added", ex);
+            }
         }
 
         public void StopMonitoring()

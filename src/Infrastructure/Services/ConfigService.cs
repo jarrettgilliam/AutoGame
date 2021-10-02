@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using AutoGame.Infrastructure.Constants;
 using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.Models;
 using Newtonsoft.Json;
@@ -8,11 +9,8 @@ namespace AutoGame.Infrastructure.Services
 {
     public class ConfigService : IConfigService
     {
-        private readonly string configPath =
-            Path.Join(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                nameof(AutoGame),
-                nameof(Config) + ".json");
+        private static readonly string ConfigPath = 
+            Path.Join(Strings.AppDataFolder, nameof(Config) + ".json");
 
         public Config Load(Func<Config> defaultConfigFactory)
         {
@@ -20,7 +18,7 @@ namespace AutoGame.Infrastructure.Services
 
             try
             {
-                using (StreamReader sr = new StreamReader(this.configPath))
+                using (StreamReader sr = new StreamReader(ConfigPath))
                 using (JsonTextReader reader = new JsonTextReader(sr))
                 {
                     config = JsonSerializer.CreateDefault().Deserialize<Config>(reader);
@@ -40,9 +38,9 @@ namespace AutoGame.Infrastructure.Services
 
         public void Save(Config config)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(this.configPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath));
 
-            using (StreamWriter sw = new StreamWriter(this.configPath))
+            using (StreamWriter sw = new StreamWriter(ConfigPath))
             using (JsonTextWriter writer = new JsonTextWriter(sw))
             {
                 writer.Formatting = Formatting.Indented;
