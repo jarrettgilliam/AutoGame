@@ -22,8 +22,15 @@ namespace AutoGame.Infrastructure.Services
                 });
         }
 
+        public bool EnableTraceLogging { get; set; }
+
         public void Log(string message, LogLevel level)
         {
+            if (level == LogLevel.Trace && !this.EnableTraceLogging)
+            {
+                return;
+            }
+
             this.logWriter.Value.WriteLine($"{DateTime.Now} {level}: {message}");
         }
 

@@ -7,6 +7,7 @@ namespace AutoGame.Infrastructure.Models
     public class Config : BindableBase
     {
         private bool isDirty;
+        private bool enableTraceLogging;
         private string softwareKey;
         private string softwarePath;
         private bool launchWhenGamepadConnected;
@@ -22,6 +23,12 @@ namespace AutoGame.Infrastructure.Models
         {
             get => this.isDirty;
             set => this.SetProperty(ref this.isDirty, value);
+        }
+
+        public bool EnableTraceLogging
+        {
+            get => this.enableTraceLogging;
+            set => this.SetProperty(ref this.enableTraceLogging, value);
         }
 
         public string SoftwareKey

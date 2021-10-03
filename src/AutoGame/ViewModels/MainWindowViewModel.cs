@@ -112,7 +112,7 @@ namespace AutoGame.ViewModels
             try
             {
                 this.SetWindowState(WindowState.Minimized);
-                this.Config = this.ConfigService.Load(this.AutoGameService.CreateDefaultConfiguration);
+                this.Config = this.LoadConfig();
                 this.AutoGameService.ApplyConfiguration(this.Config);
             }
             catch (Exception ex)
@@ -186,13 +186,20 @@ namespace AutoGame.ViewModels
         {
             try
             {
-                this.Config = this.ConfigService.Load(this.AutoGameService.CreateDefaultConfiguration);
+                this.Config = this.LoadConfig();
                 this.SetWindowState(WindowState.Minimized);
             }
             catch (Exception ex)
             {
                 this.LoggingService.LogException("handling Cancel", ex);
             }
+        }
+
+        private Config LoadConfig()
+        {
+            Config config = this.ConfigService.Load(this.AutoGameService.CreateDefaultConfiguration);
+            this.LoggingService.EnableTraceLogging = config.EnableTraceLogging;
+            return config;
         }
 
         private void OnApply()
