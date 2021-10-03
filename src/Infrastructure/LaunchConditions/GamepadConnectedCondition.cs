@@ -20,11 +20,11 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         public void StartMonitoring()
         {
-            Gamepad.GamepadAdded += this.Gamepad_GamepadAdded;
+            RawGameController.RawGameControllerAdded += this.RawGameController_RawGameControllerAdded; ;
             this.CheckConditionMet();
         }
 
-        private void Gamepad_GamepadAdded(object sender, Gamepad e)
+        private void RawGameController_RawGameControllerAdded(object sender, RawGameController e)
         {
             try
             {
@@ -38,14 +38,14 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         public void StopMonitoring()
         {
-            Gamepad.GamepadAdded -= this.Gamepad_GamepadAdded;
+            RawGameController.RawGameControllerAdded -= this.RawGameController_RawGameControllerAdded;
         }
 
         private void CheckConditionMet()
         {
             lock (this.checkConditionLock)
             {
-                if (Gamepad.Gamepads.Any())
+                if (RawGameController.RawGameControllers.Any())
                 {
                     this.ConditionMet?.Invoke(this, EventArgs.Empty);
                 }
