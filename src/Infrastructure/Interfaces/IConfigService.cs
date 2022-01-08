@@ -5,7 +5,7 @@ namespace AutoGame.Infrastructure.Interfaces
 {
     public interface IConfigService
     {
-        Config Load(Func<Config> defaultConfigFactory);
+        Config GetConfigOrNull();
 
         void Save(Config config);
     }

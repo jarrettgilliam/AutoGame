@@ -33,7 +33,7 @@ namespace AutoGame
                             this.LoggingService,
                             new ISoftwareManager[]
                             {
-                            new SteamBigPictureManager(),
+                            new SteamBigPictureManager(this.LoggingService),
                             new PlayniteFullscreenManager()
                             },
                             new GamepadConnectedCondition(this.LoggingService),

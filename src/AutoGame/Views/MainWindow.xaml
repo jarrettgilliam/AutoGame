@@ -1,17 +1,33 @@
-﻿<localctl:BaseWindow x:Class="AutoGame.Views.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AutoGame"
-        xmlns:localctl="clr-namespace:AutoGame.Controls"
-        xmlns:localvm="clr-namespace:AutoGame.ViewModels"
-        mc:Ignorable="d"
-        Title="Auto Game"
-        WindowState="{Binding WindowState, Mode=TwoWay}"
-        ShowWindow="{Binding ShowWindow, Mode=TwoWay}"
-        NotifyIconVisible="{Binding NotifyIconVisible, Mode=TwoWay}"
-        Height="200" Width="530" ResizeMode="NoResize">
+﻿<localctl:BaseWindow 
+    x:Class="AutoGame.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:localctl="clr-namespace:AutoGame.Controls"
+    mc:Ignorable="d"
+    Title="AutoGame"
+    WindowState="{Binding WindowState, Mode=TwoWay}"
+    ShowWindow="{Binding ShowWindow, Mode=TwoWay}"
+    NotifyIconVisible="{Binding NotifyIconVisible, Mode=TwoWay}"
+    Height="200" Width="530" ResizeMode="NoResize">
+    <FrameworkElement.Resources>
+        <Style x:Key="ToolTipErrorMessageStyle" TargetType="TextBox">
+            <Style.Resources>
+                <Style TargetType="ToolTip">
+                    <Setter Property="BorderBrush" Value="Red" />
+                    <Setter Property="Background" Value="DarkRed" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="ToolTipService.InitialShowDelay" Value="0" />
+                </Style>
+            </Style.Resources>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </FrameworkElement.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -29,7 +45,13 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Label Grid.Row="0" Grid.Column="0" Margin="5 0 0 0" Content="Software to launch:" VerticalAlignment="Center" />
+                <Label
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="5 0 0 0"
+                    Content="Software to launch:"
+                    VerticalAlignment="Center" />
+
                 <ComboBox
                     Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="5"
                     ItemsSource="{Binding AutoGameService.AvailableSoftware}"
@@ -38,19 +60,42 @@
                     SelectedValue="{Binding Config.SoftwareKey, Mode=TwoWay}"
                     VerticalContentAlignment="Center" />
 
-                <Label Grid.Row="1" Grid.Column="0" Margin="5 0 0 0" Content="Software path" VerticalAlignment="Center" />
-                <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Text="{Binding Config.SoftwarePath, Mode=TwoWay}" VerticalContentAlignment="Center" />
-                <Button Grid.Row="1" Grid.Column="2" Width="20" Margin="0 0 5 0" Content="..." Command="{Binding BrowseSoftwarePathCommand}" VerticalAlignment="Center" ToolTip="Browse" />
+                <Label
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="5 0 0 0"
+                    Content="Software path:"
+                    VerticalAlignment="Center" />
+
+                <TextBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="5"
+                    Text="{Binding Config.SoftwarePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource ResourceKey=ToolTipErrorMessageStyle}"
+                    VerticalContentAlignment="Center" />
+
+                <Button
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    Width="20"
+                    Margin="0 0 5 0"
+                    Content="..."
+                    Command="{Binding BrowseSoftwarePathCommand}"
+                    VerticalAlignment="Center"
+                    ToolTip="Browse" />
             </Grid>
 
             <CheckBox 
                 Margin="5"
                 Content="Launch when a gamepad is connected"
                 IsChecked="{Binding Config.LaunchWhenGamepadConnected, Mode=TwoWay}" />
+
             <CheckBox 
                 Margin="5"
                 Content="Launch when a parsec connection is established"
                 IsChecked="{Binding Config.LaunchWhenParsecConnected, Mode=TwoWay}" />
+
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
             <StackPanel.Resources>
@@ -59,16 +104,22 @@
                     <Setter Property="MinWidth" Value="75" />
                 </Style>
             </StackPanel.Resources>
+
             <Button 
                 Content="OK" 
-                Command="{Binding OKCommand}" />
+                Command="{Binding OKCommand}"
+                IsDefault="True" />
+
             <Button 
                 Content="Cancel" 
-                Command="{Binding CancelCommand}" />
+                Command="{Binding CancelCommand}"
+                IsCancel="True" />
+
             <Button 
                 Content="Apply" 
                 Command="{Binding ApplyCommand}"
                 IsEnabled="{Binding Config.IsDirty}"/>
+
         </StackPanel>
     </Grid>
 </localctl:BaseWindow>

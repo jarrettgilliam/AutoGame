@@ -12,6 +12,6 @@ namespace AutoGame.Infrastructure.Interfaces
 
         ISoftwareManager GetSoftwareByKey(string softwareKey);
 
-        void ApplyConfiguration(Config config);
+        bool TryApplyConfiguration(Config config);
     }
 }

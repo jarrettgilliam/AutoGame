@@ -59,7 +59,7 @@ namespace AutoGame.Infrastructure.Tests.Services
         {
             this.ArrangeAutoGameService(out _, out _, out var autoGameService);
 
-            Assert.Throws<ArgumentNullException>("config", () => autoGameService.ApplyConfiguration(null));
+            Assert.Throws<ArgumentNullException>("config", () => autoGameService.TryApplyConfiguration(null));
         }
 
         private void ArrangeAutoGameService(

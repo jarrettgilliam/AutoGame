@@ -1,12 +1,21 @@
 ﻿using AutoGame.Infrastructure.Helper;
 using AutoGame.Infrastructure.Interfaces;
+using Microsoft.Win32;
 using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace AutoGame.Infrastructure.SoftwareManager
 {
     public class SteamBigPictureManager : ISoftwareManager
     {
+        public SteamBigPictureManager(ILoggingService loggingService)
+        {
+            this.LoggingService = loggingService;
+        }
+
+        private ILoggingService LoggingService { get; }
+
         public string Key { get; } = "SteamBigPicture";
 
         public string Description { get; } = "Steam Big Picture";
@@ -21,7 +30,24 @@ namespace AutoGame.Infrastructure.SoftwareManager
 
         public string FindSoftwarePathOrDefault()
         {
-            return @"C:\Program Files (x86)\Steam\Steam.exe";
+            string defaultSteamPath = Path.Join(
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                @"Steam\steam.exe");
+
+            try
+            {
+                string registryPath = (string)Registry.GetValue(
+                    keyName: @"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam",
+                    valueName: "SteamExe",
+                    defaultValue: defaultSteamPath);
+
+                return Path.GetFullPath(registryPath);
+            }
+            catch (Exception ex)
+            {
+                this.LoggingService.LogException("finding the path to steam", ex);
+                return defaultSteamPath;
+            }
         }
     }
 }

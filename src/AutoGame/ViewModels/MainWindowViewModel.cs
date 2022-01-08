@@ -32,7 +32,7 @@ namespace AutoGame.ViewModels
             this.BrowseSoftwarePathCommand = new DelegateCommand(this.OnBrowseSoftwarePath);
             this.OKCommand = new DelegateCommand(this.OnOK);
             this.CancelCommand = new DelegateCommand(this.OnCancel);
-            this.ApplyCommand = new DelegateCommand(this.OnApply);
+            this.ApplyCommand = new DelegateCommand(() => this.OnApply());
         }
 
         private ILoggingService LoggingService { get; }
@@ -111,9 +111,19 @@ namespace AutoGame.ViewModels
         {
             try
             {
-                this.SetWindowState(WindowState.Minimized);
-                this.Config = this.LoadConfig();
-                this.AutoGameService.ApplyConfiguration(this.Config);
+                if (this.TryLoadConfig())
+                {
+                    if (this.AutoGameService.TryApplyConfiguration(this.Config))
+                    {
+                        this.SetWindowState(WindowState.Minimized);
+                    }
+                }
+                else
+                {
+                    // The configuration file doesn't exist so consider this initial setup.
+                    // Create a default configuration without applying it yet and don't minimize.
+                    this.Config = this.AutoGameService.CreateDefaultConfiguration();
+                }
             }
             catch (Exception ex)
             {
@@ -169,12 +179,10 @@ namespace AutoGame.ViewModels
         {
             try
             {
-                if (this.Config.IsDirty)
+                if (this.OnApply())
                 {
-                    this.OnApply();
+                    this.SetWindowState(WindowState.Minimized);
                 }
-
-                this.SetWindowState(WindowState.Minimized);
             }
             catch (Exception ex)
             {
@@ -186,7 +194,7 @@ namespace AutoGame.ViewModels
         {
             try
             {
-                this.Config = this.LoadConfig();
+                this.TryLoadConfig();
                 this.SetWindowState(WindowState.Minimized);
             }
             catch (Exception ex)
@@ -195,23 +203,39 @@ namespace AutoGame.ViewModels
             }
         }
 
-        private Config LoadConfig()
+        private bool TryLoadConfig()
         {
-            Config config = this.ConfigService.Load(this.AutoGameService.CreateDefaultConfiguration);
-            this.LoggingService.EnableTraceLogging = config.EnableTraceLogging;
-            return config;
+            Config config = this.ConfigService.GetConfigOrNull();
+
+            if (config != null)
+            {
+                this.Config = config;
+                this.LoggingService.EnableTraceLogging = config.EnableTraceLogging;
+            }
+
+            return config != null;
         }
 
-        private void OnApply()
+        private bool OnApply()
         {
             try
             {
-                this.ConfigService.Save(this.Config);
-                this.AutoGameService.ApplyConfiguration(this.Config);
+                if (this.Config.IsDirty)
+                {
+                    if (!this.AutoGameService.TryApplyConfiguration(this.Config))
+                    {
+                        return false;
+                    }
+
+                    this.ConfigService.Save(this.Config);
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
                 this.LoggingService.LogException("handling Apply", ex);
+                return false;
             }
         }
 

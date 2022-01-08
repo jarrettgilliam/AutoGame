@@ -16,7 +16,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         public event EventHandler ConditionMet;
 
-        public ILoggingService LoggingService { get; }
+        private ILoggingService LoggingService { get; }
 
         public void StartMonitoring()
         {

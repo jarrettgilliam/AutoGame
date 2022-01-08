@@ -25,7 +25,7 @@ namespace AutoGame.Infrastructure.Services
             this.ParsecConnectedCondition = parsecConnectedCondition;
         }
 
-        public ILoggingService LoggingService { get; }
+        private ILoggingService LoggingService { get; }
 
         public IList<ISoftwareManager> AvailableSoftware { get; }
 
@@ -33,9 +33,14 @@ namespace AutoGame.Infrastructure.Services
 
         private ILaunchCondition ParsecConnectedCondition { get; }
 
-        public void ApplyConfiguration(Config config)
+        public bool TryApplyConfiguration(Config config)
         {
             this.ValidateConfig(config);
+
+            if (config.HasErrors)
+            {
+                return false;
+            }
 
             this.appliedSoftware = this.GetSoftwareByKey(config.SoftwareKey);
             this.appliedSoftwarePath = config.SoftwarePath;
@@ -59,6 +64,8 @@ namespace AutoGame.Infrastructure.Services
                 condition.ConditionMet += this.OnLaunchConditionMet;
                 condition.StartMonitoring();
             }
+
+            return true;
         }
 
         public Config CreateDefaultConfiguration()
@@ -118,15 +125,17 @@ namespace AutoGame.Infrastructure.Services
 
         private void ValidateConfig(Config config)
         {
-            if (config == null)
-            {
-                throw new ArgumentNullException(nameof(config));
-            }
+            _ = config ?? throw new ArgumentNullException(nameof(config));
 
-            if (string.IsNullOrEmpty(config.SoftwarePath) ||
-                !File.Exists(config.SoftwarePath))
+            config.ClearAllErrors();
+
+            if (string.IsNullOrEmpty(config.SoftwarePath))
             {
-                throw new FileNotFoundException("The software path is invalid", config.SoftwarePath);
+                config.AddError(nameof(config.SoftwarePath), "Required");
+            }
+            else if (!File.Exists(config.SoftwarePath))
+            {
+                config.AddError(nameof(config.SoftwarePath), "File not found");
             }
         }
     }

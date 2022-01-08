@@ -15,11 +15,15 @@ namespace AutoGame.Infrastructure.Services
 
         public LoggingService()
         {
-            this.logWriter = new Lazy<StreamWriter>(() => 
-                new StreamWriter(LogPath, append: false)
+            this.logWriter = new Lazy<StreamWriter>(() =>
+            {
+                Directory.CreateDirectory(Strings.AppDataFolder);
+
+                return new StreamWriter(LogPath, append: false)
                 {
                     AutoFlush = true
-                });
+                };
+            });
         }
 
         public bool EnableTraceLogging { get; set; }
