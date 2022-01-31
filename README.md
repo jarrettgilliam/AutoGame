@@ -24,4 +24,4 @@ From here you can choose your game launcher, set it's installation path, and cho
 Donate
 ======
 
-If you found this software helpful and you want to give back, feel free to [buy me a beer](https://www.paypal.com/donate?hosted_button_id=UJGFS5JKMP5B6)!
+If you found this software helpful and you want to give back, feel free to [buy me a coffee](https://www.paypal.com/donate?hosted_button_id=UJGFS5JKMP5B6)!
