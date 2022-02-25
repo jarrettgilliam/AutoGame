@@ -20,7 +20,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         public void StartMonitoring()
         {
-            RawGameController.RawGameControllerAdded += this.RawGameController_RawGameControllerAdded; ;
+            RawGameController.RawGameControllerAdded += this.RawGameController_RawGameControllerAdded;
             this.CheckConditionMet();
         }
 
