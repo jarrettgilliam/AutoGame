@@ -46,10 +46,10 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.NetCore.DesktopRuntime.3.1.x64"
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.NetCore.CoreRuntime.6.0.x64"
                     {
-                    "Name" = "8:.NET Desktop Runtime 3.1 (x64)"
-                    "ProductCode" = "8:Microsoft.NetCore.DesktopRuntime.3.1.x64"
+                    "Name" = "8:.NET Runtime 6.0.3 (x64)"
+                    "ProductCode" = "8:Microsoft.NetCore.CoreRuntime.6.0.x64"
                     }
                 }
             }
@@ -78,10 +78,10 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.NetCore.DesktopRuntime.3.1.x64"
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.NetCore.CoreRuntime.6.0.x64"
                     {
-                    "Name" = "8:.NET Desktop Runtime 3.1 (x64)"
-                    "ProductCode" = "8:Microsoft.NetCore.DesktopRuntime.3.1.x64"
+                    "Name" = "8:.NET Runtime 6.0.3 (x64)"
+                    "ProductCode" = "8:Microsoft.NetCore.CoreRuntime.6.0.x64"
                     }
                 }
             }
@@ -733,7 +733,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_2C1E483903FD4FCBA53EF82FB0D21A06"
             {
-            "SourcePath" = "8:..\\AutoGame\\obj\\Release\\netcoreapp3.1\\AutoGame.exe"
+            "SourcePath" = "8:..\\AutoGame\\obj\\Release\\net6.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_93D681D956BC4AC3B85B06D8784811D8"
