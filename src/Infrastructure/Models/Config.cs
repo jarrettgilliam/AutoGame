@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 
 namespace AutoGame.Infrastructure.Models
@@ -12,14 +11,14 @@ namespace AutoGame.Infrastructure.Models
     public class Config : BindableBase, INotifyDataErrorInfo
     {
         private bool isDirty;
-        private Dictionary<string, IEnumerable<string>> allErrors;
+        private readonly Dictionary<string, IEnumerable<string>> allErrors;
         private bool enableTraceLogging;
-        private string softwareKey;
-        private string softwarePath;
+        private string? softwareKey;
+        private string? softwarePath;
         private bool launchWhenGamepadConnected;
         private bool launchWhenParsecConnected;
 
-        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
+        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
         public Config()
         {
@@ -43,22 +42,16 @@ namespace AutoGame.Infrastructure.Models
             set => this.SetProperty(ref this.enableTraceLogging, value);
         }
 
-        public string SoftwareKey
+        public string? SoftwareKey
         {
             get => this.softwareKey;
             set => this.SetProperty(ref this.softwareKey, value);
         }
 
-        public string SoftwarePath
+        public string? SoftwarePath
         {
             get => this.softwarePath;
-            set
-            {
-                if (this.SetProperty(ref this.softwarePath, value))
-                {
-                    this.ClearPropertyErrors();
-                }
-            }
+            set => this.SetProperty(ref this.softwarePath, value);
         }
 
         public bool LaunchWhenGamepadConnected
@@ -73,12 +66,12 @@ namespace AutoGame.Infrastructure.Models
             set => this.SetProperty(ref this.launchWhenParsecConnected, value);
         }
 
-        public IEnumerable GetErrors(string propertyName) =>
-            this.allErrors.GetValueOrDefault(propertyName);
+        public IEnumerable GetErrors(string? propertyName) => 
+            this.allErrors.GetValueOrDefault(propertyName ?? "") ?? Array.Empty<string>();
 
         public void AddError(string propertyName, string error)
         {
-            List<string> propErrors = this.GetErrors(propertyName)?.Cast<string>()?.ToList() ?? new List<string>();
+            List<string> propErrors = this.GetErrors(propertyName).Cast<string>().ToList();
 
             propErrors.Add(error);
 
@@ -87,9 +80,15 @@ namespace AutoGame.Infrastructure.Models
             this.ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
         }
 
-        public void ClearPropertyErrors([CallerMemberName] string propertyName = null)
+        protected override void OnPropertyChanged(PropertyChangedEventArgs args)
         {
-            if (this.allErrors.Remove(propertyName))
+            base.OnPropertyChanged(args);
+            this.ClearPropertyErrors(args.PropertyName);
+        }
+
+        public void ClearPropertyErrors(string? propertyName = null)
+        {
+            if (propertyName != null && this.allErrors.Remove(propertyName))
             {
                 this.ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
             }
@@ -106,7 +105,7 @@ namespace AutoGame.Infrastructure.Models
             }
         }
 
-        private void SetIsDirty(object sender, PropertyChangedEventArgs e)
+        private void SetIsDirty(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(this.IsDirty))
             {

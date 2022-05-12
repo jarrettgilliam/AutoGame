@@ -36,7 +36,7 @@ namespace AutoGame.Infrastructure.Tests.Services
                 out _,
                 out var autoGameService);
 
-            ISoftwareManager actual = autoGameService.GetSoftwareByKey(expected.Object.Key);
+            ISoftwareManager actual = autoGameService.GetSoftwareByKeyOrNull(expected.Object.Key);
 
             Assert.Equal(expected.Object, actual);
         }
@@ -49,17 +49,9 @@ namespace AutoGame.Infrastructure.Tests.Services
                 out _,
                 out var autoGameService);
 
-            ISoftwareManager actual = autoGameService.GetSoftwareByKey("badKey");
+            ISoftwareManager actual = autoGameService.GetSoftwareByKeyOrNull("badKey");
 
             Assert.Equal(expected.Object, actual);
-        }
-
-        [Fact]
-        public void ApplyConfiguration_NullConfig_Throws()
-        {
-            this.ArrangeAutoGameService(out _, out _, out var autoGameService);
-
-            Assert.Throws<ArgumentNullException>("config", () => autoGameService.TryApplyConfiguration(null));
         }
 
         private void ArrangeAutoGameService(
@@ -75,14 +67,17 @@ namespace AutoGame.Infrastructure.Tests.Services
             software2 = new Mock<ISoftwareManager>();
             software2.SetupGet(x => x.Key).Returns("key2");
 
+            var condition1 = new Mock<ILaunchCondition>();
+            var condition2 = new Mock<ILaunchCondition>();
+
             autoGameService = new AutoGameService(
                 loggingService.Object,
                 new ISoftwareManager[] {
                     software1.Object,
                     software2.Object
                 },
-                null,
-                null);
+                condition1.Object,
+                condition2.Object);
         }
     }
 }

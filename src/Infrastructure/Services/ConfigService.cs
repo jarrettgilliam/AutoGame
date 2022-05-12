@@ -12,22 +12,20 @@ namespace AutoGame.Infrastructure.Services
         private static readonly string ConfigPath =
             Path.Join(Strings.AppDataFolder, nameof(Config) + ".json");
 
-        public Config GetConfigOrNull()
+        public Config? GetConfigOrNull()
         {
-            Config config = null;
+            Config? config = null;
 
             try
             {
-                using (StreamReader sr = new StreamReader(ConfigPath))
-                using (JsonTextReader reader = new JsonTextReader(sr))
+                using (var sr = new StreamReader(ConfigPath))
+                using (var reader = new JsonTextReader(sr))
                 {
                     config = JsonSerializer.CreateDefault().Deserialize<Config>(reader);
-                    config.IsDirty = false;
+                    config!.IsDirty = false;
                 }
             }
-            catch (Exception ex) when (
-                ex is FileNotFoundException ||
-                ex is DirectoryNotFoundException)
+            catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
             {
             }
 
@@ -38,8 +36,8 @@ namespace AutoGame.Infrastructure.Services
         {
             Directory.CreateDirectory(Strings.AppDataFolder);
 
-            using (StreamWriter sw = new StreamWriter(ConfigPath))
-            using (JsonTextWriter writer = new JsonTextWriter(sw))
+            using (var sw = new StreamWriter(ConfigPath))
+            using (var writer = new JsonTextWriter(sw))
             {
                 writer.Formatting = Formatting.Indented;
                 JsonSerializer.CreateDefault().Serialize(writer, config);

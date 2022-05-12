@@ -7,7 +7,7 @@ namespace AutoGame.Infrastructure.Helper
     internal static class WindowHelper
     {
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern IntPtr FindWindow(string sClass, string sWindow);
+        public static extern IntPtr FindWindow(string? sClass, string sWindow);
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr GetForegroundWindow();

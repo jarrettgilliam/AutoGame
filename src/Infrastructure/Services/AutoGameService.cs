@@ -9,9 +9,9 @@ namespace AutoGame.Infrastructure.Services
 {
     public sealed class AutoGameService : IAutoGameService
     {
-        private ISoftwareManager appliedSoftware;
-        private string appliedSoftwarePath;
-        private IList<ILaunchCondition> appliedLaunchConditions;
+        private ISoftwareManager? appliedSoftware;
+        private string? appliedSoftwarePath;
+        private IList<ILaunchCondition>? appliedLaunchConditions;
 
         public AutoGameService(
             ILoggingService loggingService,
@@ -42,7 +42,7 @@ namespace AutoGame.Infrastructure.Services
                 return false;
             }
 
-            this.appliedSoftware = this.GetSoftwareByKey(config.SoftwareKey);
+            this.appliedSoftware = this.GetSoftwareByKeyOrNull(config.SoftwareKey);
             this.appliedSoftwarePath = config.SoftwarePath;
 
             this.StopMonitoringAllLaunchConditions();
@@ -81,7 +81,7 @@ namespace AutoGame.Infrastructure.Services
             };
         }
 
-        public ISoftwareManager GetSoftwareByKey(string softwareKey)
+        public ISoftwareManager? GetSoftwareByKeyOrNull(string? softwareKey)
         {
             return this.AvailableSoftware.FirstOrDefault(s => s.Key == softwareKey) ??
                    this.AvailableSoftware.FirstOrDefault();
@@ -108,11 +108,12 @@ namespace AutoGame.Infrastructure.Services
             }
         }
 
-        private void OnLaunchConditionMet(object sender, EventArgs e)
+        private void OnLaunchConditionMet(object? sender, EventArgs e)
         {
             try
             {
-                if (!this.appliedSoftware.IsRunning)
+                if (this.appliedSoftware?.IsRunning == false && 
+                    this.appliedSoftwarePath is not null)
                 {
                     this.appliedSoftware.Start(this.appliedSoftwarePath);
                 }
@@ -125,8 +126,6 @@ namespace AutoGame.Infrastructure.Services
 
         private void ValidateConfig(Config config)
         {
-            _ = config ?? throw new ArgumentNullException(nameof(config));
-
             config.ClearAllErrors();
 
             if (string.IsNullOrEmpty(config.SoftwarePath))

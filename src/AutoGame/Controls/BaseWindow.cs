@@ -22,7 +22,7 @@ namespace AutoGame.Controls
                 typeof(BaseWindow),
                 new FrameworkPropertyMetadata(false, OnNotifyIconVisibleChanged));
 
-        private NotifyIcon notifyIcon = null;
+        private NotifyIcon? notifyIcon;
 
         public BaseWindow()
         {
@@ -50,15 +50,20 @@ namespace AutoGame.Controls
             this.notifyIcon.Icon = new Icon(@"Icons\AutoGame.ico");
         }
 
-        private MainWindowViewModel ViewModel => this.DataContext as MainWindowViewModel;
+        private MainWindowViewModel? ViewModel => this.DataContext as MainWindowViewModel;
 
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
             this.Loaded -= this.MainWindow_Loaded;
-            this.notifyIcon.Click -= this.NotifyIcon_Click;
-            this.notifyIcon.Dispose();
-            this.notifyIcon = null;
+
+            if (this.notifyIcon is not null)
+            {
+                this.notifyIcon.Click -= this.NotifyIcon_Click;
+                this.notifyIcon.Dispose();
+                this.notifyIcon = null;
+            }
+
             this.ViewModel?.Dispose();
         }
 
@@ -79,21 +84,23 @@ namespace AutoGame.Controls
 
         private static void OnNotifyIconVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is BaseWindow baseWindow && e.NewValue is bool notifyIconVisible)
+            if (d is BaseWindow baseWindow && 
+                baseWindow.notifyIcon is not null &&
+                e.NewValue is bool notifyIconVisible)
             {
                 baseWindow.notifyIcon.Visible = notifyIconVisible;
             }
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private void MainWindow_Loaded(object? sender, RoutedEventArgs e)
         {
             this.Loaded -= this.MainWindow_Loaded;
-            this.ViewModel?.LoadedCommand?.Execute(null);
+            this.ViewModel?.LoadedCommand.Execute(null);
         }
 
-        private void NotifyIcon_Click(object sender, EventArgs e)
+        private void NotifyIcon_Click(object? sender, EventArgs e)
         {
-            this.ViewModel?.NotifyIconClickCommand?.Execute(null);
+            this.ViewModel?.NotifyIconClickCommand.Execute(null);
         }
     }
 }

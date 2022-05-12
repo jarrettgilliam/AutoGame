@@ -1,11 +1,10 @@
-﻿using System;
-using AutoGame.Infrastructure.Models;
+﻿using AutoGame.Infrastructure.Models;
 
 namespace AutoGame.Infrastructure.Interfaces
 {
     public interface IConfigService
     {
-        Config GetConfigOrNull();
+        Config? GetConfigOrNull();
 
         void Save(Config config);
     }

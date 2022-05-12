@@ -10,7 +10,7 @@ namespace AutoGame.Infrastructure.Interfaces
 
         Config CreateDefaultConfiguration();
 
-        ISoftwareManager GetSoftwareByKey(string softwareKey);
+        ISoftwareManager? GetSoftwareByKeyOrNull(string? softwareKey);
 
         bool TryApplyConfiguration(Config config);
     }

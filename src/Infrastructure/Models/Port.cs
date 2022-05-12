@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -7,21 +6,22 @@ namespace AutoGame.Infrastructure.Models
 {
     public class Port
     {
-        public string Protocol;
+        public string? Protocol;
 
-        public string LocalAddress;
+        public string? LocalAddress;
 
-        public string ForeignAddress;
+        public string? ForeignAddress;
 
-        public string State;
+        public string? State;
 
         public int ProcessId;
 
         public static bool TryParse(string s, out Port port)
         {
+            port = new Port();
+            
             if (string.IsNullOrEmpty(s))
             {
-                port = null;
                 return false;
             }
 
@@ -34,11 +34,9 @@ namespace AutoGame.Infrastructure.Models
 
             if (tokens.Count < 1)
             {
-                port = null;
                 return false;
             }
 
-            port = new Port();
 
             port.Protocol = tokens.Pop();
 
@@ -46,7 +44,6 @@ namespace AutoGame.Infrastructure.Models
             {
                 if (tokens.Count < 4)
                 {
-                    port = null;
                     return false;
                 }
             }
@@ -54,13 +51,11 @@ namespace AutoGame.Infrastructure.Models
             {
                 if (tokens.Count < 3)
                 {
-                    port = null;
                     return false;
                 }
             }
             else
             {
-                port = null;
                 return false;
             }
 
@@ -74,7 +69,6 @@ namespace AutoGame.Infrastructure.Models
 
             if (!int.TryParse(tokens.Pop(), out port.ProcessId))
             {
-                port = null;
                 return false;
             }
 

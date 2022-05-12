@@ -23,9 +23,9 @@ namespace AutoGame.Infrastructure.LaunchConditions
         private bool wasConnected;
         private bool wasMuted;
 
-        private MMDeviceEnumerator mmDeviceEnumerator;
-        private MMDevice mmDevice;
-        private IAudioSessionEventsHandler audioEventClient;
+        private MMDeviceEnumerator? mmDeviceEnumerator;
+        private MMDevice? mmDevice;
+        private readonly IAudioSessionEventsHandler audioEventClient;
 
         public ParsecConnectedCondition(ILoggingService loggingService)
         {
@@ -33,7 +33,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
             this.audioEventClient = new ParsecAudioSessionEventsHandler(loggingService, this.CheckConditionMet);
         }
 
-        public event EventHandler ConditionMet;
+        public event EventHandler? ConditionMet;
 
         private ILoggingService LoggingService { get; }
 
@@ -56,7 +56,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
             this.CheckConditionMet();
         }
 
-        private void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
+        private void SystemEvents_DisplaySettingsChanged(object? sender, EventArgs e)
         {
             try
             {
@@ -215,11 +215,16 @@ namespace AutoGame.Infrastructure.LaunchConditions
 
         private IEnumerable<AudioSessionControl> GetAudioSessions(Process[] parsecProcs)
         {
-            foreach (MMDevice mmDevice in this.mmDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+            if (this.mmDeviceEnumerator is null)
             {
-                for (int i = 0; i < mmDevice.AudioSessionManager.Sessions.Count; i++)
+                yield break;
+            }
+            
+            foreach (MMDevice mmd in this.mmDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+            {
+                for (int i = 0; i < mmd.AudioSessionManager.Sessions.Count; i++)
                 {
-                    AudioSessionControl session = mmDevice.AudioSessionManager.Sessions[i];
+                    AudioSessionControl session = mmd.AudioSessionManager.Sessions[i];
 
                     if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
                     {
@@ -229,7 +234,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
             }
         }
 
-        private void Trace(string message, [CallerMemberName] string member = null) =>
+        private void Trace(string message, [CallerMemberName] string? member = null) =>
             this.LoggingService.Log($"{nameof(ParsecConnectedCondition)}.{member} {message}", LogLevel.Trace);
 
         private class ParsecAudioSessionEventsHandler : IAudioSessionEventsHandler

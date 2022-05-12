@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace AutoGame.Infrastructure.SoftwareManager
+namespace AutoGame.Infrastructure.SoftwareManagers
 {
     public class PlayniteFullscreenManager : ISoftwareManager
     {
@@ -15,7 +15,7 @@ namespace AutoGame.Infrastructure.SoftwareManager
 
         public string Description { get; } = "Playnite Fullscreen";
 
-        public bool IsRunning => Process.GetProcessesByName(PLAYNITE_FULLSCREEN_APP)?.Any() == true;
+        public bool IsRunning => Process.GetProcessesByName(PLAYNITE_FULLSCREEN_APP).Any();
 
         public void Start(string softwarePath)
         {

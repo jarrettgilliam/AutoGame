@@ -4,7 +4,7 @@ namespace AutoGame.Infrastructure.Interfaces
 {
     public interface ILaunchCondition
     {
-        event EventHandler ConditionMet;
+        event EventHandler? ConditionMet;
 
         void StartMonitoring();
 

@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace AutoGame.Infrastructure.SoftwareManager
+namespace AutoGame.Infrastructure.SoftwareManagers
 {
     public class SteamBigPictureManager : ISoftwareManager
     {
@@ -16,9 +16,9 @@ namespace AutoGame.Infrastructure.SoftwareManager
 
         private ILoggingService LoggingService { get; }
 
-        public string Key { get; } = "SteamBigPicture";
+        public string Key => "SteamBigPicture";
 
-        public string Description { get; } = "Steam Big Picture";
+        public string Description => "Steam Big Picture";
 
         // From: https://www.displayfusion.com/ScriptedFunctions/View/?ID=b21d08ca-438a-41e5-8b9d-0125b07a2abc
         public bool IsRunning => WindowHelper.FindWindow("CUIEngineWin32", "Steam") != IntPtr.Zero;
@@ -32,22 +32,27 @@ namespace AutoGame.Infrastructure.SoftwareManager
         {
             string defaultSteamPath = Path.Join(
                 Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                @"Steam\steam.exe");
+                "Steam",
+                "steam.exe");
 
             try
             {
-                string registryPath = (string)Registry.GetValue(
+                string? registryPath = (string?)Registry.GetValue(
                     keyName: @"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam",
                     valueName: "SteamExe",
                     defaultValue: defaultSteamPath);
 
-                return Path.GetFullPath(registryPath);
+                if (registryPath is not null)
+                {
+                    return Path.GetFullPath(registryPath);
+                }
             }
             catch (Exception ex)
             {
                 this.LoggingService.LogException("finding the path to steam", ex);
-                return defaultSteamPath;
             }
+
+            return defaultSteamPath;
         }
     }
 }

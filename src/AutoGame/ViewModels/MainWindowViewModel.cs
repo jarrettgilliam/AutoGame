@@ -33,6 +33,8 @@ namespace AutoGame.ViewModels
             this.OKCommand = new DelegateCommand(this.OnOK);
             this.CancelCommand = new DelegateCommand(this.OnCancel);
             this.ApplyCommand = new DelegateCommand(() => this.OnApply());
+            
+            this.config = this.AutoGameService.CreateDefaultConfiguration();
         }
 
         private ILoggingService LoggingService { get; }
@@ -62,15 +64,8 @@ namespace AutoGame.ViewModels
                 var oldValue = this.config;
                 if (this.SetProperty(ref this.config, value))
                 {
-                    if (oldValue != null)
-                    {
-                        oldValue.PropertyChanged -= this.OnConfigSoftwareKeyChanged;
-                    }
-
-                    if (value != null)
-                    {
-                        value.PropertyChanged += this.OnConfigSoftwareKeyChanged;
-                    }
+                    oldValue.PropertyChanged -= this.OnConfigSoftwareKeyChanged;
+                    value.PropertyChanged += this.OnConfigSoftwareKeyChanged;
                 }
             }
         }
@@ -147,9 +142,9 @@ namespace AutoGame.ViewModels
         {
             try
             {
-                ISoftwareManager software = this.AutoGameService.GetSoftwareByKey(this.Config.SoftwareKey);
-                string defaultPath = software.FindSoftwarePathOrDefault();
-                string executable = Path.GetFileName(defaultPath);
+                ISoftwareManager? software = this.AutoGameService.GetSoftwareByKeyOrNull(this.Config.SoftwareKey);
+                string? defaultPath = software?.FindSoftwarePathOrDefault();
+                string? executable = Path.GetFileName(defaultPath);
 
                 var dialog = new OpenFileDialog()
                 {
@@ -162,7 +157,10 @@ namespace AutoGame.ViewModels
                     dialog.InitialDirectory = Path.GetDirectoryName(defaultPath);
                 }
 
-                dialog.Filter = $"{software.Description}|{executable}";
+                if (software?.Description is not null && executable is not null)
+                {   
+                    dialog.Filter = $"{software.Description}|{executable}";
+                }
 
                 if (dialog.ShowDialog() == true)
                 {
@@ -205,15 +203,15 @@ namespace AutoGame.ViewModels
 
         private bool TryLoadConfig()
         {
-            Config config = this.ConfigService.GetConfigOrNull();
+            Config? c = this.ConfigService.GetConfigOrNull();
 
-            if (config != null)
+            if (c != null)
             {
-                this.Config = config;
-                this.LoggingService.EnableTraceLogging = config.EnableTraceLogging;
+                this.Config = c;
+                this.LoggingService.EnableTraceLogging = c.EnableTraceLogging;
             }
 
-            return config != null;
+            return c != null;
         }
 
         private bool OnApply()
@@ -239,14 +237,14 @@ namespace AutoGame.ViewModels
             }
         }
 
-        private void OnConfigSoftwareKeyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnConfigSoftwareKeyChanged(object? sender, PropertyChangedEventArgs e)
         {
             try
             {
-                if (e.PropertyName == nameof(this.Config.SoftwareKey) && sender is Config config)
+                if (e.PropertyName == nameof(this.Config.SoftwareKey) && sender is Config c)
                 {
-                    ISoftwareManager s = this.AutoGameService.GetSoftwareByKey(config.SoftwareKey);
-                    config.SoftwarePath = s.FindSoftwarePathOrDefault();
+                    ISoftwareManager? s = this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey);
+                    c.SoftwarePath = s?.FindSoftwarePathOrDefault();
                 }
             }
             catch (Exception ex)
@@ -255,16 +253,16 @@ namespace AutoGame.ViewModels
             }
         }
 
-        private void SetWindowState(WindowState windowState)
+        private void SetWindowState(WindowState state)
         {
-            if (this.WindowState == windowState)
+            if (this.WindowState == state)
             {
                 return;
             }
 
-            if (windowState == WindowState.Minimized)
+            if (state == WindowState.Minimized)
             {
-                this.WindowState = windowState;
+                this.WindowState = state;
                 this.ShowWindow = false;
                 this.NotifyIconVisible = true;
             }
@@ -272,7 +270,7 @@ namespace AutoGame.ViewModels
             {
                 this.NotifyIconVisible = false;
                 this.ShowWindow = true;
-                this.WindowState = windowState;
+                this.WindowState = state;
             }
         }
     }

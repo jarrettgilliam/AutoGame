@@ -3,7 +3,7 @@ using System.Windows;
 using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.LaunchConditions;
 using AutoGame.Infrastructure.Services;
-using AutoGame.Infrastructure.SoftwareManager;
+using AutoGame.Infrastructure.SoftwareManagers;
 using AutoGame.ViewModels;
 using AutoGame.Views;
 
@@ -33,8 +33,8 @@ namespace AutoGame
                             this.LoggingService,
                             new ISoftwareManager[]
                             {
-                            new SteamBigPictureManager(this.LoggingService),
-                            new PlayniteFullscreenManager()
+                                new SteamBigPictureManager(this.LoggingService),
+                                new PlayniteFullscreenManager()
                             },
                             new GamepadConnectedCondition(this.LoggingService),
                             new ParsecConnectedCondition(this.LoggingService)))

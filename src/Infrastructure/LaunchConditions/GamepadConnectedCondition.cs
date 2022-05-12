@@ -14,7 +14,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
             this.LoggingService = loggingService;
         }
 
-        public event EventHandler ConditionMet;
+        public event EventHandler? ConditionMet;
 
         private ILoggingService LoggingService { get; }
 
@@ -24,7 +24,7 @@ namespace AutoGame.Infrastructure.LaunchConditions
             this.CheckConditionMet();
         }
 
-        private void RawGameController_RawGameControllerAdded(object sender, RawGameController e)
+        private void RawGameController_RawGameControllerAdded(object? sender, RawGameController e)
         {
             try
             {
