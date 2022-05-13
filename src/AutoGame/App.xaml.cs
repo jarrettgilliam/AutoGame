@@ -23,6 +23,7 @@ public partial class App : Application
         this.DateTimeService = new DateTimeService();
         this.User32Service = new WindowsUser32Service();
         this.SleepService = new SleepService();
+        this.ProcessService = new ProcessService();
         
         this.LoggingService = new LoggingService(
             this.AppInfo,
@@ -35,6 +36,7 @@ public partial class App : Application
     private ILoggingService LoggingService { get; }
     private IUser32Service User32Service { get; }
     private ISleepService SleepService { get; }
+    private IProcessService ProcessService { get; }
     private IFileSystem FileSystem { get; }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -60,18 +62,20 @@ public partial class App : Application
                             new SteamBigPictureManager(
                                 this.LoggingService,
                                 this.User32Service,
-                                this.FileSystem),
+                                this.FileSystem,
+                                this.ProcessService),
                             new PlayniteFullscreenManager(
                                 new WindowService(
                                     this.User32Service,
                                     this.DateTimeService,
                                     this.SleepService),
-                                this.FileSystem)
+                                this.FileSystem,
+                                this.ProcessService)
                         },
                         new GamepadConnectedCondition(this.LoggingService),
                         new ParsecConnectedCondition(
                             this.LoggingService,
-                            new NetStatPortsService(),
+                            new NetStatPortsService(this.ProcessService),
                             this.SleepService)),
                     this.FileSystem)
             };

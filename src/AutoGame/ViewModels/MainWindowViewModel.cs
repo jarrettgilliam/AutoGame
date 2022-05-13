@@ -43,7 +43,7 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
 
     private IConfigService ConfigService { get; }
 
-    private IAutoGameService AutoGameService { get; }
+    public IAutoGameService AutoGameService { get; }
     
     private IFileSystem FileSystem { get; }
 

@@ -2,7 +2,6 @@
 
 using AutoGame.Core.Interfaces;
 using System;
-using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Linq;
 
@@ -10,14 +9,17 @@ public class PlayniteFullscreenManager : ISoftwareManager
 {
     public PlayniteFullscreenManager(
         IWindowService windowService,
-        IFileSystem fileSystem)
+        IFileSystem fileSystem,
+        IProcessService processService)
     {
         this.WindowService = windowService;
         this.FileSystem = fileSystem;
+        this.ProcessService = processService;
     }
         
     private IWindowService WindowService { get; }
     private IFileSystem FileSystem { get; }
+    private IProcessService ProcessService { get; }
         
     private const string PLAYNITE_FULLSCREEN_APP = "Playnite.FullscreenApp";
 
@@ -25,11 +27,11 @@ public class PlayniteFullscreenManager : ISoftwareManager
 
     public string Description => "Playnite Fullscreen";
 
-    public bool IsRunning => Process.GetProcessesByName(PLAYNITE_FULLSCREEN_APP).Any();
+    public bool IsRunning => this.ProcessService.GetProcessesByName(PLAYNITE_FULLSCREEN_APP).Any();
 
     public void Start(string softwarePath)
     {
-        Process.Start(softwarePath);
+        this.ProcessService.Start(softwarePath);
         this.WindowService.RepeatTryForceForegroundWindowByTitle("Playnite", TimeSpan.FromSeconds(5));
     }
 

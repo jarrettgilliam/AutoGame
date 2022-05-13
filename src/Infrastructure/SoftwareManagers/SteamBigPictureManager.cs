@@ -3,7 +3,6 @@
 using AutoGame.Core.Interfaces;
 using Microsoft.Win32;
 using System;
-using System.Diagnostics;
 using System.IO.Abstractions;
 
 public class SteamBigPictureManager : ISoftwareManager
@@ -11,16 +10,19 @@ public class SteamBigPictureManager : ISoftwareManager
     public SteamBigPictureManager(
         ILoggingService loggingService,
         IUser32Service user32Service,
-        IFileSystem fileSystem)
+        IFileSystem fileSystem,
+        IProcessService processService)
     {
         this.LoggingService = loggingService;
         this.User32Service = user32Service;
         this.FileSystem = fileSystem;
+        this.ProcessService = processService;
     }
 
     private ILoggingService LoggingService { get; }
     private IUser32Service User32Service { get; }
     private IFileSystem FileSystem { get; }
+    private  IProcessService ProcessService { get; }
 
     public string Key => "SteamBigPicture";
 
@@ -31,7 +33,7 @@ public class SteamBigPictureManager : ISoftwareManager
 
     public void Start(string softwarePath)
     {
-        Process.Start(softwarePath, "-start steam://open/bigpicture -fulldesktopres");
+        this.ProcessService.Start(softwarePath, "-start steam://open/bigpicture -fulldesktopres");
     }
 
     public string FindSoftwarePathOrDefault()

@@ -29,9 +29,10 @@ public sealed class AutoGameService : IAutoGameService
 
     private ILoggingService LoggingService { get; }
     private IFileSystem FileSystem { get; }
-    public IList<ISoftwareManager> AvailableSoftware { get; }
     private ILaunchCondition GamepadConnectedCondition { get; }
     private ILaunchCondition ParsecConnectedCondition { get; }
+    
+    public IList<ISoftwareManager> AvailableSoftware { get; }
 
     public bool TryApplyConfiguration(Config config)
     {

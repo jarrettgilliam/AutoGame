@@ -11,12 +11,20 @@ using AutoGame.Core.Models;
 // From: https://gist.github.com/cheynewallace/5971686
 public class NetStatPortsService : INetStatPortsService
 {
+    public NetStatPortsService(IProcessService processService)
+    {
+        this.ProcessService = processService;
+    }
+
+    private IProcessService ProcessService { get; }
+
     public IList<Port> GetNetStatPorts()
     {
         var ports = new List<Port>();
 
-        using var process = new Process();
-        var ps = new ProcessStartInfo()
+        using IProcess process = this.ProcessService.NewProcess();
+        
+        process.StartInfo = new ProcessStartInfo()
         {
             Arguments = "-a -n -o",
             FileName = "netstat.exe",
@@ -28,7 +36,6 @@ public class NetStatPortsService : INetStatPortsService
             RedirectStandardError = true
         };
 
-        process.StartInfo = ps;
         process.Start();
 
         string output = process.StandardOutput.ReadToEnd();
