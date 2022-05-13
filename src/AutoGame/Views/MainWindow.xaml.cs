@@ -1,15 +1,14 @@
-﻿using AutoGame.Controls;
+﻿namespace AutoGame.Views;
 
-namespace AutoGame.Views
+using AutoGame.Controls;
+
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow : BaseWindow
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : BaseWindow
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            this.InitializeComponent();
-        }
+        this.InitializeComponent();
     }
 }

@@ -1,49 +1,48 @@
-﻿using System;
+﻿namespace AutoGame.Infrastructure.Services;
+
+using System;
 using System.IO;
-using AutoGame.Infrastructure.Constants;
-using AutoGame.Infrastructure.Enums;
-using AutoGame.Infrastructure.Interfaces;
+using AutoGame.Core.Enums;
+using AutoGame.Core.Interfaces;
 
-namespace AutoGame.Infrastructure.Services
+public class LoggingService : ILoggingService
 {
-    public class LoggingService : ILoggingService
+    private readonly Lazy<StreamWriter> logWriter;
+
+    public LoggingService(IAppInfoService appInfo)
     {
-        private static readonly string LogPath =
-            Path.Join(Strings.AppDataFolder, "Log.txt");
-
-        private readonly Lazy<StreamWriter> logWriter;
-
-        public LoggingService()
+        this.AppInfo = appInfo;
+        
+        this.logWriter = new Lazy<StreamWriter>(() =>
         {
-            this.logWriter = new Lazy<StreamWriter>(() =>
-            {
-                Directory.CreateDirectory(Strings.AppDataFolder);
+            Directory.CreateDirectory(this.AppInfo.AppDataFolder);
 
-                return new StreamWriter(LogPath, append: false)
-                {
-                    AutoFlush = true
-                };
-            });
+            return new StreamWriter(this.AppInfo.LogFilePath, append: false)
+            {
+                AutoFlush = true
+            };
+        });
+    }
+        
+    private IAppInfoService AppInfo { get; }
+
+    public bool EnableTraceLogging { get; set; }
+
+    public void Log(string message, LogLevel level)
+    {
+        if (level == LogLevel.Trace && !this.EnableTraceLogging)
+        {
+            return;
         }
 
-        public bool EnableTraceLogging { get; set; }
+        this.logWriter.Value.WriteLine($"{DateTimeOffset.Now} {level}: {message}");
+    }
 
-        public void Log(string message, LogLevel level)
+    public void Dispose()
+    {
+        if (this.logWriter.IsValueCreated)
         {
-            if (level == LogLevel.Trace && !this.EnableTraceLogging)
-            {
-                return;
-            }
-
-            this.logWriter.Value.WriteLine($"{DateTime.Now} {level}: {message}");
-        }
-
-        public void Dispose()
-        {
-            if (this.logWriter.IsValueCreated)
-            {
-                this.logWriter.Value.Dispose();
-            }
+            this.logWriter.Value.Dispose();
         }
     }
 }

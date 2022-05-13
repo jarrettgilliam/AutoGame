@@ -1,49 +1,50 @@
-﻿using System;
+﻿namespace AutoGame.Infrastructure.Services;
+
+using System;
 using System.IO;
-using AutoGame.Infrastructure.Constants;
-using AutoGame.Infrastructure.Interfaces;
-using AutoGame.Infrastructure.Models;
+using AutoGame.Core.Interfaces;
+using AutoGame.Core.Models;
 using Newtonsoft.Json;
 
-namespace AutoGame.Infrastructure.Services
+public class ConfigService : IConfigService
 {
-    public class ConfigService : IConfigService
+    public ConfigService(IAppInfoService appInfo)
     {
-        private static readonly string ConfigPath =
-            Path.Join(Strings.AppDataFolder, nameof(Config) + ".json");
+        this.AppInfo = appInfo;
+    }
+        
+    private IAppInfoService AppInfo { get; }
 
-        public Config? GetConfigOrNull()
+    public Config? GetConfigOrNull()
+    {
+        Config? config = null;
+
+        try
         {
-            Config? config = null;
+            using var sr = new StreamReader(this.AppInfo.ConfigFilePath);
+            using var reader = new JsonTextReader(sr);
 
-            try
-            {
-                using (var sr = new StreamReader(ConfigPath))
-                using (var reader = new JsonTextReader(sr))
-                {
-                    config = JsonSerializer.CreateDefault().Deserialize<Config>(reader);
-                    config!.IsDirty = false;
-                }
-            }
-            catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
-            {
-            }
-
-            return config;
+            config = JsonSerializer.CreateDefault().Deserialize<Config>(reader);
+            config!.IsDirty = false;
+        }
+        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+        {
         }
 
-        public void Save(Config config)
+        return config;
+    }
+
+    public void Save(Config config)
+    {
+        Directory.CreateDirectory(this.AppInfo.AppDataFolder);
+
+        using (var sw = new StreamWriter(this.AppInfo.ConfigFilePath))
+        using (var writer = new JsonTextWriter(sw))
         {
-            Directory.CreateDirectory(Strings.AppDataFolder);
-
-            using (var sw = new StreamWriter(ConfigPath))
-            using (var writer = new JsonTextWriter(sw))
-            {
-                writer.Formatting = Formatting.Indented;
-                JsonSerializer.CreateDefault().Serialize(writer, config);
-            }
-
-            config.IsDirty = false;
+            writer.Formatting = Formatting.Indented;
+            JsonSerializer.CreateDefault().Serialize(writer, config);
         }
+
+        config.IsDirty = false;
     }
 }

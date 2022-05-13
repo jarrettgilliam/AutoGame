@@ -1,83 +1,81 @@
-﻿using System;
-using AutoGame.Infrastructure.Interfaces;
-using AutoGame.Infrastructure.Services;
+﻿namespace AutoGame.Infrastructure.Tests.Services;
+
+using AutoGame.Core.Interfaces;
 using Moq;
 using Xunit;
+using AutoGame.Core.Services;
 
-namespace AutoGame.Infrastructure.Tests.Services
+public class AutoGameServiceTests
 {
-    public class AutoGameServiceTests
+    [Fact]
+    public void AvailableSoftware_PassedList_Matches()
     {
-        [Fact]
-        public void AvailableSoftware_PassedList_Matches()
-        {
-            this.ArrangeAutoGameService(
-                out var software0,
-                out var software1,
-                out var autoGameService);
+        this.ArrangeAutoGameService(
+            out var software0,
+            out var software1,
+            out var autoGameService);
 
-            Assert.Equal(2, autoGameService.AvailableSoftware.Count);
-            Assert.Equal(software0.Object, autoGameService.AvailableSoftware[0]);
-            Assert.Equal(software1.Object, autoGameService.AvailableSoftware[1]);
-        }
+        Assert.Equal(2, autoGameService.AvailableSoftware.Count);
+        Assert.Equal(software0.Object, autoGameService.AvailableSoftware[0]);
+        Assert.Equal(software1.Object, autoGameService.AvailableSoftware[1]);
+    }
 
-        [Fact]
-        public void CreateDefaultConfiguration_NotNull()
-        {
-            this.ArrangeAutoGameService(out _, out _, out var autoGameService);
-            Assert.NotNull(autoGameService.CreateDefaultConfiguration());
-        }
+    [Fact]
+    public void CreateDefaultConfiguration_NotNull()
+    {
+        this.ArrangeAutoGameService(out _, out _, out var autoGameService);
+        Assert.NotNull(autoGameService.CreateDefaultConfiguration());
+    }
 
-        [Fact]
-        public void GetSoftwareByKey_ValidKey_MatchingSoftwareManager()
-        {
-            this.ArrangeAutoGameService(
-                out var expected,
-                out _,
-                out var autoGameService);
+    [Fact]
+    public void GetSoftwareByKey_ValidKey_MatchingSoftwareManager()
+    {
+        this.ArrangeAutoGameService(
+            out var expected,
+            out _,
+            out var autoGameService);
 
-            ISoftwareManager actual = autoGameService.GetSoftwareByKeyOrNull(expected.Object.Key);
+        ISoftwareManager actual = autoGameService.GetSoftwareByKeyOrNull(expected.Object.Key);
 
-            Assert.Equal(expected.Object, actual);
-        }
+        Assert.Equal(expected.Object, actual);
+    }
 
-        [Fact]
-        public void GetSoftwareByKey_InvalidKey_FirstSoftwareManager()
-        {
-            this.ArrangeAutoGameService(
-                out var expected,
-                out _,
-                out var autoGameService);
+    [Fact]
+    public void GetSoftwareByKey_InvalidKey_FirstSoftwareManager()
+    {
+        this.ArrangeAutoGameService(
+            out var expected,
+            out _,
+            out var autoGameService);
 
-            ISoftwareManager actual = autoGameService.GetSoftwareByKeyOrNull("badKey");
+        ISoftwareManager actual = autoGameService.GetSoftwareByKeyOrNull("badKey");
 
-            Assert.Equal(expected.Object, actual);
-        }
+        Assert.Equal(expected.Object, actual);
+    }
 
-        private void ArrangeAutoGameService(
-            out Mock<ISoftwareManager> software1,
-            out Mock<ISoftwareManager> software2,
-            out IAutoGameService autoGameService)
-        {
-            var loggingService = new Mock<ILoggingService>();
+    private void ArrangeAutoGameService(
+        out Mock<ISoftwareManager> software1,
+        out Mock<ISoftwareManager> software2,
+        out IAutoGameService autoGameService)
+    {
+        var loggingService = new Mock<ILoggingService>();
 
-            software1 = new Mock<ISoftwareManager>();
-            software1.SetupGet(x => x.Key).Returns("key1");
+        software1 = new Mock<ISoftwareManager>();
+        software1.SetupGet(x => x.Key).Returns("key1");
 
-            software2 = new Mock<ISoftwareManager>();
-            software2.SetupGet(x => x.Key).Returns("key2");
+        software2 = new Mock<ISoftwareManager>();
+        software2.SetupGet(x => x.Key).Returns("key2");
 
-            var condition1 = new Mock<ILaunchCondition>();
-            var condition2 = new Mock<ILaunchCondition>();
+        var condition1 = new Mock<ILaunchCondition>();
+        var condition2 = new Mock<ILaunchCondition>();
 
-            autoGameService = new AutoGameService(
-                loggingService.Object,
-                new ISoftwareManager[] {
-                    software1.Object,
-                    software2.Object
-                },
-                condition1.Object,
-                condition2.Object);
-        }
+        autoGameService = new AutoGameService(
+            loggingService.Object,
+            new ISoftwareManager[] {
+                software1.Object,
+                software2.Object
+            },
+            condition1.Object,
+            condition2.Object);
     }
 }

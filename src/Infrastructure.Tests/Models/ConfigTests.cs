@@ -1,18 +1,17 @@
-using AutoGame.Infrastructure.Models;
+namespace AutoGame.Infrastructure.Tests.Models;
+
+using AutoGame.Core.Models;
 using Xunit;
 
-namespace AutoGame.Infrastructure.Tests.Models
+public class ConfigTests
 {
-    public class ConfigTests
+    [Fact]
+    public void SetIsDirty_ChangeAProperty_IsDirtyShouldBeTrue()
     {
-        [Fact]
-        public void SetIsDirty_ChangeAProperty_IsDirtyShouldBeTrue()
-        {
-            Config config = new Config();
+        Config config = new Config();
 
-            Assert.False(config.IsDirty);
-            config.SoftwarePath = "New software path";
-            Assert.True(config.IsDirty);
-        }
+        Assert.False(config.IsDirty);
+        config.SoftwarePath = "New software path";
+        Assert.True(config.IsDirty);
     }
 }
