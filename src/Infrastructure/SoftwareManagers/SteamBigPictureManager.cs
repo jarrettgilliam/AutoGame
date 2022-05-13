@@ -1,7 +1,6 @@
 ﻿namespace AutoGame.Infrastructure.SoftwareManagers;
 
 using AutoGame.Core.Interfaces;
-using Microsoft.Win32;
 using System;
 using System.IO.Abstractions;
 
@@ -11,18 +10,21 @@ public class SteamBigPictureManager : ISoftwareManager
         ILoggingService loggingService,
         IUser32Service user32Service,
         IFileSystem fileSystem,
-        IProcessService processService)
+        IProcessService processService,
+        IRegistryService registryService)
     {
         this.LoggingService = loggingService;
         this.User32Service = user32Service;
         this.FileSystem = fileSystem;
         this.ProcessService = processService;
+        this.RegistryService = registryService;
     }
 
     private ILoggingService LoggingService { get; }
     private IUser32Service User32Service { get; }
     private IFileSystem FileSystem { get; }
-    private  IProcessService ProcessService { get; }
+    private IProcessService ProcessService { get; }
+    private IRegistryService RegistryService { get; }
 
     public string Key => "SteamBigPicture";
 
@@ -45,7 +47,7 @@ public class SteamBigPictureManager : ISoftwareManager
 
         try
         {
-            string? registryPath = (string?)Registry.GetValue(
+            string? registryPath = (string?)this.RegistryService.GetValue(
                 keyName: @"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam",
                 valueName: "SteamExe",
                 defaultValue: defaultSteamPath);

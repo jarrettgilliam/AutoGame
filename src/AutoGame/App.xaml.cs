@@ -63,7 +63,8 @@ public partial class App : Application
                                 this.LoggingService,
                                 this.User32Service,
                                 this.FileSystem,
-                                this.ProcessService),
+                                this.ProcessService,
+                                new WindowsRegistryService()),
                             new PlayniteFullscreenManager(
                                 new WindowService(
                                     this.User32Service,
