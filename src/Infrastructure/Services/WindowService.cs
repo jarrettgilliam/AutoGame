@@ -1,69 +1,67 @@
 ﻿namespace AutoGame.Infrastructure.Services;
 
 using System;
-using System.Runtime.InteropServices;
-using System.Threading;
 using AutoGame.Core.Interfaces;
 
 public class WindowService : IWindowService
 {
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern IntPtr FindWindow(string? sClass, string sWindow);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern IntPtr GetForegroundWindow();
-
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern int SetForegroundWindow(IntPtr hwnd);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr ProcessId);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
-
-    // https://weblog.west-wind.com/posts/2020/Oct/12/Window-Activation-Headaches-in-WPF
-    private static void ForceForegroundWindow(IntPtr hwnd)
+    public WindowService(
+        IUser32Service user32Service,
+        IDateTimeService dateTimeService,
+        ISleepService sleepService)
     {
-        uint threadId1 = GetWindowThreadProcessId(GetForegroundWindow(), IntPtr.Zero);
-        uint threadId2 = GetWindowThreadProcessId(hwnd, IntPtr.Zero);
+        this.User32Service = user32Service;
+        this.DateTimeService = dateTimeService;
+        this.SleepService = sleepService;
+    }
+
+    private IUser32Service User32Service { get; }
+    private IDateTimeService DateTimeService { get; }
+    private ISleepService SleepService { get; }
+    
+    // https://weblog.west-wind.com/posts/2020/Oct/12/Window-Activation-Headaches-in-WPF
+    private void ForceForegroundWindow(IntPtr hwnd)
+    {
+        uint threadId1 = this.User32Service.GetWindowThreadProcessId(this.User32Service.GetForegroundWindow(), IntPtr.Zero);
+        uint threadId2 = this.User32Service.GetWindowThreadProcessId(hwnd, IntPtr.Zero);
 
         if (threadId1 != threadId2)
         {
-            AttachThreadInput(threadId1, threadId2, true);
-            SetForegroundWindow(hwnd);
-            AttachThreadInput(threadId1, threadId2, false);
+            this.User32Service.AttachThreadInput(threadId1, threadId2, true);
+            this.User32Service.SetForegroundWindow(hwnd);
+            this.User32Service.AttachThreadInput(threadId1, threadId2, false);
         }
         else
         {
-            SetForegroundWindow(hwnd);
+            this.User32Service.SetForegroundWindow(hwnd);
         }
     }
 
     public bool RepeatTryForceForegroundWindowByTitle(string windowTitle, TimeSpan timeout)
     {
-        DateTime start = DateTime.UtcNow;
+        TimeSpan sleepInterval = TimeSpan.FromMilliseconds(100);
+        DateTime start = this.DateTimeService.UtcNow;
 
         while (true)
         {
-            IntPtr window = FindWindow(null, windowTitle);
+            IntPtr window = this.User32Service.FindWindow(null, windowTitle);
 
             if (window != IntPtr.Zero)
             {
-                ForceForegroundWindow(window);
+                this.ForceForegroundWindow(window);
 
-                if (GetForegroundWindow() == window)
+                if (this.User32Service.GetForegroundWindow() == window)
                 {
                     return true;
                 }
             }
 
-            if (DateTime.UtcNow - start > timeout)
+            if (this.DateTimeService.UtcNow - start > timeout)
             {
                 break;
             }
 
-            Thread.Sleep(100);
+            this.SleepService.Sleep(sleepInterval);
         }
 
         return false;

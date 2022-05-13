@@ -9,9 +9,12 @@ public class LoggingService : ILoggingService
 {
     private readonly Lazy<StreamWriter> logWriter;
 
-    public LoggingService(IAppInfoService appInfo)
+    public LoggingService(
+        IAppInfoService appInfo,
+        IDateTimeService dateTimeService)
     {
         this.AppInfo = appInfo;
+        this.DateTimeService = dateTimeService;
         
         this.logWriter = new Lazy<StreamWriter>(() =>
         {
@@ -23,8 +26,9 @@ public class LoggingService : ILoggingService
             };
         });
     }
-        
+
     private IAppInfoService AppInfo { get; }
+    private IDateTimeService DateTimeService { get; }
 
     public bool EnableTraceLogging { get; set; }
 
@@ -35,7 +39,7 @@ public class LoggingService : ILoggingService
             return;
         }
 
-        this.logWriter.Value.WriteLine($"{DateTimeOffset.Now} {level}: {message}");
+        this.logWriter.Value.WriteLine($"{this.DateTimeService.NowOffset} {level}: {message}");
     }
 
     public void Dispose()

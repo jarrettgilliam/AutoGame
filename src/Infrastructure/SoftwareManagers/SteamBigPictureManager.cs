@@ -5,23 +5,25 @@ using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
-using AutoGame.Infrastructure.Services;
 
 public class SteamBigPictureManager : ISoftwareManager
 {
-    public SteamBigPictureManager(ILoggingService loggingService)
+    public SteamBigPictureManager(ILoggingService loggingService, IUser32Service user32Service)
     {
         this.LoggingService = loggingService;
+        this.User32Service = user32Service;
     }
 
     private ILoggingService LoggingService { get; }
+    
+    private IUser32Service User32Service { get; }
 
     public string Key => "SteamBigPicture";
 
     public string Description => "Steam Big Picture";
 
     // From: https://www.displayfusion.com/ScriptedFunctions/View/?ID=b21d08ca-438a-41e5-8b9d-0125b07a2abc
-    public bool IsRunning => WindowService.FindWindow("CUIEngineWin32", "Steam") != IntPtr.Zero;
+    public bool IsRunning => this.User32Service.FindWindow("CUIEngineWin32", "Steam") != IntPtr.Zero;
 
     public void Start(string softwarePath)
     {

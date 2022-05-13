@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
@@ -14,9 +13,6 @@ using NAudio.CoreAudioApi.Interfaces;
 
 public class ParsecConnectedCondition : ILaunchCondition
 {
-    private const int MaxRetries = 3;
-    private static readonly TimeSpan RetryInterval = TimeSpan.FromMilliseconds(100);
-
     private readonly object checkConditionLock = new object();
 
     private bool wasConnected;
@@ -28,10 +24,12 @@ public class ParsecConnectedCondition : ILaunchCondition
 
     public ParsecConnectedCondition(
         ILoggingService loggingService,
-        INetStatPortsService netStatPortsService)
+        INetStatPortsService netStatPortsService,
+        ISleepService sleepService)
     {
         this.LoggingService = loggingService;
         this.NetStatPortsService = netStatPortsService;
+        this.SleepService = sleepService;
             
         this.audioEventClient = new ParsecAudioSessionEventsHandler(loggingService, this.CheckConditionMet);
     }
@@ -41,6 +39,8 @@ public class ParsecConnectedCondition : ILaunchCondition
     private ILoggingService LoggingService { get; }
         
     private INetStatPortsService NetStatPortsService { get; }
+    
+    private ISleepService SleepService { get; }
 
     public void StartMonitoring()
     {
@@ -130,10 +130,10 @@ public class ParsecConnectedCondition : ILaunchCondition
         {
             bool isConnected = this.GetIsConnected();
 
-            this.Trace($"{nameof(isConnected)}={isConnected}; {nameof(wasConnected)}={this.wasConnected}");
+            this.Trace($"{nameof(isConnected)}={isConnected}; {nameof(this.wasConnected)}={this.wasConnected}");
             if (!this.wasConnected && isConnected)
             {
-                this.Trace($"{nameof(ConditionMet)} fired");
+                this.Trace($"{nameof(this.ConditionMet)} fired");
                 this.ConditionMet?.Invoke(this, EventArgs.Empty);
             }
 
@@ -197,7 +197,10 @@ public class ParsecConnectedCondition : ILaunchCondition
     }
 
     private bool HasAnyActiveAudioSessions(Process[] parsecProcs)
-    {
+    {    
+        const int MaxRetries = 3;
+        TimeSpan retryInterval = TimeSpan.FromMilliseconds(100);
+        
         bool hasAudioSession = false;
 
         int i = 1;
@@ -211,7 +214,7 @@ public class ParsecConnectedCondition : ILaunchCondition
                 break;
             }
 
-            Thread.Sleep(RetryInterval);
+            this.SleepService.Sleep(retryInterval);
         }
 
         this.Trace($"returned {hasAudioSession}; {i} attempt(s)");
