@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
@@ -15,22 +15,22 @@ public sealed class AutoGameService : IAutoGameService
 
     public AutoGameService(
         ILoggingService loggingService,
+        IFileSystem fileSystem,
         IList<ISoftwareManager> availableSoftware,
         ILaunchCondition gamepadConnectedCondition,
         ILaunchCondition parsecConnectedCondition)
     {
         this.LoggingService = loggingService;
+        this.FileSystem = fileSystem;
         this.AvailableSoftware = availableSoftware;
         this.GamepadConnectedCondition = gamepadConnectedCondition;
         this.ParsecConnectedCondition = parsecConnectedCondition;
     }
 
     private ILoggingService LoggingService { get; }
-
+    private IFileSystem FileSystem { get; }
     public IList<ISoftwareManager> AvailableSoftware { get; }
-
     private ILaunchCondition GamepadConnectedCondition { get; }
-
     private ILaunchCondition ParsecConnectedCondition { get; }
 
     public bool TryApplyConfiguration(Config config)
@@ -96,16 +96,18 @@ public sealed class AutoGameService : IAutoGameService
 
     private void StopMonitoringAllLaunchConditions()
     {
-        if (this.appliedLaunchConditions != null)
+        if (this.appliedLaunchConditions is null)
         {
-            foreach (ILaunchCondition condition in this.appliedLaunchConditions)
-            {
-                condition.ConditionMet -= this.OnLaunchConditionMet;
-                condition.StopMonitoring();
-            }
-
-            this.appliedLaunchConditions = null;
+            return;
         }
+
+        foreach (ILaunchCondition condition in this.appliedLaunchConditions)
+        {
+            condition.ConditionMet -= this.OnLaunchConditionMet;
+            condition.StopMonitoring();
+        }
+
+        this.appliedLaunchConditions = null;
     }
 
     private void OnLaunchConditionMet(object? sender, EventArgs e)
@@ -132,7 +134,7 @@ public sealed class AutoGameService : IAutoGameService
         {
             config.AddError(nameof(config.SoftwarePath), "Required");
         }
-        else if (!File.Exists(config.SoftwarePath))
+        else if (!this.FileSystem.File.Exists(config.SoftwarePath))
         {
             config.AddError(nameof(config.SoftwarePath), "File not found");
         }

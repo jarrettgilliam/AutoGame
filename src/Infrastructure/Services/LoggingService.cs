@@ -1,34 +1,38 @@
 ﻿namespace AutoGame.Infrastructure.Services;
 
 using System;
+using System.IO.Abstractions;
 using System.IO;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 
-public class LoggingService : ILoggingService
+public sealed class LoggingService : ILoggingService
 {
     private readonly Lazy<StreamWriter> logWriter;
 
     public LoggingService(
         IAppInfoService appInfo,
-        IDateTimeService dateTimeService)
+        IDateTimeService dateTimeService,
+        IFileSystem fileSystem)
     {
         this.AppInfo = appInfo;
         this.DateTimeService = dateTimeService;
+        this.FileSystem = fileSystem;
         
         this.logWriter = new Lazy<StreamWriter>(() =>
         {
-            Directory.CreateDirectory(this.AppInfo.AppDataFolder);
+            this.FileSystem.Directory.CreateDirectory(this.AppInfo.AppDataFolder);
 
-            return new StreamWriter(this.AppInfo.LogFilePath, append: false)
-            {
-                AutoFlush = true
-            };
+            var sw = this.FileSystem.File.CreateText(this.AppInfo.LogFilePath);
+            sw.AutoFlush = true;
+
+            return sw;
         });
     }
 
     private IAppInfoService AppInfo { get; }
     private IDateTimeService DateTimeService { get; }
+    private IFileSystem FileSystem { get; }
 
     public bool EnableTraceLogging { get; set; }
 

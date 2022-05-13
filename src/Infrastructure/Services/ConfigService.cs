@@ -2,18 +2,23 @@
 
 using System;
 using System.IO;
+using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using Newtonsoft.Json;
 
 public class ConfigService : IConfigService
 {
-    public ConfigService(IAppInfoService appInfo)
+    public ConfigService(
+        IAppInfoService appInfo,
+        IFileSystem fileSystem)
     {
         this.AppInfo = appInfo;
+        this.FileSystem = fileSystem;
     }
         
     private IAppInfoService AppInfo { get; }
+    private IFileSystem FileSystem { get; }
 
     public Config? GetConfigOrNull()
     {
@@ -21,8 +26,8 @@ public class ConfigService : IConfigService
 
         try
         {
-            using var sr = new StreamReader(this.AppInfo.ConfigFilePath);
-            using var reader = new JsonTextReader(sr);
+            using StreamReader sr = this.FileSystem.File.OpenText(this.AppInfo.ConfigFilePath);
+            using JsonTextReader reader = new(sr);
 
             config = JsonSerializer.CreateDefault().Deserialize<Config>(reader);
             config!.IsDirty = false;
@@ -36,14 +41,13 @@ public class ConfigService : IConfigService
 
     public void Save(Config config)
     {
-        Directory.CreateDirectory(this.AppInfo.AppDataFolder);
+        this.FileSystem.Directory.CreateDirectory(this.AppInfo.AppDataFolder);
 
-        using (var sw = new StreamWriter(this.AppInfo.ConfigFilePath))
-        using (var writer = new JsonTextWriter(sw))
-        {
-            writer.Formatting = Formatting.Indented;
-            JsonSerializer.CreateDefault().Serialize(writer, config);
-        }
+        using StreamWriter sw = this.FileSystem.File.CreateText(this.AppInfo.ConfigFilePath);
+        using JsonTextWriter writer = new(sw);
+        
+        writer.Formatting = Formatting.Indented;
+        JsonSerializer.CreateDefault().Serialize(writer, config);
 
         config.IsDirty = false;
     }

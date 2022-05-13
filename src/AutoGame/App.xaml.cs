@@ -1,6 +1,7 @@
 ﻿namespace AutoGame;
 
 using System;
+using System.IO.Abstractions;
 using System.Windows;
 using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.LaunchConditions;
@@ -17,11 +18,16 @@ public partial class App : Application
 {
     public App()
     {
-        this.AppInfo = new AppInfoService();
+        this.FileSystem = new FileSystem();
+        this.AppInfo = new AppInfoService(this.FileSystem);
         this.DateTimeService = new DateTimeService();
-        this.LoggingService = new LoggingService(this.AppInfo, this.DateTimeService);
         this.User32Service = new WindowsUser32Service();
         this.SleepService = new SleepService();
+        
+        this.LoggingService = new LoggingService(
+            this.AppInfo,
+            this.DateTimeService,
+            this.FileSystem);
     }
 
     private IAppInfoService AppInfo { get; }
@@ -29,6 +35,7 @@ public partial class App : Application
     private ILoggingService LoggingService { get; }
     private IUser32Service User32Service { get; }
     private ISleepService SleepService { get; }
+    private IFileSystem FileSystem { get; }
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -42,25 +49,31 @@ public partial class App : Application
             {
                 DataContext = new MainWindowViewModel(
                     this.LoggingService,
-                    new ConfigService(this.AppInfo),
+                    new ConfigService(
+                        this.AppInfo,
+                        this.FileSystem),
                     new AutoGameService(
                         this.LoggingService,
+                        this.FileSystem,
                         new ISoftwareManager[]
                         {
                             new SteamBigPictureManager(
                                 this.LoggingService,
-                                this.User32Service),
+                                this.User32Service,
+                                this.FileSystem),
                             new PlayniteFullscreenManager(
                                 new WindowService(
                                     this.User32Service,
                                     this.DateTimeService,
-                                    this.SleepService))
+                                    this.SleepService),
+                                this.FileSystem)
                         },
                         new GamepadConnectedCondition(this.LoggingService),
                         new ParsecConnectedCondition(
                             this.LoggingService,
                             new NetStatPortsService(),
-                            this.SleepService)))
+                            this.SleepService)),
+                    this.FileSystem)
             };
 
             window.Show();

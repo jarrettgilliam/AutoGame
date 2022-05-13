@@ -1,30 +1,34 @@
 ﻿namespace AutoGame.Infrastructure.Services;
 
 using System;
-using System.IO;
+using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 
 public class AppInfoService : IAppInfoService
 {
-    public AppInfoService()
+    public AppInfoService(IFileSystem fileSystem)
     {
+        this.FileSystem = fileSystem;
+        
         this.AppDataFolder =
-            Path.Join(
+            this.FileSystem.Path.Join(
                 Environment.GetFolderPath(
                     Environment.SpecialFolder.LocalApplicationData),
                 nameof(AutoGame));
         
         this.ConfigFilePath = 
-            Path.Join(
+            this.FileSystem.Path.Join(
                 this.AppDataFolder, 
                 nameof(Config) + ".json");
         
         this.LogFilePath = 
-            Path.Join(
+            this.FileSystem.Path.Join(
                 this.AppDataFolder,
                 "Log.txt");
     }
+    
+    private IFileSystem FileSystem { get; }
     
     public string AppDataFolder { get; }
 

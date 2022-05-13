@@ -1,5 +1,6 @@
 ﻿namespace AutoGame.Infrastructure.Tests.Services;
 
+using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using Moq;
 using Xunit;
@@ -66,11 +67,14 @@ public class AutoGameServiceTests
         software2 = new Mock<ISoftwareManager>();
         software2.SetupGet(x => x.Key).Returns("key2");
 
+        var fileSystem = new Mock<IFileSystem>();
+        
         var condition1 = new Mock<ILaunchCondition>();
         var condition2 = new Mock<ILaunchCondition>();
 
         autoGameService = new AutoGameService(
             loggingService.Object,
+            fileSystem.Object,
             new ISoftwareManager[] {
                 software1.Object,
                 software2.Object
