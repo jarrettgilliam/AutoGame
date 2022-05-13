@@ -38,6 +38,8 @@ public sealed class ProcessService : IProcessService
 
         public StreamReader StandardError => this.process.StandardError;
 
+        public int Id => this.process.Id;
+
         public int ExitCode => this.process.ExitCode;
         
         public bool Start() => this.process.Start();

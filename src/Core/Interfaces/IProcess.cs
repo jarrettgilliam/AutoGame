@@ -9,6 +9,8 @@ public interface IProcess : IDisposable
     StreamReader StandardOutput { get; }
     
     StreamReader StandardError { get; }
+
+    int Id { get; }
     
     int ExitCode { get; }
 

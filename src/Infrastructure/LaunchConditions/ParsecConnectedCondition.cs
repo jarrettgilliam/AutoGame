@@ -25,22 +25,22 @@ public class ParsecConnectedCondition : ILaunchCondition
     public ParsecConnectedCondition(
         ILoggingService loggingService,
         INetStatPortsService netStatPortsService,
-        ISleepService sleepService)
+        ISleepService sleepService,
+        IProcessService processService)
     {
         this.LoggingService = loggingService;
         this.NetStatPortsService = netStatPortsService;
         this.SleepService = sleepService;
+        this.ProcessService = processService;
             
         this.audioEventClient = new ParsecAudioSessionEventsHandler(loggingService, this.CheckConditionMet);
     }
 
     public event EventHandler? ConditionMet;
-
     private ILoggingService LoggingService { get; }
-        
     private INetStatPortsService NetStatPortsService { get; }
-    
     private ISleepService SleepService { get; }
+    private IProcessService ProcessService { get; }
 
     public void StartMonitoring()
     {
@@ -94,7 +94,7 @@ public class ParsecConnectedCondition : ILaunchCondition
         try
         {
             var session = new AudioSessionControl(newSession);
-            Process[] parsecProcs = this.GetParsecdProcesses();
+            IProcess[] parsecProcs = this.GetParsecdProcesses();
 
             if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
             {
@@ -163,15 +163,15 @@ public class ParsecConnectedCondition : ILaunchCondition
 
     private bool GetIsConnected()
     {
-        Process[] parsecProcs = this.GetParsecdProcesses();
+        IProcess[] parsecProcs = this.GetParsecdProcesses();
 
         return this.HasAnyActiveUDPPorts(parsecProcs) &&
                this.HasAnyActiveAudioSessions(parsecProcs);
     }
 
-    private Process[] GetParsecdProcesses() => Process.GetProcessesByName("parsecd");
+    private IProcess[] GetParsecdProcesses() => this.ProcessService.GetProcessesByName("parsecd");
 
-    private bool HasAnyActiveUDPPorts(Process[] parsecProcs)
+    private bool HasAnyActiveUDPPorts(IProcess[] parsecProcs)
     {
         IList<Port> ports = this.NetStatPortsService.GetNetStatPorts();
 
@@ -181,7 +181,7 @@ public class ParsecConnectedCondition : ILaunchCondition
         return hasPorts;
     }
 
-    private bool IsParsecUDPPort(Port port, Process[] parsecProcs)
+    private bool IsParsecUDPPort(Port port, IProcess[] parsecProcs)
     {
         if (port.Protocol != "UDP")
         {
@@ -196,7 +196,7 @@ public class ParsecConnectedCondition : ILaunchCondition
         return true;
     }
 
-    private bool HasAnyActiveAudioSessions(Process[] parsecProcs)
+    private bool HasAnyActiveAudioSessions(IProcess[] parsecProcs)
     {    
         const int MaxRetries = 3;
         TimeSpan retryInterval = TimeSpan.FromMilliseconds(100);
@@ -221,7 +221,7 @@ public class ParsecConnectedCondition : ILaunchCondition
         return hasAudioSession;
     }
 
-    private IEnumerable<AudioSessionControl> GetAudioSessions(Process[] parsecProcs)
+    private IEnumerable<AudioSessionControl> GetAudioSessions(IProcess[] parsecProcs)
     {
         if (this.mmDeviceEnumerator is null)
         {
@@ -252,8 +252,8 @@ public class ParsecConnectedCondition : ILaunchCondition
             ILoggingService loggingService,
             Action checkConditionMet)
         {
-            this.LoggingService = loggingService ?? throw new ArgumentNullException(nameof(loggingService));
-            this.CheckConditionMet = checkConditionMet ?? throw new ArgumentNullException(nameof(checkConditionMet));
+            this.LoggingService = loggingService;
+            this.CheckConditionMet = checkConditionMet;
         }
 
         private ILoggingService LoggingService { get; }

@@ -79,7 +79,8 @@ public partial class App : Application
                         new ParsecConnectedCondition(
                             this.LoggingService,
                             new NetStatPortsService(this.ProcessService),
-                            this.SleepService)),
+                            this.SleepService,
+                            this.ProcessService)),
                     this.FileSystem)
             };
 
