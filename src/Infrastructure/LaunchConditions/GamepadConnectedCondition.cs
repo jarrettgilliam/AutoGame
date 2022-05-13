@@ -1,30 +1,32 @@
 ﻿namespace AutoGame.Infrastructure.LaunchConditions;
 
 using System;
-using System.Linq;
 using AutoGame.Core.Interfaces;
-using Windows.Gaming.Input;
 
 public class GamepadConnectedCondition : ILaunchCondition
 {
     private readonly object checkConditionLock = new object();
 
-    public GamepadConnectedCondition(ILoggingService loggingService)
+    public GamepadConnectedCondition(
+        ILoggingService loggingService,
+        IRawGameControllerService rawGameControllerService)
     {
         this.LoggingService = loggingService;
+        this.RawGameControllerService = rawGameControllerService;
     }
 
     public event EventHandler? ConditionMet;
 
     private ILoggingService LoggingService { get; }
+    private IRawGameControllerService RawGameControllerService { get; }
 
     public void StartMonitoring()
     {
-        RawGameController.RawGameControllerAdded += this.RawGameController_RawGameControllerAdded;
+        this.RawGameControllerService.RawGameControllerAdded += this.RawGameController_RawGameControllerAdded;
         this.CheckConditionMet();
     }
 
-    private void RawGameController_RawGameControllerAdded(object? sender, RawGameController e)
+    private void RawGameController_RawGameControllerAdded(object? sender, EventArgs e)
     {
         try
         {
@@ -38,14 +40,14 @@ public class GamepadConnectedCondition : ILaunchCondition
 
     public void StopMonitoring()
     {
-        RawGameController.RawGameControllerAdded -= this.RawGameController_RawGameControllerAdded;
+        this.RawGameControllerService.RawGameControllerAdded -= this.RawGameController_RawGameControllerAdded;
     }
 
     private void CheckConditionMet()
     {
         lock (this.checkConditionLock)
         {
-            if (RawGameController.RawGameControllers.Any())
+            if (this.RawGameControllerService.HasAnyRawGameControllers)
             {
                 this.ConditionMet?.Invoke(this, EventArgs.Empty);
             }

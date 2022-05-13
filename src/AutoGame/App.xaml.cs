@@ -72,7 +72,9 @@ public partial class App : Application
                                 this.FileSystem,
                                 this.ProcessService)
                         },
-                        new GamepadConnectedCondition(this.LoggingService),
+                        new GamepadConnectedCondition(
+                            this.LoggingService,
+                            new WindowsRawGameControllerService()),
                         new ParsecConnectedCondition(
                             this.LoggingService,
                             new NetStatPortsService(this.ProcessService),
