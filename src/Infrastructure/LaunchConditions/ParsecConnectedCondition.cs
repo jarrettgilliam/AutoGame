@@ -25,12 +25,14 @@ public class ParsecConnectedCondition : ILaunchCondition
         INetStatPortsService netStatPortsService,
         ISleepService sleepService,
         IProcessService processService,
+        ISystemEventsService systemEventsService,
         MMDeviceEnumerator mmDeviceEnumerator)
     {
         this.LoggingService = loggingService;
         this.NetStatPortsService = netStatPortsService;
         this.SleepService = sleepService;
         this.ProcessService = processService;
+        this.SystemEventsService = systemEventsService;
         this.MMDeviceEnumerator = mmDeviceEnumerator;
             
         this.audioEventClient = new ParsecAudioSessionEventsHandler(loggingService, this.CheckConditionMet);
@@ -41,13 +43,13 @@ public class ParsecConnectedCondition : ILaunchCondition
     private INetStatPortsService NetStatPortsService { get; }
     private ISleepService SleepService { get; }
     private IProcessService ProcessService { get; }
-    
+    private ISystemEventsService SystemEventsService { get; }
     private MMDeviceEnumerator MMDeviceEnumerator { get; }
 
     public void StartMonitoring()
     {
         // Listen for display setting changes
-        Microsoft.Win32.SystemEvents.DisplaySettingsChanged += this.SystemEvents_DisplaySettingsChanged;
+        this.SystemEventsService.DisplaySettingsChanged += this.SystemEvents_DisplaySettingsChanged;
 
         // Listen for mute/unmute changes
         // From: https://stackoverflow.com/q/27650935/987968
@@ -144,7 +146,7 @@ public class ParsecConnectedCondition : ILaunchCondition
 
     public void StopMonitoring()
     {
-        Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= this.SystemEvents_DisplaySettingsChanged;
+        this.SystemEventsService.DisplaySettingsChanged -= this.SystemEvents_DisplaySettingsChanged;
 
         if (this.mmDevice != null)
         {

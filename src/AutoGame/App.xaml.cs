@@ -84,6 +84,7 @@ public partial class App : Application
                             new NetStatPortsService(this.ProcessService),
                             this.SleepService,
                             this.ProcessService,
+                            new SystemEventsService(),
                             this.MMDeviceEnumerator)),
                     this.FileSystem)
             };
