@@ -10,6 +10,7 @@ using AutoGame.Infrastructure.SoftwareManagers;
 using AutoGame.ViewModels;
 using AutoGame.Views;
 using AutoGame.Core.Services;
+using NAudio.CoreAudioApi;
 
 /// <summary>
 /// Interaction logic for App.xaml
@@ -24,6 +25,7 @@ public partial class App : Application
         this.User32Service = new WindowsUser32Service();
         this.SleepService = new SleepService();
         this.ProcessService = new ProcessService();
+        this.MMDeviceEnumerator = new MMDeviceEnumerator();
         
         this.LoggingService = new LoggingService(
             this.AppInfo,
@@ -38,6 +40,7 @@ public partial class App : Application
     private ISleepService SleepService { get; }
     private IProcessService ProcessService { get; }
     private IFileSystem FileSystem { get; }
+    private MMDeviceEnumerator MMDeviceEnumerator { get; }
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -80,7 +83,8 @@ public partial class App : Application
                             this.LoggingService,
                             new NetStatPortsService(this.ProcessService),
                             this.SleepService,
-                            this.ProcessService)),
+                            this.ProcessService,
+                            this.MMDeviceEnumerator)),
                     this.FileSystem)
             };
 
@@ -95,6 +99,7 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         Application.Current.DispatcherUnhandledException -= this.Current_DispatcherUnhandledException;
+        this.MMDeviceEnumerator.Dispose();
     }
 
     private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

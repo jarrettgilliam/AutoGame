@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using AutoGame.Core.Enums;
@@ -18,7 +17,6 @@ public class ParsecConnectedCondition : ILaunchCondition
     private bool wasConnected;
     private bool wasMuted;
 
-    private MMDeviceEnumerator? mmDeviceEnumerator;
     private MMDevice? mmDevice;
     private readonly IAudioSessionEventsHandler audioEventClient;
 
@@ -26,12 +24,14 @@ public class ParsecConnectedCondition : ILaunchCondition
         ILoggingService loggingService,
         INetStatPortsService netStatPortsService,
         ISleepService sleepService,
-        IProcessService processService)
+        IProcessService processService,
+        MMDeviceEnumerator mmDeviceEnumerator)
     {
         this.LoggingService = loggingService;
         this.NetStatPortsService = netStatPortsService;
         this.SleepService = sleepService;
         this.ProcessService = processService;
+        this.MMDeviceEnumerator = mmDeviceEnumerator;
             
         this.audioEventClient = new ParsecAudioSessionEventsHandler(loggingService, this.CheckConditionMet);
     }
@@ -41,6 +41,8 @@ public class ParsecConnectedCondition : ILaunchCondition
     private INetStatPortsService NetStatPortsService { get; }
     private ISleepService SleepService { get; }
     private IProcessService ProcessService { get; }
+    
+    private MMDeviceEnumerator MMDeviceEnumerator { get; }
 
     public void StartMonitoring()
     {
@@ -49,8 +51,7 @@ public class ParsecConnectedCondition : ILaunchCondition
 
         // Listen for mute/unmute changes
         // From: https://stackoverflow.com/q/27650935/987968
-        this.mmDeviceEnumerator = new MMDeviceEnumerator();
-        this.mmDevice = this.mmDeviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+        this.mmDevice = this.MMDeviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
         this.mmDevice.AudioEndpointVolume.OnVolumeNotification += this.AudioEndpointVolume_OnVolumeNotification;
         this.wasMuted = this.mmDevice.AudioEndpointVolume.Mute;
 
@@ -153,12 +154,6 @@ public class ParsecConnectedCondition : ILaunchCondition
             this.mmDevice.Dispose();
             this.mmDevice = null;
         }
-
-        if (this.mmDeviceEnumerator != null)
-        {
-            this.mmDeviceEnumerator.Dispose();
-            this.mmDeviceEnumerator = null;
-        }
     }
 
     private bool GetIsConnected()
@@ -223,12 +218,7 @@ public class ParsecConnectedCondition : ILaunchCondition
 
     private IEnumerable<AudioSessionControl> GetAudioSessions(IProcess[] parsecProcs)
     {
-        if (this.mmDeviceEnumerator is null)
-        {
-            yield break;
-        }
-            
-        foreach (MMDevice mmd in this.mmDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+        foreach (MMDevice mmd in this.MMDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
         {
             for (int i = 0; i < mmd.AudioSessionManager.Sessions.Count; i++)
             {

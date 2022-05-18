@@ -27,4 +27,13 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="NAudio.Core">
+      <HintPath>..\NAudio\NAudio.Wasapi\bin\Release\netstandard2.0\NAudio.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="NAudio.Wasapi">
+      <HintPath>..\NAudio\NAudio.Wasapi\bin\Release\netstandard2.0\NAudio.Wasapi.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
