@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Win32.SystemEvents" Version="6.0.1" />
+    <PackageReference Include="NAudio" Version="1.10.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Prism.Core" Version="8.1.97" />
     <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
@@ -18,15 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="NAudio.Core">
-      <HintPath>..\NAudio\NAudio.Wasapi\bin\Release\netstandard2.0\NAudio.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="NAudio.Wasapi">
-      <HintPath>..\NAudio\NAudio.Wasapi\bin\Release\netstandard2.0\NAudio.Wasapi.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

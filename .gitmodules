@@ -1,3 +1,0 @@
-[submodule "src/NAudio"]
-	path = src/NAudio
-	url = https://github.com/jarrettgilliam/NAudio.git
