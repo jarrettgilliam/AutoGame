@@ -8,6 +8,8 @@
     <AssemblyName>AutoGame.Infrastructure.Tests</AssemblyName>
 
     <RootNamespace>AutoGame.Infrastructure.Tests</RootNamespace>
+
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
