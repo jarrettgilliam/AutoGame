@@ -12,7 +12,7 @@ using NAudio.CoreAudioApi.Interfaces;
 
 public class ParsecConnectedCondition : ILaunchCondition
 {
-    private readonly object checkConditionLock = new object();
+    private readonly object checkConditionLock = new();
 
     private bool wasConnected;
     private bool wasMuted;
@@ -221,17 +221,10 @@ public class ParsecConnectedCondition : ILaunchCondition
 
     private IEnumerable<AudioSessionControl> GetAudioSessions(IProcess[] parsecProcs)
     {
-        if (this.MMDeviceEnumerator is null)
-        {
-            yield break;
-        }
-            
         foreach (IMMDevice mmd in this.MMDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
         {
-            for (int i = 0; i < mmd.AudioSessionManager.Sessions.Count; i++)
+            foreach (AudioSessionControl session in mmd.AudioSessionManager.Sessions)
             {
-                AudioSessionControl session = mmd.AudioSessionManager.Sessions[i];
-
                 if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
                 {
                     yield return session;
