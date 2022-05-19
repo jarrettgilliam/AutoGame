@@ -10,6 +10,7 @@ using AutoGame.Infrastructure.SoftwareManagers;
 using AutoGame.ViewModels;
 using AutoGame.Views;
 using AutoGame.Core.Services;
+using NAudio.CoreAudioApi;
 
 /// <summary>
 /// Interaction logic for App.xaml
@@ -81,7 +82,9 @@ public partial class App : Application
                             new NetStatPortsService(this.ProcessService),
                             this.SleepService,
                             this.ProcessService,
-                            new SystemEventsService())),
+                            new SystemEventsService(),
+                            new MMDeviceEnumeratorWrapper(
+                                new MMDeviceEnumerator()))),
                     this.FileSystem)
             };
 
