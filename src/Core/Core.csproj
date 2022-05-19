@@ -9,9 +9,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="NAudio" Version="1.10.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
       <PackageReference Include="Prism.Core" Version="8.1.97" />
       <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Enums\Role.cs" />
+      <Compile Remove="Enums\DeviceState.cs" />
+      <Compile Remove="Enums\DataFlow.cs" />
     </ItemGroup>
 
 </Project>
