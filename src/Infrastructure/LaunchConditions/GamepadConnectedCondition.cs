@@ -2,6 +2,7 @@
 
 using System;
 using AutoGame.Core.Interfaces;
+using AutoGame.Infrastructure.Interfaces;
 
 public class GamepadConnectedCondition : ILaunchCondition
 {

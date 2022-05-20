@@ -3,7 +3,7 @@
 using System;
 using System.Linq;
 using Windows.Gaming.Input;
-using AutoGame.Core.Interfaces;
+using AutoGame.Infrastructure.Interfaces;
 
 public sealed class WindowsRawGameControllerService : IRawGameControllerService
 {
