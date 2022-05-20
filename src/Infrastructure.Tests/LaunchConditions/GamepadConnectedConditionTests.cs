@@ -4,8 +4,6 @@ using System;
 using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.LaunchConditions;
-using Moq;
-using Xunit;
 
 public class GamepadConnectedConditionTests
 {

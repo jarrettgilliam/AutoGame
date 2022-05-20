@@ -1,9 +1,7 @@
-﻿namespace AutoGame.Infrastructure.Tests.Services;
+﻿namespace AutoGame.Core.Tests.Services;
 
 using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
-using Moq;
-using Xunit;
 using AutoGame.Core.Services;
 
 public class AutoGameServiceTests

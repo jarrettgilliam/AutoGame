@@ -1,7 +1,6 @@
-﻿namespace AutoGame.Infrastructure.Tests.Models;
+﻿namespace AutoGame.Core.Tests.Models;
 
 using AutoGame.Core.Models;
-using Xunit;
 
 public class PortTests
 {

@@ -6,10 +6,8 @@ using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.LaunchConditions;
-using Moq;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
-using Xunit;
 
 public class ParsecConnectedConditionTests
 {

@@ -1,9 +1,8 @@
-namespace AutoGame.Tests;
+namespace AutoGame.Tests.ViewModels;
 
 using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.ViewModels;
-using Moq;
 
 public class MainWindowViewModelTests
 {
