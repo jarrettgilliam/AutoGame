@@ -1,4 +1,4 @@
-﻿namespace AutoGame.Infrastructure.Services;
+﻿namespace AutoGame.Core.Services;
 
 using System;
 using System.IO.Abstractions;

@@ -1,8 +1,8 @@
-﻿namespace AutoGame.Infrastructure.Services;
+﻿namespace AutoGame.Core.Services;
 
 using System;
-using System.IO.Abstractions;
 using System.IO;
+using System.IO.Abstractions;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 

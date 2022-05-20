@@ -19,7 +19,6 @@ public class PlayniteFullscreenManagerTests
 
     public PlayniteFullscreenManagerTests()
     {
-        
         this.pathMock
             .Setup(x => x.Join(
                 It.IsAny<string>(),
