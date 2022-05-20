@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using AutoGame.Core.Interfaces;
+using AutoGame.Infrastructure.Interfaces;
 using NAudio.CoreAudioApi;
 
 public sealed class MMDeviceEnumeratorWrapper : IMMDeviceEnumerator

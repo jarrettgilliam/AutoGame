@@ -1,4 +1,4 @@
-﻿namespace AutoGame.Core.Interfaces;
+﻿namespace AutoGame.Infrastructure.Interfaces;
 
 using NAudio.CoreAudioApi;
 

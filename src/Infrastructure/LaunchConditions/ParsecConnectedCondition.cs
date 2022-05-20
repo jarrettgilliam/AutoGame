@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
+using AutoGame.Infrastructure.Interfaces;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 
