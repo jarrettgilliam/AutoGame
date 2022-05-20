@@ -10,7 +10,6 @@ using Moq;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using Xunit;
-using IDisposable = ABI.System.IDisposable;
 
 public class ParsecConnectedConditionTests
 {
@@ -34,6 +33,8 @@ public class ParsecConnectedConditionTests
     private readonly List<AudioSessionControl> audioSessionControls;
     private readonly AudioSessionControlMock audioSessionControlMock;
 
+    private bool suppressConditionMet = false;
+
     public ParsecConnectedConditionTests()
     {
         this.netstatPorts = new List<Port>
@@ -56,7 +57,7 @@ public class ParsecConnectedConditionTests
 
         this.processServiceMock
             .Setup(x => x.GetProcessesByName(It.IsAny<string?>()))
-            .Returns(() => this.processes);
+            .Returns(() => this.suppressConditionMet ? Array.Empty<IProcess>() : this.processes);
 
         this.audioSessionControlMock = new AudioSessionControlMock
         {
@@ -101,7 +102,7 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void ActiveUDPPortAndAudioSession_Fires_ConditionMet()
     {
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
 
         Assert.Equal(1, helper.FiredCount);
     }
@@ -111,7 +112,7 @@ public class ParsecConnectedConditionTests
     {
         this.netstatPorts.Clear();
 
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
 
         Assert.Equal(0, helper.FiredCount);
     }
@@ -121,7 +122,7 @@ public class ParsecConnectedConditionTests
     {
         this.netstatPorts[0].ProcessId = 8888;
 
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
         
         Assert.Equal(0, helper.FiredCount);
     }
@@ -132,7 +133,7 @@ public class ParsecConnectedConditionTests
     {
         this.netstatPorts[0].Protocol = "TCP";
 
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
         
         Assert.Equal(0, helper.FiredCount);
     }
@@ -142,7 +143,7 @@ public class ParsecConnectedConditionTests
     {
         this.audioSessionControls.Clear();
 
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
 
         Assert.Equal(0, helper.FiredCount);
     }
@@ -152,7 +153,7 @@ public class ParsecConnectedConditionTests
     {
         this.audioSessionControls.Clear();
 
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
         
         this.sleepServiceMock.Verify(
             x => x.Sleep(It.IsAny<TimeSpan>()),
@@ -162,7 +163,7 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void ConnectionAlreadyDetected_DoesntFire_ConditionMet()
     {
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
 
         Assert.Equal(1, helper.FiredCount);
 
@@ -177,7 +178,7 @@ public class ParsecConnectedConditionTests
     {
         this.audioSessionControlMock.State = AudioSessionState.AudioSessionStateInactive;
 
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
 
         Assert.Equal(0, helper.FiredCount);
     }
@@ -187,7 +188,7 @@ public class ParsecConnectedConditionTests
     {
         this.audioSessionControlMock.State = AudioSessionState.AudioSessionStateInactive;
 
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
 
         Assert.Equal(0, helper.FiredCount);
 
@@ -202,7 +203,7 @@ public class ParsecConnectedConditionTests
     {
         this.audioSessionControls.Clear();
 
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
 
         Assert.Equal(0, helper.FiredCount);
 
@@ -220,7 +221,7 @@ public class ParsecConnectedConditionTests
     {
         this.audioSessionControls.Clear();
 
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
 
         Assert.Equal(0, helper.FiredCount);
 
@@ -243,7 +244,9 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void DisplaySettingsChanged_Fires_ConditionMet()
     {
-        using var helper = new ConditionMetHelper(this, suppressConditionMet: true);
+        this.suppressConditionMet = true;
+        using var helper = new LaunchConditionTestHelper(this.sut);
+        this.suppressConditionMet = false;
         
         Assert.Equal(0, helper.FiredCount);
 
@@ -255,7 +258,9 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void MuteChanged_Fires_ConditionMet()
     {
-        using var helper = new ConditionMetHelper(this, suppressConditionMet: true);
+        this.suppressConditionMet = true;
+        using var helper = new LaunchConditionTestHelper(this.sut);
+        this.suppressConditionMet = false;
         
         Assert.Equal(0, helper.FiredCount);
 
@@ -274,7 +279,9 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void OtherVolumePropertyChanged_DoesntFire_ConditionMet()
     {
-        using var helper = new ConditionMetHelper(this, suppressConditionMet: true);
+        this.suppressConditionMet = true;
+        using var helper = new LaunchConditionTestHelper(this.sut);
+        this.suppressConditionMet = false;
         
         Assert.Equal(0, helper.FiredCount);
 
@@ -295,7 +302,7 @@ public class ParsecConnectedConditionTests
     {
         this.audioSessionControlMock.ProcessId = 8888;
 
-        using var helper = new ConditionMetHelper(this);
+        using var helper = new LaunchConditionTestHelper(this.sut);
         
         Assert.Null(this.audioSessionControlMock.EventClient);
         
@@ -331,43 +338,6 @@ public class ParsecConnectedConditionTests
         Assert.Null(this.audioSessionControlMock.EventClient);
 
         this.mmDeviceMock.Verify(x => x.Dispose(), Times.Once);
-    }
-
-    private class ConditionMetHelper : IDisposable
-    {
-        private readonly ParsecConnectedConditionTests parent;
-
-        public ConditionMetHelper(
-            ParsecConnectedConditionTests parent,
-            bool suppressConditionMet = false)
-        {
-            this.parent = parent;
-            this.parent.sut.ConditionMet += this.OnConditionMet;
-
-            IProcess[] processBackup = this.parent.processes;
-
-            if (suppressConditionMet)
-            {
-                this.parent.processes = Array.Empty<IProcess>();
-            }
-
-            this.parent.sut.StartMonitoring();
-
-            if (suppressConditionMet)
-            {
-                this.parent.processes = processBackup;
-            }
-        }
-
-        public int FiredCount { get; private set; }
-
-        public void Dispose()
-        {
-            this.parent.sut.StopMonitoring();
-            this.parent.sut.ConditionMet -= this.OnConditionMet;
-        }
-
-        private void OnConditionMet(object? sender, EventArgs e) => this.FiredCount++;
     }
 
     private class AudioSessionControlMock : IAudioSessionControl2
