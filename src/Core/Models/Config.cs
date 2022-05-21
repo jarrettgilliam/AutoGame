@@ -7,8 +7,8 @@ using Newtonsoft.Json;
 
 public class Config : BindableBase, INotifyDataErrorInfo
 {
+    private readonly Dictionary<string, IEnumerable<string>> allErrors = new();
     private bool isDirty;
-    private readonly Dictionary<string, IEnumerable<string>> allErrors;
     private bool enableTraceLogging;
     private string? softwareKey;
     private string? softwarePath;
@@ -16,12 +16,6 @@ public class Config : BindableBase, INotifyDataErrorInfo
     private bool launchWhenParsecConnected;
 
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
-
-    public Config()
-    {
-        this.PropertyChanged += this.SetIsDirty;
-        this.allErrors = new Dictionary<string, IEnumerable<string>>();
-    }
 
     [JsonIgnore]
     public bool IsDirty
@@ -80,6 +74,7 @@ public class Config : BindableBase, INotifyDataErrorInfo
     protected override void OnPropertyChanged(PropertyChangedEventArgs args)
     {
         base.OnPropertyChanged(args);
+        this.SetIsDirty(args);
         this.ClearPropertyErrors(args.PropertyName);
     }
 
@@ -102,7 +97,7 @@ public class Config : BindableBase, INotifyDataErrorInfo
         }
     }
 
-    private void SetIsDirty(object? sender, PropertyChangedEventArgs e)
+    private void SetIsDirty(PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(this.IsDirty))
         {
