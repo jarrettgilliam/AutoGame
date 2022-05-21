@@ -83,7 +83,7 @@ public class Config : BindableBase, INotifyDataErrorInfo
         this.ClearPropertyErrors(args.PropertyName);
     }
 
-    public void ClearPropertyErrors(string? propertyName = null)
+    private void ClearPropertyErrors(string? propertyName = null)
     {
         if (propertyName != null && this.allErrors.Remove(propertyName))
         {
