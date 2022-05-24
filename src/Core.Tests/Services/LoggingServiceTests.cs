@@ -55,7 +55,7 @@ public class LoggingServiceTests
         this.sut.Log(error, LogLevel.Error);
         
         Assert.Equal(
-            $"{dtOffset} {level}: {error}\n",
+            $"{dtOffset} {level}: {error}{Environment.NewLine}",
             Encoding.UTF8.GetString(this.logMemoryStream.ToArray()));
     }
 
