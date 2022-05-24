@@ -85,7 +85,8 @@ public partial class App : Application
                             new SystemEventsService(),
                             new MMDeviceEnumeratorWrapper(
                                 new MMDeviceEnumerator()))),
-                    this.FileSystem)
+                    this.FileSystem,
+                    new DialogService())
             };
 
             window.Show();

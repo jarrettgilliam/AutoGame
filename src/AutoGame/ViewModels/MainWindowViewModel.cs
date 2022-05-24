@@ -7,7 +7,8 @@ using System.Windows;
 using System.Windows.Input;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
-using Microsoft.Win32;
+using AutoGame.Infrastructure.Interfaces;
+using AutoGame.Infrastructure.Models;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -22,12 +23,14 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
         ILoggingService loggingService,
         IConfigService configService,
         IAutoGameService autoGameService,
-        IFileSystem fileSystem)
+        IFileSystem fileSystem,
+        IDialogService dialogService)
     {
         this.LoggingService = loggingService;
         this.ConfigService = configService;
-        this.AutoGameService = autoGameService;
         this.FileSystem = fileSystem;
+        this.DialogService = dialogService;
+        this.AutoGameService = autoGameService;
 
         this.LoadedCommand = new DelegateCommand(this.OnLoaded);
         this.NotifyIconClickCommand = new DelegateCommand(this.OnNotifyIconClick);
@@ -40,12 +43,11 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
     }
 
     private ILoggingService LoggingService { get; }
-
     private IConfigService ConfigService { get; }
+    private IFileSystem FileSystem { get; }
+    private IDialogService DialogService { get; }
 
     public IAutoGameService AutoGameService { get; }
-    
-    private IFileSystem FileSystem { get; }
 
     public ICommand LoadedCommand { get; }
 
@@ -150,25 +152,25 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
             string? defaultPath = software?.FindSoftwarePathOrDefault();
             string? executable = this.FileSystem.Path.GetFileName(defaultPath);
 
-            var dialog = new OpenFileDialog()
+            var parms = new OpenFileDialogParms
             {
                 FileName = executable,
                 InitialDirectory = this.FileSystem.Path.GetDirectoryName(this.Config.SoftwarePath)
             };
 
-            if (string.IsNullOrEmpty(dialog.InitialDirectory))
+            if (string.IsNullOrEmpty(parms.InitialDirectory))
             {
-                dialog.InitialDirectory = this.FileSystem.Path.GetDirectoryName(defaultPath);
+                parms.InitialDirectory = this.FileSystem.Path.GetDirectoryName(defaultPath);
             }
 
             if (software?.Description is not null && executable is not null)
             {   
-                dialog.Filter = $"{software.Description}|{executable}";
+                parms.Filter = $"{software.Description}|{executable}";
             }
 
-            if (dialog.ShowDialog() == true)
+            if (this.DialogService.ShowOpenFileDialog(parms, out string? selectedFileName))
             {
-                this.Config.SoftwarePath = dialog.FileName;
+                this.Config.SoftwarePath = selectedFileName;
             }
         }
         catch (Exception ex)

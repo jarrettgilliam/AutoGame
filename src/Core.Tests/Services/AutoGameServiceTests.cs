@@ -4,7 +4,6 @@ using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Core.Services;
-using Xunit.Sdk;
 
 public class AutoGameServiceTests
 {
