@@ -14,7 +14,7 @@ public class Port
 
     public int ProcessId;
 
-    public static bool TryParse(string s, out Port port)
+    public static bool TryParse(string? s, out Port port)
     {
         port = new Port();
             

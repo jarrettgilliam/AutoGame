@@ -5,12 +5,12 @@ using AutoGame.Core.Models;
 public class PortTests
 {
     [Theory]
-    [InlineData((string)null)]
+    [InlineData((string?)null)]
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("Active Connections")]
     [InlineData("  Proto  Local Address          Foreign Address        State           PID")]
-    public void TryParse_InvalidValue_ReturnFalse(string s)
+    public void TryParse_InvalidValue_ReturnFalse(string? s)
     {
         Assert.False(Port.TryParse(s, out _));
     }
