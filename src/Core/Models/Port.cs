@@ -2,7 +2,7 @@
 
 using System.Text.RegularExpressions;
 
-public class Port
+public record Port
 {
     public string? Protocol;
 

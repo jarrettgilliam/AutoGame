@@ -48,7 +48,7 @@ public class NetStatPortsService : INetStatPortsService
                 : errorText);
         }
 
-        foreach (string row in Regex.Split(output, Environment.NewLine))
+        foreach (string row in output.Split(Environment.NewLine))
         {
             if (Port.TryParse(row, out Port port))
             {
