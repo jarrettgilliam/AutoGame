@@ -10,5 +10,5 @@ public interface ISoftwareManager
 
     void Start(string softwarePath);
 
-    string FindSoftwarePathOrDefault();
+    string? FindSoftwarePathOrDefault();
 }

@@ -40,6 +40,7 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
         this.ApplyCommand = new DelegateCommand(() => this.OnApply());
             
         this.config = this.AutoGameService.CreateDefaultConfiguration();
+        this.config.PropertyChanged += this.OnConfigSoftwareKeyChanged;
     }
 
     private ILoggingService LoggingService { get; }
