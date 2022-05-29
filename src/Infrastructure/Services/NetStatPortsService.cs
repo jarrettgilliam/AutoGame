@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 using AutoGame.Core.Exceptions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;

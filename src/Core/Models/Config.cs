@@ -3,7 +3,7 @@
 using Prism.Mvvm;
 using System.Collections;
 using System.ComponentModel;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 public class Config : BindableBase, INotifyDataErrorInfo
 {

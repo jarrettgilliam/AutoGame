@@ -17,7 +17,7 @@ public class NetStatPortsServiceTests
     private readonly StringBuilder standardOutputMock = new();
     private readonly StringBuilder standardErrorMock = new();
     
-    private ProcessStartInfo startInfo;
+    private ProcessStartInfo? startInfo;
 
     public NetStatPortsServiceTests()
     {
@@ -53,7 +53,7 @@ public class NetStatPortsServiceTests
     {
         this.sut.GetNetStatPorts();
         
-        Assert.Equal("netstat.exe", this.startInfo.FileName);
+        Assert.Equal("netstat.exe", this.startInfo!.FileName);
         Assert.Equal("-a -n -o", this.startInfo.Arguments);
         Assert.False(this.startInfo.UseShellExecute);
         Assert.True(this.startInfo.CreateNoWindow);

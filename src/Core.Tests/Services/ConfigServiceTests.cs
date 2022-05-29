@@ -1,7 +1,7 @@
-﻿
-namespace AutoGame.Core.Tests.Services;
+﻿namespace AutoGame.Core.Tests.Services;
 
 using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using System.Text;
 using AutoGame.Core.Interfaces;
@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 public class ConfigServiceTests
 {
-    private readonly ConfigService sut;
+    private ConfigService sut;
     private readonly Mock<IAppInfoService> appInfoServiceMock = new();
     private readonly Mock<IFileSystem> fileSystemMock = new();
     private readonly Mock<IFile> fileMock = new();
@@ -40,17 +40,16 @@ public class ConfigServiceTests
             .Returns(@"C:\AutoGame\config.json");
 
         this.fileMock
-            .Setup(x => x.OpenText(this.appInfoServiceMock.Object.ConfigFilePath))
+            .Setup(x => x.OpenRead(this.appInfoServiceMock.Object.ConfigFilePath))
             .Returns(() =>
-                new StreamReader(
-                    new MemoryStream(
-                        Encoding.UTF8.GetBytes(
-                            JsonConvert.SerializeObject(this.configMock)))));
+                new MemoryStream(
+                    Encoding.UTF8.GetBytes(
+                        JsonConvert.SerializeObject(this.configMock))));
 
         this.fileMock
-            .Setup(x => x.CreateText(this.appInfoServiceMock.Object.ConfigFilePath))
-            .Returns(new StreamWriter(this.saveMemoryStream));
-        
+            .Setup(x => x.Create(this.appInfoServiceMock.Object.ConfigFilePath))
+            .Returns(this.saveMemoryStream);
+
         this.fileSystemMock
             .SetupGet(x => x.File)
             .Returns(this.fileMock.Object);
@@ -77,9 +76,9 @@ public class ConfigServiceTests
     public void GetConfigOrNull_HandlesException_ReturnsNull(Type exceptionType)
     {
         this.fileMock
-            .Setup(x => x.OpenText(this.appInfoServiceMock.Object.ConfigFilePath))
+            .Setup(x => x.OpenRead(this.appInfoServiceMock.Object.ConfigFilePath))
             .Returns(() => throw ((Exception)Activator.CreateInstance(exceptionType)!));
-        
+
         Assert.Null(this.sut.GetConfigOrNull());
     }
 
@@ -92,9 +91,9 @@ public class ConfigServiceTests
     public void GetConfigOrNull_Exception_Throws(Type exceptionType)
     {
         this.fileMock
-            .Setup(x => x.OpenText(this.appInfoServiceMock.Object.ConfigFilePath))
+            .Setup(x => x.OpenRead(this.appInfoServiceMock.Object.ConfigFilePath))
             .Returns(() => throw ((Exception)Activator.CreateInstance(exceptionType)!));
-        
+
         Assert.Throws(exceptionType, () => this.sut.GetConfigOrNull());
     }
 
@@ -102,12 +101,11 @@ public class ConfigServiceTests
     public void GetConfigOrNull_CantDeserialize_Throws()
     {
         this.fileMock
-            .Setup(x => x.OpenText(this.appInfoServiceMock.Object.ConfigFilePath))
+            .Setup(x => x.OpenRead(this.appInfoServiceMock.Object.ConfigFilePath))
             .Returns(() =>
-                new StreamReader(
-                    new MemoryStream(
-                        Encoding.UTF8.GetBytes(
-                            "This is not json"))));
+                new MemoryStream(
+                    Encoding.UTF8.GetBytes(
+                        "This is not json")));
 
         Assert.ThrowsAny<Exception>(() => this.sut.GetConfigOrNull());
     }
@@ -123,7 +121,7 @@ public class ConfigServiceTests
     public void Save_CreatesDirectory()
     {
         this.sut.Save(this.configMock);
-        
+
         this.directoryMock.Verify(
             x => x.CreateDirectory(this.appInfoServiceMock.Object.AppDataFolder),
             Times.Once);
@@ -133,12 +131,12 @@ public class ConfigServiceTests
     public void Save_WritesJson()
     {
         this.sut.Save(this.configMock);
-        
+
         Config savedConfig = JsonConvert.DeserializeObject<Config>(
             Encoding.UTF8.GetString(this.saveMemoryStream.ToArray()))!;
 
         savedConfig.IsDirty = false;
-        
+
         Assert.True(this.ConfigsAreEqual(this.configMock, savedConfig));
     }
 
@@ -148,9 +146,9 @@ public class ConfigServiceTests
     public void Save_ExcludesIgnoredProperties(string ignoredPropertyName)
     {
         this.sut.Save(this.configMock);
-        
+
         string configJson = Encoding.UTF8.GetString(this.saveMemoryStream.ToArray());
-        
+
         Assert.DoesNotContain(ignoredPropertyName, configJson);
     }
 
@@ -158,10 +156,30 @@ public class ConfigServiceTests
     public void Save_SetsIsDirty_False()
     {
         this.configMock.IsDirty = true;
-        
+
         this.sut.Save(this.configMock);
-        
+
         Assert.False(this.configMock.IsDirty);
+    }
+
+    [Fact]
+    public void Save_LargeExistingFile_Truncates()
+    {
+        var fsMock = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            {
+                this.appInfoServiceMock.Object.ConfigFilePath,
+                new MockFileData(new string('a', 1000))
+            }
+        });
+
+        this.sut = new ConfigService(this.appInfoServiceMock.Object, fsMock);
+        this.sut.Save(this.configMock);
+
+        string configFileText = fsMock.File.ReadAllText(
+            this.appInfoServiceMock.Object.ConfigFilePath);
+        
+        Assert.Equal('}', configFileText.Last());
     }
 
     private bool ConfigsAreEqual(Config? left, Config? right)

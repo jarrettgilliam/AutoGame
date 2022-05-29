@@ -3,9 +3,9 @@
 using System;
 using System.IO;
 using System.IO.Abstractions;
+using System.Text.Json;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
-using Newtonsoft.Json;
 
 public class ConfigService : IConfigService
 {
@@ -26,10 +26,8 @@ public class ConfigService : IConfigService
 
         try
         {
-            using StreamReader sr = this.FileSystem.File.OpenText(this.AppInfo.ConfigFilePath);
-            using JsonTextReader reader = new(sr);
-
-            config = JsonSerializer.CreateDefault().Deserialize<Config>(reader);
+            using Stream s = this.FileSystem.File.OpenRead(this.AppInfo.ConfigFilePath);
+            config = JsonSerializer.Deserialize<Config>(s);
             config!.IsDirty = false;
         }
         catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
@@ -43,11 +41,9 @@ public class ConfigService : IConfigService
     {
         this.FileSystem.Directory.CreateDirectory(this.AppInfo.AppDataFolder);
 
-        using StreamWriter sw = this.FileSystem.File.CreateText(this.AppInfo.ConfigFilePath);
-        using JsonTextWriter writer = new(sw);
-        
-        writer.Formatting = Formatting.Indented;
-        JsonSerializer.CreateDefault().Serialize(writer, config);
+        using Stream s = this.FileSystem.File.Create(this.AppInfo.ConfigFilePath);
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        JsonSerializer.Serialize(s, config, options);
 
         config.IsDirty = false;
     }
