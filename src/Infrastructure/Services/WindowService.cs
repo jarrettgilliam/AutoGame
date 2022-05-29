@@ -56,7 +56,7 @@ public class WindowService : IWindowService
                 }
             }
 
-            if (this.DateTimeService.UtcNow - start > timeout)
+            if (this.DateTimeService.UtcNow - start >= timeout)
             {
                 break;
             }
