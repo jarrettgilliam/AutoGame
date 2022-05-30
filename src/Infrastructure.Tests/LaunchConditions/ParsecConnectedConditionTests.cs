@@ -165,8 +165,7 @@ public class ParsecConnectedConditionTests
 
         Assert.Equal(1, helper.FiredCount);
 
-        this.sut.StopMonitoring();
-        this.sut.StartMonitoring();
+        this.systemEventsServiceMock.Raise(x => x.DisplaySettingsChanged += null, EventArgs.Empty);
 
         Assert.Equal(1, helper.FiredCount);
     }
@@ -336,6 +335,19 @@ public class ParsecConnectedConditionTests
         Assert.Null(this.audioSessionControlMock.EventClient);
 
         this.mmDeviceMock.Verify(x => x.Dispose(), Times.Once);
+    }
+
+    [Fact]
+    public void StopMonitoring_ResetsWasConnected()
+    {
+        using var helper = new LaunchConditionTestHelper(this.sut);
+        
+        Assert.Equal(1, helper.FiredCount);
+        
+        this.sut.StopMonitoring();
+        this.sut.StartMonitoring();
+        
+        Assert.Equal(2, helper.FiredCount);
     }
 
     private class AudioSessionControlMock : IAudioSessionControl2

@@ -148,6 +148,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
     public void StopMonitoring()
     {
+        this.wasConnected = false;
         this.SystemEventsService.DisplaySettingsChanged -= this.SystemEvents_DisplaySettingsChanged;
 
         if (this.mmDevice != null)
