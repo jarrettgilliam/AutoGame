@@ -9,4 +9,6 @@ public interface IConfigService
     void Save(Config config);
 
     Config CreateDefault(ISoftwareManager? software);
+
+    void Validate(Config config);
 }

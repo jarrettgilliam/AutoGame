@@ -64,6 +64,16 @@ public class MainWindowViewModelTests
                 JsonConvert.DeserializeObject<Config>(
                     JsonConvert.SerializeObject(this.defaultConfigMock))!);
 
+        this.configServiceMock
+            .Setup(x => x.Validate(It.IsAny<Config>()))
+            .Callback<Config>(config =>
+            {
+                if (!this.canApplyConfiguration)
+                {
+                    config.AddError("property", "Error message");
+                }
+            });
+
         this.autoGameServiceMock
             .Setup(x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()))
             .Returns(this.softwareManagerMock.Object);
@@ -79,10 +89,6 @@ public class MainWindowViewModelTests
         this.softwareManagerMock
             .SetupGet(x => x.Description)
             .Returns(SoftwareDescription);
-
-        this.autoGameServiceMock
-            .Setup(x => x.TryApplyConfiguration(It.IsAny<Config>()))
-            .Returns(() => this.canApplyConfiguration);
 
         this.dialogServiceMock
             .Setup(x => x.ShowOpenFileDialog(It.IsAny<OpenFileDialogParms>(), out It.Ref<string?>.IsAny))
@@ -160,7 +166,7 @@ public class MainWindowViewModelTests
 
         this.sut.LoadedCommand.Execute(null);
 
-        this.autoGameServiceMock.Verify(x => x.TryApplyConfiguration(It.IsAny<Config>()), Times.Never);
+        this.autoGameServiceMock.Verify(x => x.ApplyConfiguration(It.IsAny<Config>()), Times.Never);
     }
 
     [Fact]
@@ -178,7 +184,7 @@ public class MainWindowViewModelTests
     {
         this.sut.LoadedCommand.Execute(null);
 
-        this.autoGameServiceMock.Verify(x => x.TryApplyConfiguration(this.savedConfigMock), Times.Once);
+        this.autoGameServiceMock.Verify(x => x.ApplyConfiguration(this.savedConfigMock), Times.Once);
     }
 
     [Fact]
@@ -317,7 +323,7 @@ public class MainWindowViewModelTests
         this.sut.ApplyCommand.Execute(null);
 
         this.autoGameServiceMock.Verify(
-            x => x.TryApplyConfiguration(It.IsAny<Config>()),
+            x => x.ApplyConfiguration(It.IsAny<Config>()),
             Times.Never);
     }
 
@@ -330,7 +336,7 @@ public class MainWindowViewModelTests
         this.sut.ApplyCommand.Execute(null);
 
         this.autoGameServiceMock.Verify(
-            x => x.TryApplyConfiguration(It.IsAny<Config>()),
+            x => x.ApplyConfiguration(It.IsAny<Config>()),
             Times.Once);
     }
 

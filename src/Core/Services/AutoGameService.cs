@@ -34,15 +34,8 @@ public sealed class AutoGameService : IAutoGameService
     
     public IList<ISoftwareManager> AvailableSoftware { get; }
 
-    public bool TryApplyConfiguration(Config config)
+    public void ApplyConfiguration(Config config)
     {
-        this.ValidateConfig(config);
-
-        if (config.HasErrors)
-        {
-            return false;
-        }
-
         this.appliedSoftware = this.GetSoftwareByKeyOrNull(config.SoftwareKey);
         this.appliedSoftwarePath = config.SoftwarePath;
 
@@ -65,8 +58,6 @@ public sealed class AutoGameService : IAutoGameService
             condition.ConditionMet += this.OnLaunchConditionMet;
             condition.StartMonitoring();
         }
-
-        return true;
     }
 
     public ISoftwareManager? GetSoftwareByKeyOrNull(string? softwareKey)
@@ -111,20 +102,6 @@ public sealed class AutoGameService : IAutoGameService
         catch (Exception ex)
         {
             this.LoggingService.LogException("handling launch condition met", ex);
-        }
-    }
-
-    private void ValidateConfig(Config config)
-    {
-        config.ClearAllErrors();
-
-        if (string.IsNullOrEmpty(config.SoftwarePath))
-        {
-            config.AddError(nameof(config.SoftwarePath), "Required");
-        }
-        else if (!this.FileSystem.File.Exists(config.SoftwarePath))
-        {
-            config.AddError(nameof(config.SoftwarePath), "File not found");
         }
     }
 }

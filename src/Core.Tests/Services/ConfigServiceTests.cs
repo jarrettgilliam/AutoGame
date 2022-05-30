@@ -50,6 +50,10 @@ public class ConfigServiceTests
         this.fileMock
             .Setup(x => x.Create(this.appInfoServiceMock.Object.ConfigFilePath))
             .Returns(this.saveMemoryStream);
+        
+        this.fileMock
+            .Setup(x => x.Exists(It.IsAny<string>()))
+            .Returns(true);
 
         this.fileSystemMock
             .SetupGet(x => x.File)
@@ -192,13 +196,13 @@ public class ConfigServiceTests
     }
 
     [Fact]
-    public void CreateDefaultConfiguration_Config_NotNull()
+    public void CreateDefault_Config_NotNull()
     {
         Assert.NotNull(this.sut.CreateDefault(this.softwareMock.Object));
     }
 
     [Fact]
-    public void CreateDefaultConfiguration_Config_MatchesFirstSoftware()
+    public void CreateDefault_Config_MatchesFirstSoftware()
     {
         Config config = this.sut.CreateDefault(this.softwareMock.Object);
         
@@ -209,6 +213,29 @@ public class ConfigServiceTests
         Assert.Equal(
             this.softwareMock.Object.FindSoftwarePathOrDefault(),
             config.SoftwarePath);
+    }
+
+    [Fact]
+    public void Validate_ValidConfig_NoErrors()
+    {
+        this.sut.Validate(this.configMock);
+        Assert.False(this.configMock.HasErrors);
+    }
+
+    [Fact]
+    public void Validate_EmptySoftwarePath_ConfigErrors()
+    {
+        this.configMock.SoftwarePath = string.Empty;
+        this.sut.Validate(this.configMock);
+        Assert.True(this.configMock.HasErrors);
+    }
+
+    [Fact]
+    public void Validate_SoftwarePathDoesntExist_ConfigErrors()
+    {
+        this.fileMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+        this.sut.Validate(this.configMock);
+        Assert.True(this.configMock.HasErrors);
     }
 
     private bool ConfigsAreEqual(Config? left, Config? right)

@@ -8,5 +8,5 @@ public interface IAutoGameService : IDisposable
 
     ISoftwareManager? GetSoftwareByKeyOrNull(string? softwareKey);
 
-    bool TryApplyConfiguration(Config config);
+    void ApplyConfiguration(Config config);
 }

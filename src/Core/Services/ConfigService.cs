@@ -56,4 +56,18 @@ public class ConfigService : IConfigService
             LaunchWhenGamepadConnected = true,
             LaunchWhenParsecConnected = true
         };
+
+    public void Validate(Config config)
+    {
+        config.ClearAllErrors();
+
+        if (string.IsNullOrEmpty(config.SoftwarePath))
+        {
+            config.AddError(nameof(config.SoftwarePath), "Required");
+        }
+        else if (!this.FileSystem.File.Exists(config.SoftwarePath))
+        {
+            config.AddError(nameof(config.SoftwarePath), "File not found");
+        }
+    }
 }

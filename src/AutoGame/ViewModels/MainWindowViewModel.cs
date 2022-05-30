@@ -118,8 +118,11 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
         {
             if (this.TryLoadConfig())
             {
-                if (this.AutoGameService.TryApplyConfiguration(this.Config))
+                this.ConfigService.Validate(this.Config);
+
+                if (!this.Config.HasErrors)
                 {
+                    this.AutoGameService.ApplyConfiguration(this.Config);
                     this.SetWindowState(WindowState.Minimized);
                 }
             }
@@ -231,11 +234,14 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
         {
             if (this.Config.IsDirty)
             {
-                if (!this.AutoGameService.TryApplyConfiguration(this.Config))
+                this.ConfigService.Validate(this.Config);
+                
+                if (this.Config.HasErrors)
                 {
                     return false;
                 }
 
+                this.AutoGameService.ApplyConfiguration(this.Config);
                 this.ConfigService.Save(this.Config);
             }
 
