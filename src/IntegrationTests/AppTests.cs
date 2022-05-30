@@ -1,4 +1,4 @@
-﻿namespace AutoGame.Tests;
+﻿namespace AutoGame.IntegrationTests;
 
 using AutoGame.Core.Interfaces;
 using AutoGame.ViewModels;

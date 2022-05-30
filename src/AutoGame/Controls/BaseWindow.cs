@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
 
-public class BaseWindow : Window
+public abstract class BaseWindow : Window
 {
     public static readonly DependencyProperty ShowWindowProperty =
         DependencyProperty.Register(
@@ -24,7 +24,7 @@ public class BaseWindow : Window
 
     private NotifyIcon? notifyIcon;
 
-    public BaseWindow()
+    protected BaseWindow()
     {
         this.Loaded += this.MainWindow_Loaded;
     }

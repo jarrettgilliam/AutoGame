@@ -26,12 +26,11 @@ public class ParsecConnectedConditionTests
     private readonly Mock<IAudioSessionManager> audioSessionManagerMock = new();
     private readonly Mock<IAudioEndpointVolume> audioEndpointVolumeMock = new();
 
-    private IProcess[] processes;
     private readonly List<Port> netstatPorts;
     private readonly List<AudioSessionControl> audioSessionControls;
     private readonly AudioSessionControlMock audioSessionControlMock;
 
-    private bool suppressConditionMet = false;
+    private bool suppressConditionMet;
 
     public ParsecConnectedConditionTests()
     {
@@ -48,14 +47,11 @@ public class ParsecConnectedConditionTests
             .SetupGet(x => x.Id)
             .Returns(PARSECD_PROC_ID);
 
-        this.processes = new IProcess[]
-        {
-            this.processMock.Object
-        };
-
         this.processServiceMock
             .Setup(x => x.GetProcessesByName(It.IsAny<string?>()))
-            .Returns(() => this.suppressConditionMet ? Array.Empty<IProcess>() : this.processes);
+            .Returns(() => this.suppressConditionMet
+                ? Array.Empty<IProcess>()
+                : new[] { this.processMock.Object });
 
         this.audioSessionControlMock = new AudioSessionControlMock
         {
@@ -121,10 +117,9 @@ public class ParsecConnectedConditionTests
         this.netstatPorts[0].ProcessId = 8888;
 
         using var helper = new LaunchConditionTestHelper(this.sut);
-        
+
         Assert.Equal(0, helper.FiredCount);
     }
-
 
     [Fact]
     public void NetStatNoUDPPorts_DoesntFire_ConditionMet()
@@ -132,7 +127,7 @@ public class ParsecConnectedConditionTests
         this.netstatPorts[0].Protocol = "TCP";
 
         using var helper = new LaunchConditionTestHelper(this.sut);
-        
+
         Assert.Equal(0, helper.FiredCount);
     }
 
@@ -152,7 +147,7 @@ public class ParsecConnectedConditionTests
         this.audioSessionControls.Clear();
 
         using var helper = new LaunchConditionTestHelper(this.sut);
-        
+
         this.sleepServiceMock.Verify(
             x => x.Sleep(It.IsAny<TimeSpan>()),
             Times.Exactly(3));
@@ -244,7 +239,7 @@ public class ParsecConnectedConditionTests
         this.suppressConditionMet = true;
         using var helper = new LaunchConditionTestHelper(this.sut);
         this.suppressConditionMet = false;
-        
+
         Assert.Equal(0, helper.FiredCount);
 
         this.systemEventsServiceMock.Raise(x => x.DisplaySettingsChanged += null, EventArgs.Empty);
@@ -258,7 +253,7 @@ public class ParsecConnectedConditionTests
         this.suppressConditionMet = true;
         using var helper = new LaunchConditionTestHelper(this.sut);
         this.suppressConditionMet = false;
-        
+
         Assert.Equal(0, helper.FiredCount);
 
         this.audioEndpointVolumeMock.Raise(
@@ -279,7 +274,7 @@ public class ParsecConnectedConditionTests
         this.suppressConditionMet = true;
         using var helper = new LaunchConditionTestHelper(this.sut);
         this.suppressConditionMet = false;
-        
+
         Assert.Equal(0, helper.FiredCount);
 
         this.audioEndpointVolumeMock.Raise(
@@ -300,14 +295,14 @@ public class ParsecConnectedConditionTests
         this.audioSessionControlMock.ProcessId = 8888;
 
         using var helper = new LaunchConditionTestHelper(this.sut);
-        
+
         Assert.Null(this.audioSessionControlMock.EventClient);
-        
+
         this.audioSessionManagerMock.Raise(
             x => x.OnSessionCreated += null,
             this.audioSessionManagerMock.Object,
             this.audioSessionControlMock);
-        
+
         Assert.Null(this.audioSessionControlMock.EventClient);
     }
 
@@ -341,12 +336,12 @@ public class ParsecConnectedConditionTests
     public void StopMonitoring_ResetsWasConnected()
     {
         using var helper = new LaunchConditionTestHelper(this.sut);
-        
+
         Assert.Equal(1, helper.FiredCount);
-        
+
         this.sut.StopMonitoring();
         this.sut.StartMonitoring();
-        
+
         Assert.Equal(2, helper.FiredCount);
     }
 

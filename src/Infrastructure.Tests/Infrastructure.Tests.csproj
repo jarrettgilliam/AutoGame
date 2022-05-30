@@ -10,6 +10,7 @@
     <RootNamespace>AutoGame.Infrastructure.Tests</RootNamespace>
 
     <Nullable>enable</Nullable>
+    <WarningsAsErrors>Nullable</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
