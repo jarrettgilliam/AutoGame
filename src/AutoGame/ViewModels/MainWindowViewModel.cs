@@ -118,7 +118,7 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
         {
             if (this.TryLoadConfig())
             {
-                this.ConfigService.Validate(this.Config);
+                this.ConfigService.Validate(this.Config, this.AutoGameService.AvailableSoftware);
 
                 if (!this.Config.HasErrors)
                 {
@@ -207,6 +207,7 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
         try
         {
             this.TryLoadConfig();
+            this.ConfigService.Validate(this.Config, this.AutoGameService.AvailableSoftware);
             this.SetWindowState(WindowState.Minimized);
         }
         catch (Exception ex)
@@ -234,7 +235,7 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
         {
             if (this.Config.IsDirty)
             {
-                this.ConfigService.Validate(this.Config);
+                this.ConfigService.Validate(this.Config, this.AutoGameService.AvailableSoftware);
                 
                 if (this.Config.HasErrors)
                 {
