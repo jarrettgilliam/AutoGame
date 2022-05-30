@@ -5,7 +5,7 @@ using System;
 using System.IO.Abstractions;
 using System.Linq;
 
-public class PlayniteFullscreenManager : ISoftwareManager
+internal sealed class PlayniteFullscreenManager : ISoftwareManager
 {
     public PlayniteFullscreenManager(
         IWindowService windowService,

@@ -1,6 +1,5 @@
 ﻿namespace AutoGame.Core.Tests.Services;
 
-using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Core.Services;
@@ -9,25 +8,15 @@ public class AutoGameServiceTests
 {
     private readonly AutoGameService sut;
     private readonly Mock<ILoggingService> loggingServiceMock = new();
-    private readonly Mock<IFileSystem> fileSystemMock = new();
-    private readonly Mock<IFile> fileMock = new();
     private readonly Mock<ISoftwareManager> softwareMock1 = new();
     private readonly Mock<ISoftwareManager> softwareMock2 = new();
-    private readonly Mock<ILaunchCondition> gamepadConnectedConditionMock = new();
-    private readonly Mock<ILaunchCondition> parsecConnectedConditionMock = new();
+    private readonly Mock<IGamepadConnectedCondition> gamepadConnectedConditionMock = new();
+    private readonly Mock<IParsecConnectedCondition> parsecConnectedConditionMock = new();
 
     private readonly Config configMock;
 
     public AutoGameServiceTests()
     {
-        this.fileMock
-            .Setup(x => x.Exists(It.IsAny<string>()))
-            .Returns(true);
-        
-        this.fileSystemMock
-            .SetupGet(x => x.File)
-            .Returns(this.fileMock.Object);
-        
         this.softwareMock1
             .SetupGet(x => x.Key)
             .Returns(nameof(this.softwareMock1));
@@ -55,7 +44,6 @@ public class AutoGameServiceTests
 
         this.sut = new AutoGameService(
             this.loggingServiceMock.Object,
-            this.fileSystemMock.Object,
             new ISoftwareManager[]
             {
                 this.softwareMock1.Object,

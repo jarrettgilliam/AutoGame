@@ -2,12 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO.Abstractions;
 using System.Linq;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 
-public sealed class AutoGameService : IAutoGameService
+internal sealed class AutoGameService : IAutoGameService
 {
     private ISoftwareManager? appliedSoftware;
     private string? appliedSoftwarePath;
@@ -15,24 +14,21 @@ public sealed class AutoGameService : IAutoGameService
 
     public AutoGameService(
         ILoggingService loggingService,
-        IFileSystem fileSystem,
-        IList<ISoftwareManager> availableSoftware,
-        ILaunchCondition gamepadConnectedCondition,
-        ILaunchCondition parsecConnectedCondition)
+        IEnumerable<ISoftwareManager> availableSoftware,
+        IGamepadConnectedCondition gamepadConnectedCondition,
+        IParsecConnectedCondition parsecConnectedCondition)
     {
         this.LoggingService = loggingService;
-        this.FileSystem = fileSystem;
         this.AvailableSoftware = availableSoftware;
         this.GamepadConnectedCondition = gamepadConnectedCondition;
         this.ParsecConnectedCondition = parsecConnectedCondition;
     }
 
     private ILoggingService LoggingService { get; }
-    private IFileSystem FileSystem { get; }
     private ILaunchCondition GamepadConnectedCondition { get; }
     private ILaunchCondition ParsecConnectedCondition { get; }
     
-    public IList<ISoftwareManager> AvailableSoftware { get; }
+    public IEnumerable<ISoftwareManager> AvailableSoftware { get; }
 
     public void ApplyConfiguration(Config config)
     {

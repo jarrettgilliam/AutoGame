@@ -5,7 +5,7 @@ using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 
-public class AppInfoService : IAppInfoService
+internal sealed class AppInfoService : IAppInfoService
 {
     public AppInfoService(IFileSystem fileSystem)
     {

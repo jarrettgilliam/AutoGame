@@ -4,7 +4,7 @@ using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.Models;
 using Microsoft.Win32;
 
-public sealed class DialogService : IDialogService
+internal sealed class DialogService : IDialogService
 {
     public bool ShowOpenFileDialog(OpenFileDialogParms parms, out string? selectedFileName)
     {

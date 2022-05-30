@@ -6,7 +6,7 @@ using System.IO.Abstractions;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 
-public sealed class LoggingService : ILoggingService
+internal sealed class LoggingService : ILoggingService
 {
     private readonly Lazy<StreamWriter> logWriter;
 
@@ -23,7 +23,7 @@ public sealed class LoggingService : ILoggingService
         {
             this.FileSystem.Directory.CreateDirectory(this.AppInfo.AppDataFolder);
 
-            var sw = this.FileSystem.File.CreateText(this.AppInfo.LogFilePath);
+            StreamWriter sw = this.FileSystem.File.CreateText(this.AppInfo.LogFilePath);
             sw.AutoFlush = true;
 
             return sw;

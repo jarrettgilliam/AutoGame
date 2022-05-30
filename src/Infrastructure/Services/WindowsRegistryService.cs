@@ -3,7 +3,7 @@
 using AutoGame.Core.Interfaces;
 using Microsoft.Win32;
 
-public class WindowsRegistryService : IRegistryService
+internal sealed class WindowsRegistryService : IRegistryService
 {
     public object? GetValue(string keyName, string? valueName, object? defaultValue) =>
         Registry.GetValue(keyName, valueName, defaultValue);

@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using AutoGame.Core.Interfaces;
 
-public sealed class ProcessService : IProcessService
+internal sealed class ProcessService : IProcessService
 {
     public IProcess NewProcess() =>
         new ProcessWrapper(new Process());

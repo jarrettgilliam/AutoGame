@@ -4,7 +4,7 @@ using System;
 using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.Interfaces;
 
-public class GamepadConnectedCondition : ILaunchCondition
+internal sealed class GamepadConnectedCondition : IGamepadConnectedCondition
 {
     private readonly object checkConditionLock = new object();
 

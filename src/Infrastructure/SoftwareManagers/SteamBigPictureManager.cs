@@ -4,7 +4,7 @@ using AutoGame.Core.Interfaces;
 using System;
 using System.IO.Abstractions;
 
-public class SteamBigPictureManager : ISoftwareManager
+internal sealed class SteamBigPictureManager : ISoftwareManager
 {
     public SteamBigPictureManager(
         ILoggingService loggingService,

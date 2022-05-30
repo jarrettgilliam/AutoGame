@@ -11,7 +11,7 @@ using AutoGame.Infrastructure.Interfaces;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 
-public class ParsecConnectedCondition : ILaunchCondition
+internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 {
     private readonly object checkConditionLock = new();
 

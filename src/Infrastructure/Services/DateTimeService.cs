@@ -3,7 +3,7 @@
 using System;
 using AutoGame.Core.Interfaces;
 
-public class DateTimeService : IDateTimeService
+internal sealed class DateTimeService : IDateTimeService
 {
     public DateTime UtcNow => DateTime.UtcNow;
     

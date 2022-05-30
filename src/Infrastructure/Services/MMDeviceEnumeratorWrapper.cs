@@ -5,14 +5,9 @@ using System.Linq;
 using AutoGame.Infrastructure.Interfaces;
 using NAudio.CoreAudioApi;
 
-public sealed class MMDeviceEnumeratorWrapper : IMMDeviceEnumerator
+internal sealed class MMDeviceEnumeratorWrapper : IMMDeviceEnumerator
 {
-    private readonly MMDeviceEnumerator mmDeviceEnumerator;
-
-    public MMDeviceEnumeratorWrapper(MMDeviceEnumerator mmDeviceEnumerator)
-    {
-        this.mmDeviceEnumerator = mmDeviceEnumerator;
-    }
+    private readonly MMDeviceEnumerator mmDeviceEnumerator = new();
 
     public IMMDevice GetDefaultAudioEndpoint(DataFlow dataFlow, Role role) =>
         new MMDeviceWrapper(this.mmDeviceEnumerator.GetDefaultAudioEndpoint(dataFlow, role));

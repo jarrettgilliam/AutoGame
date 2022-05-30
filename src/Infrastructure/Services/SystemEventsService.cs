@@ -3,7 +3,7 @@
 using System;
 using AutoGame.Core.Interfaces;
 
-public class SystemEventsService : ISystemEventsService
+internal sealed class SystemEventsService : ISystemEventsService
 {
     public event EventHandler? DisplaySettingsChanged
     {

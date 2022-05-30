@@ -4,7 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using AutoGame.Core.Interfaces;
 
-public class WindowsUser32Service : IUser32Service
+internal sealed class WindowsUser32Service : IUser32Service
 {
     public IntPtr FindWindow(string? sClass, string sWindow) => 
         NativeMethods.FindWindow(sClass, sWindow);

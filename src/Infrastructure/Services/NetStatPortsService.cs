@@ -8,7 +8,7 @@ using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 
 // From: https://gist.github.com/cheynewallace/5971686
-public class NetStatPortsService : INetStatPortsService
+internal sealed class NetStatPortsService : INetStatPortsService
 {
     public NetStatPortsService(IProcessService processService)
     {

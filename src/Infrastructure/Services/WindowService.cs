@@ -3,7 +3,7 @@
 using System;
 using AutoGame.Core.Interfaces;
 
-public class WindowService : IWindowService
+internal sealed class WindowService : IWindowService
 {
     public WindowService(
         IUser32Service user32Service,

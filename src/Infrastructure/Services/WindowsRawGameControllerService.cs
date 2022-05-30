@@ -5,7 +5,7 @@ using System.Linq;
 using Windows.Gaming.Input;
 using AutoGame.Infrastructure.Interfaces;
 
-public sealed class WindowsRawGameControllerService : IRawGameControllerService
+internal sealed class WindowsRawGameControllerService : IRawGameControllerService
 {
     private readonly object addRemoveLock = new();
     private bool subscribedToLowLevelEvent;

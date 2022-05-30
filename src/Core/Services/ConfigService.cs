@@ -7,7 +7,7 @@ using System.Text.Json;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 
-public class ConfigService : IConfigService
+internal sealed class ConfigService : IConfigService
 {
     public ConfigService(
         IAppInfoService appInfo,

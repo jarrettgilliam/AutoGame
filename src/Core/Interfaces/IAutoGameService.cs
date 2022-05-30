@@ -4,7 +4,7 @@ using AutoGame.Core.Models;
 
 public interface IAutoGameService : IDisposable
 {
-    IList<ISoftwareManager> AvailableSoftware { get; }
+    IEnumerable<ISoftwareManager> AvailableSoftware { get; }
 
     ISoftwareManager? GetSoftwareByKeyOrNull(string? softwareKey);
 

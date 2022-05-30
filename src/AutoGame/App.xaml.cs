@@ -3,42 +3,29 @@
 using System;
 using System.IO.Abstractions;
 using System.Windows;
+using AutoGame.Core;
 using AutoGame.Core.Interfaces;
-using AutoGame.Infrastructure.LaunchConditions;
-using AutoGame.Infrastructure.Services;
-using AutoGame.Infrastructure.SoftwareManagers;
 using AutoGame.ViewModels;
 using AutoGame.Views;
-using AutoGame.Core.Services;
-using NAudio.CoreAudioApi;
+using AutoGame.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
 public partial class App : Application
 {
+    private readonly ServiceProvider serviceProvider;
+
     public App()
     {
-        this.FileSystem = new FileSystem();
-        this.AppInfo = new AppInfoService(this.FileSystem);
-        this.DateTimeService = new DateTimeService();
-        this.User32Service = new WindowsUser32Service();
-        this.SleepService = new SleepService();
-        this.ProcessService = new ProcessService();
-        
-        this.LoggingService = new LoggingService(
-            this.AppInfo,
-            this.DateTimeService,
-            this.FileSystem);
+        ServiceCollection services = new();
+
+        this.ConfigureServices(services);
+        this.serviceProvider = services.BuildServiceProvider();
     }
 
-    private IAppInfoService AppInfo { get; }
-    private IDateTimeService DateTimeService { get; }
-    private ILoggingService LoggingService { get; }
-    private IUser32Service User32Service { get; }
-    private ISleepService SleepService { get; }
-    private IProcessService ProcessService { get; }
-    private IFileSystem FileSystem { get; }
+    private ILoggingService? LoggingService => this.serviceProvider.GetService<ILoggingService>();
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -48,52 +35,16 @@ public partial class App : Application
 
             Application.Current.DispatcherUnhandledException += this.Current_DispatcherUnhandledException;
 
-            var window = new MainWindow()
+            var window = new MainWindow
             {
-                DataContext = new MainWindowViewModel(
-                    this.LoggingService,
-                    new ConfigService(
-                        this.AppInfo,
-                        this.FileSystem),
-                    new AutoGameService(
-                        this.LoggingService,
-                        this.FileSystem,
-                        new ISoftwareManager[]
-                        {
-                            new SteamBigPictureManager(
-                                this.LoggingService,
-                                this.User32Service,
-                                this.FileSystem,
-                                this.ProcessService,
-                                new WindowsRegistryService()),
-                            new PlayniteFullscreenManager(
-                                new WindowService(
-                                    this.User32Service,
-                                    this.DateTimeService,
-                                    this.SleepService),
-                                this.FileSystem,
-                                this.ProcessService)
-                        },
-                        new GamepadConnectedCondition(
-                            this.LoggingService,
-                            new WindowsRawGameControllerService()),
-                        new ParsecConnectedCondition(
-                            this.LoggingService,
-                            new NetStatPortsService(this.ProcessService),
-                            this.SleepService,
-                            this.ProcessService,
-                            new SystemEventsService(),
-                            new MMDeviceEnumeratorWrapper(
-                                new MMDeviceEnumerator()))),
-                    this.FileSystem,
-                    new DialogService())
+                DataContext = this.serviceProvider.GetService<MainWindowViewModel>()
             };
 
             window.Show();
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling startup", ex);
+            this.LoggingService?.LogException("handling startup", ex);
         }
     }
 
@@ -102,8 +53,17 @@ public partial class App : Application
         Application.Current.DispatcherUnhandledException -= this.Current_DispatcherUnhandledException;
     }
 
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<MainWindowViewModel>();
+        services.AddSingleton<IFileSystem, FileSystem>();
+        
+        services.AddCore();
+        services.AddInfrastructure();
+    }
+
     private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
     {
-        this.LoggingService.LogException("unhandled exception", e.Exception);
+        this.LoggingService?.LogException("unhandled exception", e.Exception);
     }
 }
