@@ -16,6 +16,7 @@ public class ConfigServiceTests
     private readonly Mock<IFileSystem> fileSystemMock = new();
     private readonly Mock<IFile> fileMock = new();
     private readonly Mock<IDirectory> directoryMock = new();
+    private readonly Mock<ISoftwareManager> softwareMock = new();
 
     private readonly Config configMock = new()
     {
@@ -57,6 +58,14 @@ public class ConfigServiceTests
         this.fileSystemMock
             .SetupGet(x => x.Directory)
             .Returns(this.directoryMock.Object);
+        
+        this.softwareMock
+            .SetupGet(x => x.Key)
+            .Returns(nameof(this.softwareMock));
+
+        this.softwareMock
+            .Setup(x => x.FindSoftwarePathOrDefault())
+            .Returns($"/path/to/{nameof(this.softwareMock)}");
 
         this.sut = new ConfigService(
             this.appInfoServiceMock.Object,
@@ -180,6 +189,26 @@ public class ConfigServiceTests
             this.appInfoServiceMock.Object.ConfigFilePath);
         
         Assert.Equal('}', configFileText.Last());
+    }
+
+    [Fact]
+    public void CreateDefaultConfiguration_Config_NotNull()
+    {
+        Assert.NotNull(this.sut.CreateDefault(this.softwareMock.Object));
+    }
+
+    [Fact]
+    public void CreateDefaultConfiguration_Config_MatchesFirstSoftware()
+    {
+        Config config = this.sut.CreateDefault(this.softwareMock.Object);
+        
+        Assert.Equal(
+            this.softwareMock.Object.Key,
+            config.SoftwareKey);
+        
+        Assert.Equal(
+            this.softwareMock.Object.FindSoftwarePathOrDefault(),
+            config.SoftwarePath);
     }
 
     private bool ConfigsAreEqual(Config? left, Config? right)

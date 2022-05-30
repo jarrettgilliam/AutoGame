@@ -6,8 +6,6 @@ public interface IAutoGameService : IDisposable
 {
     IList<ISoftwareManager> AvailableSoftware { get; }
 
-    Config CreateDefaultConfiguration();
-
     ISoftwareManager? GetSoftwareByKeyOrNull(string? softwareKey);
 
     bool TryApplyConfiguration(Config config);

@@ -74,26 +74,6 @@ public class AutoGameServiceTests
     }
 
     [Fact]
-    public void CreateDefaultConfiguration_Config_NotNull()
-    {
-        Assert.NotNull(this.sut.CreateDefaultConfiguration());
-    }
-
-    [Fact]
-    public void CreateDefaultConfiguration_Config_MatchesFirstSoftware()
-    {
-        Config config = this.sut.CreateDefaultConfiguration();
-        
-        Assert.Equal(
-            this.softwareMock1.Object.Key,
-            config.SoftwareKey);
-        
-        Assert.Equal(
-            this.softwareMock1.Object.FindSoftwarePathOrDefault(),
-            config.SoftwarePath);
-    }
-
-    [Fact]
     public void TryApplyConfiguration_ValidConfig_ReturnsTrue()
     {
         Assert.True(this.sut.TryApplyConfiguration(this.configMock));

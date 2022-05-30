@@ -69,19 +69,6 @@ public sealed class AutoGameService : IAutoGameService
         return true;
     }
 
-    public Config CreateDefaultConfiguration()
-    {
-        ISoftwareManager s = this.AvailableSoftware.First();
-
-        return new Config()
-        {
-            SoftwareKey = s.Key,
-            SoftwarePath = s.FindSoftwarePathOrDefault(),
-            LaunchWhenGamepadConnected = true,
-            LaunchWhenParsecConnected = true
-        };
-    }
-
     public ISoftwareManager? GetSoftwareByKeyOrNull(string? softwareKey)
     {
         return this.AvailableSoftware.FirstOrDefault(s => s.Key == softwareKey) ??

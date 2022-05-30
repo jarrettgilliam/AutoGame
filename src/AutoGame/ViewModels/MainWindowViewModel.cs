@@ -3,6 +3,7 @@
 using System;
 using System.ComponentModel;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using AutoGame.Core.Interfaces;
@@ -39,7 +40,9 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
         this.CancelCommand = new DelegateCommand(this.OnCancel);
         this.ApplyCommand = new DelegateCommand(() => this.OnApply());
             
-        this.config = this.AutoGameService.CreateDefaultConfiguration();
+        this.config = this.ConfigService.CreateDefault(
+            this.AutoGameService.AvailableSoftware.FirstOrDefault());
+        
         this.config.PropertyChanged += this.OnConfigSoftwareKeyChanged;
     }
 
@@ -124,7 +127,8 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
             {
                 // The configuration file doesn't exist so consider this initial setup.
                 // Create a default configuration without applying it yet and don't minimize.
-                this.Config = this.AutoGameService.CreateDefaultConfiguration();
+                this.Config = this.ConfigService.CreateDefault(
+                    this.AutoGameService.AvailableSoftware.FirstOrDefault());
             }
         }
         catch (Exception ex)

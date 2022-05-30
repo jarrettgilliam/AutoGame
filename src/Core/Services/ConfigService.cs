@@ -16,7 +16,7 @@ public class ConfigService : IConfigService
         this.AppInfo = appInfo;
         this.FileSystem = fileSystem;
     }
-        
+
     private IAppInfoService AppInfo { get; }
     private IFileSystem FileSystem { get; }
 
@@ -47,4 +47,13 @@ public class ConfigService : IConfigService
 
         config.IsDirty = false;
     }
+
+    public Config CreateDefault(ISoftwareManager? software) =>
+        new()
+        {
+            SoftwareKey = software?.Key,
+            SoftwarePath = software?.FindSoftwarePathOrDefault(),
+            LaunchWhenGamepadConnected = true,
+            LaunchWhenParsecConnected = true
+        };
 }

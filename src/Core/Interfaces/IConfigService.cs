@@ -7,4 +7,6 @@ public interface IConfigService
     Config? GetConfigOrNull();
 
     void Save(Config config);
+
+    Config CreateDefault(ISoftwareManager? software);
 }
