@@ -6,7 +6,7 @@ using AutoGame.Infrastructure.Interfaces;
 
 internal sealed class GamepadConnectedCondition : IGamepadConnectedCondition
 {
-    private readonly object checkConditionLock = new object();
+    private readonly object checkConditionLock = new();
 
     public GamepadConnectedCondition(
         ILoggingService loggingService,

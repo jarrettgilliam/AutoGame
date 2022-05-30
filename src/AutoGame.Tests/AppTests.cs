@@ -11,20 +11,12 @@ public class AppTests
     [Fact]
     public void ConfigureServices_MainWindowViewModel_IsBuildable()
     {
-        ServiceCollection services = new();
-
-        sut.ConfigureServices(services);
-
-        Assert.NotNull(services.BuildServiceProvider().GetService<MainWindowViewModel>());
+        Assert.NotNull(sut.serviceProvider.GetService<MainWindowViewModel>());
     }
 
     [Fact]
     public void ConfigureServices_SoftwareManagers_HasAny()
     {
-        ServiceCollection services = new();
-
-        sut.ConfigureServices(services);
-
-        Assert.True(services.BuildServiceProvider().GetService<IEnumerable<ISoftwareManager>>()?.Any());
+        Assert.True(sut.serviceProvider.GetService<IEnumerable<ISoftwareManager>>()?.Any());
     }
 }

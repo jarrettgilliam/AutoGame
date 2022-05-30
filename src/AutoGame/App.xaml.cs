@@ -15,12 +15,11 @@ using Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public partial class App : Application
 {
-    private readonly ServiceProvider serviceProvider;
+    internal readonly ServiceProvider serviceProvider;
 
     public App()
     {
         ServiceCollection services = new();
-
         this.ConfigureServices(services);
         this.serviceProvider = services.BuildServiceProvider();
     }
