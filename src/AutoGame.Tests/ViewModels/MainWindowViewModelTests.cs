@@ -65,8 +65,8 @@ public class MainWindowViewModelTests
                     JsonConvert.SerializeObject(this.defaultConfigMock))!);
 
         this.configServiceMock
-            .Setup(x => x.Validate(It.IsAny<Config>()))
-            .Callback<Config>(config =>
+            .Setup(x => x.Validate(It.IsAny<Config>(), It.IsAny<IEnumerable<ISoftwareManager>>()))
+            .Callback<Config, IEnumerable<ISoftwareManager>>((config, _) =>
             {
                 if (!this.canApplyConfiguration)
                 {
@@ -295,6 +295,16 @@ public class MainWindowViewModelTests
     {
         this.sut.CancelCommand.Execute(null);
         this.configServiceMock.Verify(x => x.GetConfigOrNull(), Times.Once);
+    }
+
+    [Fact]
+    public void OnCancel_ValidatesConfig()
+    {
+        this.sut.CancelCommand.Execute(null);
+        
+        this.configServiceMock.Verify(
+            x => x.Validate(It.IsAny<Config>(), It.IsAny<IEnumerable<ISoftwareManager>>()),
+            Times.Once);
     }
 
     [Fact]

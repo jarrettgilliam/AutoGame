@@ -57,7 +57,7 @@ internal sealed class ConfigService : IConfigService
             LaunchWhenParsecConnected = true
         };
 
-    public void Validate(Config config)
+    public void Validate(Config config, IEnumerable<ISoftwareManager> knownSoftware)
     {
         config.ClearAllErrors();
 
@@ -68,6 +68,11 @@ internal sealed class ConfigService : IConfigService
         else if (!this.FileSystem.File.Exists(config.SoftwarePath))
         {
             config.AddError(nameof(config.SoftwarePath), "File not found");
+        }
+
+        if (!knownSoftware.Any(x => x.Key == config.SoftwareKey))
+        {
+            config.AddError(nameof(config.SoftwareKey), "Unknown software");
         }
     }
 }

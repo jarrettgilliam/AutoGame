@@ -12,7 +12,7 @@
     NotifyIconVisible="{Binding NotifyIconVisible, Mode=TwoWay}"
     Height="200" Width="530" ResizeMode="NoResize">
     <FrameworkElement.Resources>
-        <Style x:Key="ToolTipErrorMessageStyle" TargetType="TextBox">
+        <Style x:Key="ToolTipErrorMessageStyle" TargetType="Control">
             <Style.Resources>
                 <Style TargetType="ToolTip">
                     <Setter Property="BorderBrush" Value="Red" />
@@ -58,6 +58,7 @@
                     DisplayMemberPath="Description"
                     SelectedValuePath="Key"
                     SelectedValue="{Binding Config.SoftwareKey, Mode=TwoWay}"
+                    Style="{StaticResource ResourceKey=ToolTipErrorMessageStyle}"
                     VerticalContentAlignment="Center" />
 
                 <Label

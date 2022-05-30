@@ -21,7 +21,7 @@ public class ConfigServiceTests
     private readonly Config configMock = new()
     {
         EnableTraceLogging = true,
-        SoftwareKey = "SteamBigPicture",
+        SoftwareKey = nameof(softwareMock),
         SoftwarePath = "c:\\steam.exe",
         LaunchWhenGamepadConnected = true,
         LaunchWhenParsecConnected = true,
@@ -50,7 +50,7 @@ public class ConfigServiceTests
         this.fileMock
             .Setup(x => x.Create(this.appInfoServiceMock.Object.ConfigFilePath))
             .Returns(this.saveMemoryStream);
-        
+
         this.fileMock
             .Setup(x => x.Exists(It.IsAny<string>()))
             .Returns(true);
@@ -62,7 +62,7 @@ public class ConfigServiceTests
         this.fileSystemMock
             .SetupGet(x => x.Directory)
             .Returns(this.directoryMock.Object);
-        
+
         this.softwareMock
             .SetupGet(x => x.Key)
             .Returns(nameof(this.softwareMock));
@@ -191,7 +191,7 @@ public class ConfigServiceTests
 
         string configFileText = fsMock.File.ReadAllText(
             this.appInfoServiceMock.Object.ConfigFilePath);
-        
+
         Assert.Equal('}', configFileText.Last());
     }
 
@@ -205,11 +205,11 @@ public class ConfigServiceTests
     public void CreateDefault_Config_MatchesFirstSoftware()
     {
         Config config = this.sut.CreateDefault(this.softwareMock.Object);
-        
+
         Assert.Equal(
             this.softwareMock.Object.Key,
             config.SoftwareKey);
-        
+
         Assert.Equal(
             this.softwareMock.Object.FindSoftwarePathOrDefault(),
             config.SoftwarePath);
@@ -218,7 +218,7 @@ public class ConfigServiceTests
     [Fact]
     public void Validate_ValidConfig_NoErrors()
     {
-        this.sut.Validate(this.configMock);
+        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
         Assert.False(this.configMock.HasErrors);
     }
 
@@ -226,7 +226,7 @@ public class ConfigServiceTests
     public void Validate_EmptySoftwarePath_ConfigErrors()
     {
         this.configMock.SoftwarePath = string.Empty;
-        this.sut.Validate(this.configMock);
+        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
         Assert.True(this.configMock.HasErrors);
     }
 
@@ -234,7 +234,15 @@ public class ConfigServiceTests
     public void Validate_SoftwarePathDoesntExist_ConfigErrors()
     {
         this.fileMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
-        this.sut.Validate(this.configMock);
+        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
+        Assert.True(this.configMock.HasErrors);
+    }
+
+    [Fact]
+    public void Validate_BadSoftwareKey_ConfigErrors()
+    {
+        this.configMock.SoftwareKey = "BadKey";
+        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
         Assert.True(this.configMock.HasErrors);
     }
 

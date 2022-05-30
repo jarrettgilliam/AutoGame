@@ -10,5 +10,5 @@ public interface IConfigService
 
     Config CreateDefault(ISoftwareManager? software);
 
-    void Validate(Config config);
+    void Validate(Config config, IEnumerable<ISoftwareManager> knownSoftware);
 }

@@ -58,8 +58,7 @@ internal sealed class AutoGameService : IAutoGameService
 
     public ISoftwareManager? GetSoftwareByKeyOrNull(string? softwareKey)
     {
-        return this.AvailableSoftware.FirstOrDefault(s => s.Key == softwareKey) ??
-               this.AvailableSoftware.FirstOrDefault();
+        return this.AvailableSoftware.FirstOrDefault(s => s.Key == softwareKey);
     }
 
     public void Dispose()
