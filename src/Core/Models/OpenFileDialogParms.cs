@@ -1,6 +1,6 @@
-﻿namespace AutoGame.Infrastructure.Models;
+﻿namespace AutoGame.Core.Models;
 
-public class OpenFileDialogParms
+public struct OpenFileDialogParms
 {
     public string? FileName { get; set; }
     public string? InitialDirectory { get; set; }

@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Abstractions;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
+using AutoGame.Core.Models;
 
 internal sealed class LoggingService : ILoggingService
 {
@@ -13,11 +14,13 @@ internal sealed class LoggingService : ILoggingService
     public LoggingService(
         IAppInfoService appInfo,
         IDateTimeService dateTimeService,
-        IFileSystem fileSystem)
+        IFileSystem fileSystem,
+        IDialogService dialogService)
     {
         this.AppInfo = appInfo;
         this.DateTimeService = dateTimeService;
         this.FileSystem = fileSystem;
+        this.DialogService = dialogService;
         
         this.logWriter = new Lazy<StreamWriter>(() =>
         {
@@ -33,17 +36,41 @@ internal sealed class LoggingService : ILoggingService
     private IAppInfoService AppInfo { get; }
     private IDateTimeService DateTimeService { get; }
     private IFileSystem FileSystem { get; }
+    private IDialogService DialogService { get; }
 
     public bool EnableTraceLogging { get; set; }
 
     public void Log(string message, LogLevel level)
     {
-        if (level == LogLevel.Trace && !this.EnableTraceLogging)
+        try
         {
-            return;
-        }
+            if (level == LogLevel.Trace && !this.EnableTraceLogging)
+            {
+                return;
+            }
 
-        this.logWriter.Value.WriteLine($"{this.DateTimeService.NowOffset} {level}: {message}");
+            this.logWriter.Value.WriteLine($"{this.DateTimeService.NowOffset} {level}: {message}");
+        }
+        catch (Exception ex)
+        {
+            this.ShowExceptionDialog("writing a log entry", ex);
+        }
+    }
+
+    public void LogException(string message, Exception exception)
+    {
+        this.ShowExceptionDialog(message, exception);
+        this.Log($"{message}: {exception}", LogLevel.Error);
+    }
+
+    private void ShowExceptionDialog(string message, Exception exception)
+    {
+        this.DialogService.ShowMessageBox(new MessageBoxParms
+        {
+            Message = exception.ToString(),
+            Title = $"{LogLevel.Error} {message}",
+            Icon = LogLevel.Error
+        });
     }
 
     public void Dispose()

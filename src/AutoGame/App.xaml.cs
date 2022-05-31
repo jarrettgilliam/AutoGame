@@ -3,6 +3,7 @@
 using System;
 using System.IO.Abstractions;
 using System.Windows;
+using System.Windows.Threading;
 using AutoGame.Core;
 using AutoGame.Core.Interfaces;
 using AutoGame.ViewModels;
@@ -24,8 +25,6 @@ public partial class App : Application
         this.serviceProvider = services.BuildServiceProvider();
     }
 
-    private ILoggingService? LoggingService => this.serviceProvider.GetService<ILoggingService>();
-
     protected override void OnStartup(StartupEventArgs e)
     {
         try
@@ -43,7 +42,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            this.LoggingService?.LogException("handling startup", ex);
+            this.LogExceptionAndExit("during startup", ex);
         }
     }
 
@@ -56,13 +55,27 @@ public partial class App : Application
     {
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<IFileSystem, FileSystem>();
-        
+
         services.AddCore();
         services.AddInfrastructure();
     }
 
-    private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) =>
+        this.LogExceptionAndExit("unhandled exception", e.Exception);
+
+    private void LogExceptionAndExit(string message, Exception exception)
     {
-        this.LoggingService?.LogException("unhandled exception", e.Exception);
+        var loggingService = this.serviceProvider.GetService<ILoggingService>();
+        
+        if (loggingService is not null)
+        {
+            loggingService.LogException(message, exception);
+        }
+        else
+        {
+            MessageBox.Show(exception.ToString(), $"Error {message}", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        
+        Environment.Exit(1);
     }
 }

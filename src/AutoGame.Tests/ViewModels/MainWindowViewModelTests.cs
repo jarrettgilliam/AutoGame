@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Windows;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
-using AutoGame.Infrastructure.Interfaces;
-using AutoGame.Infrastructure.Models;
 using AutoGame.ViewModels;
 using Newtonsoft.Json;
 

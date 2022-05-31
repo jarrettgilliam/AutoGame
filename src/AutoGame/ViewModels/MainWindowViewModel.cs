@@ -8,8 +8,6 @@ using System.Windows;
 using System.Windows.Input;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
-using AutoGame.Infrastructure.Interfaces;
-using AutoGame.Infrastructure.Models;
 using Prism.Commands;
 using Prism.Mvvm;
 
