@@ -4,10 +4,10 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Core.Services;
-using Newtonsoft.Json;
 
 public class ConfigServiceTests
 {
@@ -23,7 +23,7 @@ public class ConfigServiceTests
         EnableTraceLogging = true,
         SoftwareKey = nameof(softwareMock),
         SoftwarePath = "c:\\steam.exe",
-        LaunchWhenGamepadConnected = true,
+        LaunchWhenGameControllerConnected = true,
         LaunchWhenParsecConnected = true,
         IsDirty = false
     };
@@ -45,7 +45,7 @@ public class ConfigServiceTests
             .Returns(() =>
                 new MemoryStream(
                     Encoding.UTF8.GetBytes(
-                        JsonConvert.SerializeObject(this.configMock))));
+                        JsonSerializer.Serialize(this.configMock))));
 
         this.fileMock
             .Setup(x => x.Create(this.appInfoServiceMock.Object.ConfigFilePath))
@@ -145,7 +145,7 @@ public class ConfigServiceTests
     {
         this.sut.Save(this.configMock);
 
-        Config savedConfig = JsonConvert.DeserializeObject<Config>(
+        Config savedConfig = JsonSerializer.Deserialize<Config>(
             Encoding.UTF8.GetString(this.saveMemoryStream.ToArray()))!;
 
         savedConfig.IsDirty = false;
@@ -163,6 +163,22 @@ public class ConfigServiceTests
         string configJson = Encoding.UTF8.GetString(this.saveMemoryStream.ToArray());
 
         Assert.DoesNotContain(ignoredPropertyName, configJson);
+    }
+
+    // These are intentionally hard coded strings
+    [Theory]
+    [InlineData("SoftwareKey")]
+    [InlineData("SoftwarePath")]
+    [InlineData("LaunchWhenGamepadConnected")]
+    [InlineData("LaunchWhenParsecConnected")]
+    [InlineData("EnableTraceLogging")]
+    public void Save_MaintainsPropertyNames(string serializedPropertyName)
+    {
+        this.sut.Save(this.configMock);
+
+        string configJson = Encoding.UTF8.GetString(this.saveMemoryStream.ToArray());
+
+        Assert.Contains(serializedPropertyName, configJson);
     }
 
     [Fact]

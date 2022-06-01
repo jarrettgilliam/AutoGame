@@ -15,17 +15,17 @@ internal sealed class AutoGameService : IAutoGameService
     public AutoGameService(
         ILoggingService loggingService,
         IEnumerable<ISoftwareManager> availableSoftware,
-        IGamepadConnectedCondition gamepadConnectedCondition,
+        IGameControllerConnectedCondition gameControllerConnectedCondition,
         IParsecConnectedCondition parsecConnectedCondition)
     {
         this.LoggingService = loggingService;
         this.AvailableSoftware = availableSoftware;
-        this.GamepadConnectedCondition = gamepadConnectedCondition;
+        this.GameControllerConnectedCondition = gameControllerConnectedCondition;
         this.ParsecConnectedCondition = parsecConnectedCondition;
     }
 
     private ILoggingService LoggingService { get; }
-    private ILaunchCondition GamepadConnectedCondition { get; }
+    private ILaunchCondition GameControllerConnectedCondition { get; }
     private ILaunchCondition ParsecConnectedCondition { get; }
 
     public IEnumerable<ISoftwareManager> AvailableSoftware { get; }
@@ -39,9 +39,9 @@ internal sealed class AutoGameService : IAutoGameService
 
         this.appliedLaunchConditions = new List<ILaunchCondition>();
 
-        if (config.LaunchWhenGamepadConnected)
+        if (config.LaunchWhenGameControllerConnected)
         {
-            this.appliedLaunchConditions.Add(this.GamepadConnectedCondition);
+            this.appliedLaunchConditions.Add(this.GameControllerConnectedCondition);
         }
 
         if (config.LaunchWhenParsecConnected)

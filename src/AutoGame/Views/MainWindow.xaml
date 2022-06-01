@@ -89,12 +89,12 @@
 
             <CheckBox 
                 Margin="5"
-                Content="Launch when a gamepad is connected"
-                IsChecked="{Binding Config.LaunchWhenGamepadConnected, Mode=TwoWay}" />
+                Content="Launch when a game controller is connected"
+                IsChecked="{Binding Config.LaunchWhenGameControllerConnected, Mode=TwoWay}" />
 
             <CheckBox 
                 Margin="5"
-                Content="Launch when a parsec connection is established"
+                Content="Launch when a Parsec connection is established"
                 IsChecked="{Binding Config.LaunchWhenParsecConnected, Mode=TwoWay}" />
 
         </StackPanel>

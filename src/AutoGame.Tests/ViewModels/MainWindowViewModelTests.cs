@@ -30,7 +30,7 @@ public class MainWindowViewModelTests
         EnableTraceLogging = true,
         SoftwareKey = SoftwareKey,
         SoftwarePath = Path.Join(CustomDirectory, ExecutableName),
-        LaunchWhenGamepadConnected = true,
+        LaunchWhenGameControllerConnected = true,
         LaunchWhenParsecConnected = true,
         IsDirty = false
     };
@@ -40,7 +40,7 @@ public class MainWindowViewModelTests
         EnableTraceLogging = false,
         SoftwareKey = SoftwareKey,
         SoftwarePath = Path.Join(DefaultDirectory, ExecutableName),
-        LaunchWhenGamepadConnected = true,
+        LaunchWhenGameControllerConnected = true,
         LaunchWhenParsecConnected = true,
         IsDirty = false
     };

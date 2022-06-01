@@ -5,23 +5,23 @@ using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.LaunchConditions;
 
-public class GamepadConnectedConditionTests
+public class GameControllerConnectedConditionTests
 {
-    private readonly GamepadConnectedCondition sut;
+    private readonly GameControllerConnectedCondition sut;
     private readonly Mock<ILoggingService> loggingServiceMock = new();
-    private readonly Mock<IRawGameControllerService> rawGameControllerServiceMock = new();
+    private readonly Mock<IGameControllerService> gameControllerServiceMock = new();
 
-    private bool hasAnyRawGameControllers = true;
+    private bool hasAnyGameControllers = true;
 
-    public GamepadConnectedConditionTests()
+    public GameControllerConnectedConditionTests()
     {
-        this.rawGameControllerServiceMock
-            .SetupGet(x => x.HasAnyRawGameControllers)
-            .Returns(() => this.hasAnyRawGameControllers);
+        this.gameControllerServiceMock
+            .SetupGet(x => x.HasAnyGameControllers)
+            .Returns(() => this.hasAnyGameControllers);
         
-        this.sut = new GamepadConnectedCondition(
+        this.sut = new GameControllerConnectedCondition(
             this.loggingServiceMock.Object,
-            this.rawGameControllerServiceMock.Object);
+            this.gameControllerServiceMock.Object);
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public class GamepadConnectedConditionTests
     [Fact]
     public void NoConnectedGameController_DoesntFire_ConditionMet()
     {
-        this.hasAnyRawGameControllers = false;
+        this.hasAnyGameControllers = false;
         
         using var helper = new LaunchConditionTestHelper(this.sut);
         
@@ -47,7 +47,7 @@ public class GamepadConnectedConditionTests
     {
         using var helper = new LaunchConditionTestHelper(this.sut);
 
-        this.rawGameControllerServiceMock.Raise(x => x.RawGameControllerAdded += null, EventArgs.Empty);
+        this.gameControllerServiceMock.Raise(x => x.GameControllerAdded += null, EventArgs.Empty);
         
         Assert.Equal(2, helper.FiredCount);
     }
@@ -58,9 +58,9 @@ public class GamepadConnectedConditionTests
         this.sut.StartMonitoring();
         this.sut.StopMonitoring();
         
-        this.rawGameControllerServiceMock
+        this.gameControllerServiceMock
             .VerifyRemove(
-                x => x.RawGameControllerAdded -= It.IsAny<EventHandler>(),
+                x => x.GameControllerAdded -= It.IsAny<EventHandler>(),
                 Times.Once);
     }
 }

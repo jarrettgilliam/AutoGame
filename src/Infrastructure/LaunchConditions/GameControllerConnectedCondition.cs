@@ -4,30 +4,30 @@ using System;
 using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.Interfaces;
 
-internal sealed class GamepadConnectedCondition : IGamepadConnectedCondition
+internal sealed class GameControllerConnectedCondition : IGameControllerConnectedCondition
 {
     private readonly object checkConditionLock = new();
 
-    public GamepadConnectedCondition(
+    public GameControllerConnectedCondition(
         ILoggingService loggingService,
-        IRawGameControllerService rawGameControllerService)
+        IGameControllerService gameControllerService)
     {
         this.LoggingService = loggingService;
-        this.RawGameControllerService = rawGameControllerService;
+        this.GameControllerService = gameControllerService;
     }
 
     public event EventHandler? ConditionMet;
 
     private ILoggingService LoggingService { get; }
-    private IRawGameControllerService RawGameControllerService { get; }
+    private IGameControllerService GameControllerService { get; }
 
     public void StartMonitoring()
     {
-        this.RawGameControllerService.RawGameControllerAdded += this.RawGameController_RawGameControllerAdded;
+        this.GameControllerService.GameControllerAdded += this.GameControllerGameControllerAdded;
         this.CheckConditionMet();
     }
 
-    private void RawGameController_RawGameControllerAdded(object? sender, EventArgs e)
+    private void GameControllerGameControllerAdded(object? sender, EventArgs e)
     {
         try
         {
@@ -35,20 +35,20 @@ internal sealed class GamepadConnectedCondition : IGamepadConnectedCondition
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling gamepad added", ex);
+            this.LoggingService.LogException("handling game controller added", ex);
         }
     }
 
     public void StopMonitoring()
     {
-        this.RawGameControllerService.RawGameControllerAdded -= this.RawGameController_RawGameControllerAdded;
+        this.GameControllerService.GameControllerAdded -= this.GameControllerGameControllerAdded;
     }
 
     private void CheckConditionMet()
     {
         lock (this.checkConditionLock)
         {
-            if (this.RawGameControllerService.HasAnyRawGameControllers)
+            if (this.GameControllerService.HasAnyGameControllers)
             {
                 this.ConditionMet?.Invoke(this, EventArgs.Empty);
             }

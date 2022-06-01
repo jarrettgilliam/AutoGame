@@ -76,7 +76,7 @@ public class PlayniteFullscreenManagerTests
     {
         this.sut.Start(SOFTWARE_PATH);
 
-        this.processServiceMock.Verify(x => x.Start(SOFTWARE_PATH), Times.Once);
+        this.processServiceMock.Verify(x => x.Start(SOFTWARE_PATH, "--startfullscreen"), Times.Once);
     }
 
     [Fact]

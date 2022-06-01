@@ -10,7 +10,7 @@ public class AutoGameServiceTests
     private readonly Mock<ILoggingService> loggingServiceMock = new();
     private readonly Mock<ISoftwareManager> softwareMock1 = new();
     private readonly Mock<ISoftwareManager> softwareMock2 = new();
-    private readonly Mock<IGamepadConnectedCondition> gamepadConnectedConditionMock = new();
+    private readonly Mock<IGameControllerConnectedCondition> gameControllerConnectedConditionMock = new();
     private readonly Mock<IParsecConnectedCondition> parsecConnectedConditionMock = new();
 
     private readonly Config configMock;
@@ -38,7 +38,7 @@ public class AutoGameServiceTests
             EnableTraceLogging = false,
             SoftwareKey = this.softwareMock1.Object.Key,
             SoftwarePath = this.softwareMock1.Object.FindSoftwarePathOrDefault(),
-            LaunchWhenGamepadConnected = true,
+            LaunchWhenGameControllerConnected = true,
             LaunchWhenParsecConnected = true
         };
 
@@ -49,7 +49,7 @@ public class AutoGameServiceTests
                 this.softwareMock1.Object,
                 this.softwareMock2.Object
             },
-            this.gamepadConnectedConditionMock.Object,
+            this.gameControllerConnectedConditionMock.Object,
             this.parsecConnectedConditionMock.Object);
     }
 
@@ -62,25 +62,25 @@ public class AutoGameServiceTests
     }
 
     [Fact]
-    public void TryApplyConfiguration_LaunchWhenGamepadConnectedTrue_Subscribes()
+    public void TryApplyConfiguration_LaunchWhenGameControllerConnectedTrue_Subscribes()
     {
-        this.configMock.LaunchWhenGamepadConnected = true;
+        this.configMock.LaunchWhenGameControllerConnected = true;
 
         this.sut.ApplyConfiguration(this.configMock);
 
-        this.gamepadConnectedConditionMock.VerifyAdd(x => x.ConditionMet += It.IsAny<EventHandler>(), Times.Once);
-        this.gamepadConnectedConditionMock.Verify(x => x.StartMonitoring(), Times.Once);
+        this.gameControllerConnectedConditionMock.VerifyAdd(x => x.ConditionMet += It.IsAny<EventHandler>(), Times.Once);
+        this.gameControllerConnectedConditionMock.Verify(x => x.StartMonitoring(), Times.Once);
     }
 
     [Fact]
-    public void TryApplyConfiguration_LaunchWhenGamepadConnectedFalse_NoSubscribe()
+    public void TryApplyConfiguration_LaunchWhenGameControllerConnectedFalse_NoSubscribe()
     {
-        this.configMock.LaunchWhenGamepadConnected = false;
+        this.configMock.LaunchWhenGameControllerConnected = false;
 
         this.sut.ApplyConfiguration(this.configMock);
 
-        this.gamepadConnectedConditionMock.VerifyAdd(x => x.ConditionMet += It.IsAny<EventHandler>(), Times.Never);
-        this.gamepadConnectedConditionMock.Verify(x => x.StartMonitoring(), Times.Never);
+        this.gameControllerConnectedConditionMock.VerifyAdd(x => x.ConditionMet += It.IsAny<EventHandler>(), Times.Never);
+        this.gameControllerConnectedConditionMock.Verify(x => x.StartMonitoring(), Times.Never);
     }
 
     [Fact]
@@ -108,18 +108,18 @@ public class AutoGameServiceTests
     [Fact]
     public void TryApplyConfiguration_UnsubscribesConditionMet()
     {
-        this.configMock.LaunchWhenGamepadConnected = true;
+        this.configMock.LaunchWhenGameControllerConnected = true;
         this.configMock.LaunchWhenParsecConnected = true;
 
         this.sut.ApplyConfiguration(this.configMock);
 
-        this.configMock.LaunchWhenGamepadConnected = false;
+        this.configMock.LaunchWhenGameControllerConnected = false;
         this.configMock.LaunchWhenParsecConnected = false;
 
         this.sut.ApplyConfiguration(this.configMock);
 
-        this.gamepadConnectedConditionMock.VerifyRemove(x => x.ConditionMet -= It.IsAny<EventHandler>(), Times.Once);
-        this.gamepadConnectedConditionMock.Verify(x => x.StopMonitoring(), Times.Once);
+        this.gameControllerConnectedConditionMock.VerifyRemove(x => x.ConditionMet -= It.IsAny<EventHandler>(), Times.Once);
+        this.gameControllerConnectedConditionMock.Verify(x => x.StopMonitoring(), Times.Once);
 
         this.parsecConnectedConditionMock.VerifyRemove(x => x.ConditionMet -= It.IsAny<EventHandler>(), Times.Once);
         this.parsecConnectedConditionMock.Verify(x => x.StopMonitoring(), Times.Once);
@@ -146,7 +146,7 @@ public class AutoGameServiceTests
     {
         this.sut.ApplyConfiguration(this.configMock);
 
-        this.gamepadConnectedConditionMock
+        this.gameControllerConnectedConditionMock
             .Raise(x => x.ConditionMet += null, EventArgs.Empty);
 
         this.softwareMock1.Verify(
@@ -170,8 +170,8 @@ public class AutoGameServiceTests
         this.sut.ApplyConfiguration(this.configMock);
         this.sut.Dispose();
 
-        this.gamepadConnectedConditionMock.VerifyRemove(x => x.ConditionMet -= It.IsAny<EventHandler>(), Times.Once);
-        this.gamepadConnectedConditionMock.Verify(x => x.StopMonitoring(), Times.Once);
+        this.gameControllerConnectedConditionMock.VerifyRemove(x => x.ConditionMet -= It.IsAny<EventHandler>(), Times.Once);
+        this.gameControllerConnectedConditionMock.Verify(x => x.StopMonitoring(), Times.Once);
 
         this.parsecConnectedConditionMock.VerifyRemove(x => x.ConditionMet -= It.IsAny<EventHandler>(), Times.Once);
         this.parsecConnectedConditionMock.Verify(x => x.StopMonitoring(), Times.Once);

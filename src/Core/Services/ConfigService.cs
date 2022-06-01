@@ -53,7 +53,7 @@ internal sealed class ConfigService : IConfigService
         {
             SoftwareKey = software?.Key,
             SoftwarePath = software?.FindSoftwarePathOrDefault(),
-            LaunchWhenGamepadConnected = true,
+            LaunchWhenGameControllerConnected = true,
             LaunchWhenParsecConnected = true
         };
 

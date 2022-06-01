@@ -26,14 +26,14 @@ public static class DependencyInjection
         services.AddSingleton<ISleepService, SleepService>();
         services.AddSingleton<ISystemEventsService, SystemEventsService>();
         services.AddSingleton<IWindowService, WindowService>();
-        services.AddSingleton<IRawGameControllerService, WindowsRawGameControllerService>();
+        services.AddSingleton<IGameControllerService, WindowsGameControllerService>();
         services.AddSingleton<IRegistryService, WindowsRegistryService>();
         services.AddSingleton<IUser32Service, WindowsUser32Service>();
     }
 
     private static void AddLaunchConditions(this IServiceCollection services)
     {
-        services.AddSingleton<IGamepadConnectedCondition, GamepadConnectedCondition>();
+        services.AddSingleton<IGameControllerConnectedCondition, GameControllerConnectedCondition>();
         services.AddSingleton<IParsecConnectedCondition, ParsecConnectedCondition>();
     }
 
