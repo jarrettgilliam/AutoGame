@@ -82,7 +82,7 @@ public class MainWindowViewModelTests
 
         this.softwareManagerMock
             .Setup(x => x.FindSoftwarePathOrDefault())
-            .Returns(this.defaultConfigMock.SoftwarePath);
+            .Returns(this.defaultConfigMock.SoftwarePath ?? "");
 
         this.softwareManagerMock
             .SetupGet(x => x.Description)
@@ -269,6 +269,30 @@ public class MainWindowViewModelTests
         this.sut.BrowseSoftwarePathCommand.Execute(null);
 
         Assert.Equal(this.defaultConfigMock.SoftwarePath, this.sut.Config.SoftwarePath);
+    }
+
+    [Fact]
+    public void OnBrowseSoftwarePath_EmptyExecutableName_ExeFilter()
+    {
+        this.softwareManagerMock.Setup(x => x.FindSoftwarePathOrDefault()).Returns("");
+        
+        this.sut.BrowseSoftwarePathCommand.Execute(null);
+        
+        Assert.Equal($"{this.softwareManagerMock.Object.Description}|*.exe", this.openFileDialogParms.Filter);
+    }
+
+    [Fact]
+    public void OnBrowseSoftwarePath_SoftwareNotFound_DontShowDialog()
+    {
+        this.autoGameServiceMock
+            .Setup(x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()))
+            .Returns<ISoftwareManager>(null);
+        
+        this.sut.BrowseSoftwarePathCommand.Execute(null);
+        
+        this.dialogServiceMock.Verify(
+            x => x.ShowOpenFileDialog(It.IsAny<OpenFileDialogParms>(), out It.Ref<string?>.IsAny),
+            Times.Never);
     }
 
     [Fact]

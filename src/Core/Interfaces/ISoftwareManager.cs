@@ -6,9 +6,9 @@ public interface ISoftwareManager
 
     string Description { get; }
 
-    bool IsRunning { get; }
+    bool IsRunning(string softwarePath);
 
     void Start(string softwarePath);
 
-    string? FindSoftwarePathOrDefault();
+    string FindSoftwarePathOrDefault();
 }

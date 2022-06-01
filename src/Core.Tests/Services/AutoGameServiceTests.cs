@@ -156,19 +156,13 @@ public class AutoGameServiceTests
     [Fact]
     public void OnLaunchConditionMet_SoftwareRunning_DoesntStart()
     {
-        this.softwareMock1.SetupGet(x => x.IsRunning).Returns(true);
+        this.softwareMock1.Setup(x => x.IsRunning(It.IsAny<string>())).Returns(true);
 
         this.sut.ApplyConfiguration(this.configMock);
 
         this.softwareMock1.Verify(
             x => x.Start(It.IsAny<string>()), Times.Never);
     }
-
-    // [Fact]
-    // public void OnLaunchConditionMet_BadSoftwareKey_DoesntStart()
-    // {
-    //     throw new NotEmptyException();
-    // }
 
     [Fact]
     public void Dispose_Works()

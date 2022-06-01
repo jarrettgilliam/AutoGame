@@ -27,7 +27,7 @@ internal sealed class AutoGameService : IAutoGameService
     private ILoggingService LoggingService { get; }
     private ILaunchCondition GamepadConnectedCondition { get; }
     private ILaunchCondition ParsecConnectedCondition { get; }
-    
+
     public IEnumerable<ISoftwareManager> AvailableSoftware { get; }
 
     public void ApplyConfiguration(Config config)
@@ -88,8 +88,8 @@ internal sealed class AutoGameService : IAutoGameService
     {
         try
         {
-            if (this.appliedSoftware?.IsRunning == false && 
-                this.appliedSoftwarePath is not null)
+            if (this.appliedSoftwarePath is not null &&
+                this.appliedSoftware?.IsRunning(this.appliedSoftwarePath) == false)
             {
                 this.appliedSoftware.Start(this.appliedSoftwarePath);
             }

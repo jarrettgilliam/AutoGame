@@ -37,10 +37,10 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
         this.OKCommand = new DelegateCommand(this.OnOK);
         this.CancelCommand = new DelegateCommand(this.OnCancel);
         this.ApplyCommand = new DelegateCommand(() => this.OnApply());
-            
+
         this.config = this.ConfigService.CreateDefault(
             this.AutoGameService.AvailableSoftware.FirstOrDefault());
-        
+
         this.config.PropertyChanged += this.OnConfigSoftwareKeyChanged;
     }
 
@@ -155,23 +155,25 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
         try
         {
             ISoftwareManager? software = this.AutoGameService.GetSoftwareByKeyOrNull(this.Config.SoftwareKey);
-            string? defaultPath = software?.FindSoftwarePathOrDefault();
+
+            if (software is null)
+            {
+                return;
+            }
+
+            string defaultPath = software.FindSoftwarePathOrDefault();
             string? executable = this.FileSystem.Path.GetFileName(defaultPath);
 
             var parms = new OpenFileDialogParms
             {
                 FileName = executable,
-                InitialDirectory = this.FileSystem.Path.GetDirectoryName(this.Config.SoftwarePath)
+                InitialDirectory = this.FileSystem.Path.GetDirectoryName(this.Config.SoftwarePath),
+                Filter = $"{software.Description}|{(string.IsNullOrEmpty(executable) ? "*.exe" : executable)}"
             };
 
             if (string.IsNullOrEmpty(parms.InitialDirectory))
             {
                 parms.InitialDirectory = this.FileSystem.Path.GetDirectoryName(defaultPath);
-            }
-
-            if (software?.Description is not null && executable is not null)
-            {   
-                parms.Filter = $"{software.Description}|{executable}";
             }
 
             if (this.DialogService.ShowOpenFileDialog(parms, out string? selectedFileName))
@@ -234,7 +236,7 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
             if (this.Config.IsDirty)
             {
                 this.ConfigService.Validate(this.Config, this.AutoGameService.AvailableSoftware);
-                
+
                 if (this.Config.HasErrors)
                 {
                     return false;

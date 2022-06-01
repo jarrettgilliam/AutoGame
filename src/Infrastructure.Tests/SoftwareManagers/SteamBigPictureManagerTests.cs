@@ -10,15 +10,17 @@ using Xunit;
 
 public class SteamBigPictureManagerTests
 {
-    private readonly SteamBigPictureManager sut;
+    private const string SOFTWARE_NAME = "steam";
+    private const string SOFTWARE_PATH = $"/default/path/to/{SOFTWARE_NAME}.exe";
 
+    private readonly SteamBigPictureManager sut;
     private readonly Mock<ILoggingService> loggingServiceMock = new();
     private readonly Mock<IUser32Service> user32ServiceMock = new();
     private readonly Mock<IFileSystem> fileSystemMock = new();
     private readonly Mock<IPath> pathMock = new();
     private readonly Mock<IProcessService> processServiceMock = new();
     private readonly Mock<IRegistryService> registryServiceMock = new();
-
+    
     public SteamBigPictureManagerTests()
     {
         this.pathMock
@@ -63,7 +65,7 @@ public class SteamBigPictureManagerTests
             .Setup(x => x.FindWindow("CUIEngineWin32", "Steam"))
             .Returns(IntPtr.MaxValue);
 
-        Assert.True(this.sut.IsRunning);
+        Assert.True(this.sut.IsRunning(SOFTWARE_PATH));
     }
 
     [Fact]
@@ -73,18 +75,16 @@ public class SteamBigPictureManagerTests
             .Setup(x => x.FindWindow("CUIEngineWin32", "Steam"))
             .Returns(IntPtr.Zero);
 
-        Assert.False(this.sut.IsRunning);
+        Assert.False(this.sut.IsRunning(SOFTWARE_PATH));
     }
 
     [Fact]
     public void Start_StartsProcess()
     {
-        string softwarePath = "/test/steam/software/path/steam.exe";
-
-        this.sut.Start(softwarePath);
+        this.sut.Start(SOFTWARE_PATH);
 
         this.processServiceMock.Verify(
-            x => x.Start(softwarePath, "-start steam://open/bigpicture -fulldesktopres"),
+            x => x.Start(SOFTWARE_PATH, "-start steam://open/bigpicture -fulldesktopres"),
             Times.Once);
     }
 
@@ -94,7 +94,7 @@ public class SteamBigPictureManagerTests
         string defaultSteamPath = Path.Join(
             Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
             "Steam",
-            "steam.exe");
+            $"{SOFTWARE_NAME}.exe");
 
         Assert.Equal(defaultSteamPath, this.sut.FindSoftwarePathOrDefault());
     }
@@ -102,7 +102,7 @@ public class SteamBigPictureManagerTests
     [Fact]
     public void FindSoftwarePathOrDefault_ReturnsRegistryPath()
     {
-        string registryPath = "/test/steam/software/path/steam.exe";
+        string registryPath = $"/custom/path/to/{SOFTWARE_NAME}.exe";
 
         this.registryServiceMock
             .Setup(x => x.GetValue(

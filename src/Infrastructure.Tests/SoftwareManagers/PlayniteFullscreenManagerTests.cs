@@ -10,6 +10,9 @@ using Xunit;
 
 public class PlayniteFullscreenManagerTests
 {
+    private const string SOFTWARE_NAME = "Playnite.FullscreenApp";
+    private const string SOFTWARE_PATH = $"/default/path/to/{SOFTWARE_NAME}.exe";
+    
     private readonly PlayniteFullscreenManager sut;
     private readonly Mock<IWindowService> windowServiceMock = new();
     private readonly Mock<IFileSystem> fileSystemMock = new();
@@ -52,10 +55,10 @@ public class PlayniteFullscreenManagerTests
     public void IsRunning_ReturnsTrue()
     {
         this.processServiceMock
-            .Setup(x => x.GetProcessesByName("Playnite.FullscreenApp"))
+            .Setup(x => x.GetProcessesByName(SOFTWARE_NAME))
             .Returns(new[] { this.processMock.Object });
 
-        Assert.True(this.sut.IsRunning);
+        Assert.True(this.sut.IsRunning(SOFTWARE_PATH));
     }
 
     [Fact]
@@ -65,17 +68,15 @@ public class PlayniteFullscreenManagerTests
             .Setup(x => x.GetProcessesByName(It.IsAny<string?>()))
             .Returns(Array.Empty<IProcess>());
 
-        Assert.False(this.sut.IsRunning);
+        Assert.False(this.sut.IsRunning(SOFTWARE_PATH));
     }
 
     [Fact]
     public void Start_StartsProcess()
     {
-        string softwarePath = "/test/playnite/software/path/Playnite.FullscreenApp.exe";
+        this.sut.Start(SOFTWARE_PATH);
 
-        this.sut.Start(softwarePath);
-
-        this.processServiceMock.Verify(x => x.Start(softwarePath), Times.Once);
+        this.processServiceMock.Verify(x => x.Start(SOFTWARE_PATH), Times.Once);
     }
 
     [Fact]
@@ -94,7 +95,7 @@ public class PlayniteFullscreenManagerTests
         string defaultPath = Path.Join(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Playnite",
-            "Playnite.FullscreenApp.exe");
+            $"{SOFTWARE_NAME}.exe");
 
         Assert.Equal(defaultPath, this.sut.FindSoftwarePathOrDefault());
     }
