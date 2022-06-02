@@ -3,10 +3,8 @@
 public interface IProcessService
 {
     IProcess NewProcess();
-
-    IProcess Start(string fileName);
     
-    IProcess Start(string fileName, string arguments);
+    IProcess Start(string fileName, string? arguments);
 
     IProcess[] GetProcessesByName(string? processName);
 }

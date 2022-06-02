@@ -49,6 +49,12 @@ public class OtherSoftwareManagerTests
     }
 
     [Fact]
+    public void DefaultArguments_IsCorrect()
+    {
+        Assert.Equal("", this.sut.DefaultArguments);
+    }
+
+    [Fact]
     public void IsRunning_ReturnsTrue()
     {
         this.processServiceMock
@@ -71,8 +77,9 @@ public class OtherSoftwareManagerTests
     [Fact]
     public void Start_StartsProcess()
     {
-        this.sut.Start(SOFTWARE_PATH);
+        string customArgs = "--my-custom-arguments";
+        this.sut.Start(SOFTWARE_PATH, customArgs);
 
-        this.processServiceMock.Verify(x => x.Start(SOFTWARE_PATH), Times.Once);
+        this.processServiceMock.Verify(x => x.Start(SOFTWARE_PATH, customArgs), Times.Once);
     }
 }

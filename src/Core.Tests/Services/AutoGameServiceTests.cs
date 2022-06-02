@@ -38,6 +38,7 @@ public class AutoGameServiceTests
             EnableTraceLogging = false,
             SoftwareKey = this.softwareMock1.Object.Key,
             SoftwarePath = this.softwareMock1.Object.FindSoftwarePathOrDefault(),
+            SoftwareArguments = "--custom-arguments",
             LaunchWhenGameControllerConnected = true,
             LaunchWhenParsecConnected = true
         };
@@ -62,7 +63,7 @@ public class AutoGameServiceTests
     }
 
     [Fact]
-    public void TryApplyConfiguration_LaunchWhenGameControllerConnectedTrue_Subscribes()
+    public void ApplyConfiguration_LaunchWhenGameControllerConnectedTrue_Subscribes()
     {
         this.configMock.LaunchWhenGameControllerConnected = true;
 
@@ -73,7 +74,7 @@ public class AutoGameServiceTests
     }
 
     [Fact]
-    public void TryApplyConfiguration_LaunchWhenGameControllerConnectedFalse_NoSubscribe()
+    public void ApplyConfiguration_LaunchWhenGameControllerConnectedFalse_NoSubscribe()
     {
         this.configMock.LaunchWhenGameControllerConnected = false;
 
@@ -84,7 +85,7 @@ public class AutoGameServiceTests
     }
 
     [Fact]
-    public void TryApplyConfiguration_LaunchWhenParsecConnectedTrue_Subscribes()
+    public void ApplyConfiguration_LaunchWhenParsecConnectedTrue_Subscribes()
     {
         this.configMock.LaunchWhenParsecConnected = true;
 
@@ -95,7 +96,7 @@ public class AutoGameServiceTests
     }
 
     [Fact]
-    public void TryApplyConfiguration_LaunchWhenParsecConnectedFalse_NoSubscribe()
+    public void ApplyConfiguration_LaunchWhenParsecConnectedFalse_NoSubscribe()
     {
         this.configMock.LaunchWhenParsecConnected = false;
 
@@ -106,7 +107,7 @@ public class AutoGameServiceTests
     }
 
     [Fact]
-    public void TryApplyConfiguration_UnsubscribesConditionMet()
+    public void ApplyConfiguration_UnsubscribesConditionMet()
     {
         this.configMock.LaunchWhenGameControllerConnected = true;
         this.configMock.LaunchWhenParsecConnected = true;
@@ -150,7 +151,10 @@ public class AutoGameServiceTests
             .Raise(x => x.ConditionMet += null, EventArgs.Empty);
 
         this.softwareMock1.Verify(
-            x => x.Start(this.configMock.SoftwarePath!), Times.Once);
+            x => x.Start(
+                this.configMock.SoftwarePath!,
+                this.configMock.SoftwareArguments!),
+            Times.Once);
     }
 
     [Fact]
@@ -161,7 +165,7 @@ public class AutoGameServiceTests
         this.sut.ApplyConfiguration(this.configMock);
 
         this.softwareMock1.Verify(
-            x => x.Start(It.IsAny<string>()), Times.Never);
+            x => x.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]

@@ -19,6 +19,8 @@ internal sealed class OtherSoftwareManager : ISoftwareManager
     public string Key => "Other";
     
     public string Description => "Other";
+
+    public string DefaultArguments => "";
     
     public bool IsRunning(string softwarePath)
     {
@@ -32,9 +34,9 @@ internal sealed class OtherSoftwareManager : ISoftwareManager
         return this.ProcessService.GetProcessesByName(software).Any();
     }
 
-    public void Start(string softwarePath)
+    public void Start(string softwarePath, string? softwareArguments)
     {
-        this.ProcessService.Start(softwarePath);
+        this.ProcessService.Start(softwarePath, softwareArguments);
     }
 
     public string FindSoftwarePathOrDefault() => "";

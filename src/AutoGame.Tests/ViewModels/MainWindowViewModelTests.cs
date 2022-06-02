@@ -40,12 +40,13 @@ public class MainWindowViewModelTests
         EnableTraceLogging = false,
         SoftwareKey = SoftwareKey,
         SoftwarePath = Path.Join(DefaultDirectory, ExecutableName),
+        SoftwareArguments = "--arguments",
         LaunchWhenGameControllerConnected = true,
         LaunchWhenParsecConnected = true,
         IsDirty = false
     };
 
-    private OpenFileDialogParms openFileDialogParms = new();
+    private OpenFileDialogParms openFileDialogParms;
 
     private bool canApplyConfiguration = true;
     private bool fileSelected = true;
@@ -83,6 +84,10 @@ public class MainWindowViewModelTests
         this.softwareManagerMock
             .Setup(x => x.FindSoftwarePathOrDefault())
             .Returns(this.defaultConfigMock.SoftwarePath ?? "");
+
+        this.softwareManagerMock
+            .SetupGet(x => x.DefaultArguments)
+            .Returns(this.defaultConfigMock.SoftwareArguments ?? "");
 
         this.softwareManagerMock
             .SetupGet(x => x.Description)
@@ -405,6 +410,20 @@ public class MainWindowViewModelTests
         this.sut.Config.SoftwareKey = SoftwareKey;
 
         Assert.Equal(this.defaultConfigMock.SoftwarePath, this.sut.Config.SoftwarePath);
+    }
+
+    [Fact]
+    public void OnConfigSoftwareKeyChanged_SoftwareKeyChanged_UpdateSoftwareArguments()
+    {
+        this.savedConfigMock.SoftwareKey = null;
+        this.savedConfigMock.SoftwareArguments = null;
+        this.sut.Config = this.savedConfigMock;
+
+        this.sut.Config.SoftwareKey = SoftwareKey;
+
+        Assert.Equal(
+            this.defaultConfigMock.SoftwareArguments, 
+            this.sut.Config.SoftwareArguments);
     }
 
     [Fact]

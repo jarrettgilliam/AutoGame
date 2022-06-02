@@ -10,7 +10,7 @@
     WindowState="{Binding WindowState, Mode=TwoWay}"
     ShowWindow="{Binding ShowWindow, Mode=TwoWay}"
     NotifyIconVisible="{Binding NotifyIconVisible, Mode=TwoWay}"
-    Height="200" Width="530" ResizeMode="NoResize">
+    Height="210" Width="530" ResizeMode="NoResize">
     <FrameworkElement.Resources>
         <Style x:Key="ToolTipErrorMessageStyle" TargetType="Control">
             <Style.Resources>
@@ -38,6 +38,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -53,7 +54,10 @@
                     VerticalAlignment="Center" />
 
                 <ComboBox
-                    Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="5"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Margin="5"
                     ItemsSource="{Binding AutoGameService.AvailableSoftware}"
                     DisplayMemberPath="Description"
                     SelectedValuePath="Key"
@@ -85,6 +89,22 @@
                     Command="{Binding BrowseSoftwarePathCommand}"
                     VerticalAlignment="Center"
                     ToolTip="Browse" />
+                
+                <Label
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="5 0 0 0"
+                    Content="Software arguments:"
+                    VerticalAlignment="Center" />
+
+                <TextBox
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Margin="5"
+                    Text="{Binding Config.SoftwareArguments, Mode=TwoWay,
+                        UpdateSourceTrigger=PropertyChanged}"
+                    VerticalContentAlignment="Center" />
             </Grid>
 
             <CheckBox 

@@ -59,6 +59,14 @@ public class SteamBigPictureManagerTests
     }
 
     [Fact]
+    public void DefaultArguments_IsCorrect()
+    {
+        Assert.Equal(
+            "-start steam://open/bigpicture -fulldesktopres",
+            this.sut.DefaultArguments);
+    }
+
+    [Fact]
     public void IsRunning_ReturnsTrue()
     {
         this.user32ServiceMock
@@ -81,10 +89,11 @@ public class SteamBigPictureManagerTests
     [Fact]
     public void Start_StartsProcess()
     {
-        this.sut.Start(SOFTWARE_PATH);
+        string customArgs = "--my-custom-arguments";
+        this.sut.Start(SOFTWARE_PATH, customArgs);
 
         this.processServiceMock.Verify(
-            x => x.Start(SOFTWARE_PATH, "-start steam://open/bigpicture -fulldesktopres"),
+            x => x.Start(SOFTWARE_PATH, customArgs),
             Times.Once);
     }
 

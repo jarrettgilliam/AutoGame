@@ -12,6 +12,7 @@ public class Config : BindableBase, INotifyDataErrorInfo
     private bool enableTraceLogging;
     private string? softwareKey;
     private string? softwarePath;
+    private string? softwareArguments;
     private bool launchWhenGameControllerConnected;
     private bool launchWhenParsecConnected;
 
@@ -43,6 +44,12 @@ public class Config : BindableBase, INotifyDataErrorInfo
     {
         get => this.softwarePath;
         set => this.SetProperty(ref this.softwarePath, value);
+    }
+
+    public string? SoftwareArguments
+    {
+        get => this.softwareArguments;
+        set => this.SetProperty(ref this.softwareArguments, value);
     }
 
     [JsonPropertyName("LaunchWhenGamepadConnected")]

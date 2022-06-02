@@ -27,12 +27,14 @@ internal sealed class PlayniteFullscreenManager : ISoftwareManager
 
     public string Description => "Playnite Fullscreen";
 
+    public string DefaultArguments => "--startfullscreen";
+
     public bool IsRunning(string softwarePath) =>
         this.ProcessService.GetProcessesByName(PLAYNITE_FULLSCREEN_APP).Any();
 
-    public void Start(string softwarePath)
+    public void Start(string softwarePath, string? softwareArguments)
     {
-        this.ProcessService.Start(softwarePath, "--startfullscreen");
+        this.ProcessService.Start(softwarePath, softwareArguments);
         this.WindowService.RepeatTryForceForegroundWindowByTitle("Playnite", TimeSpan.FromSeconds(5));
     }
 

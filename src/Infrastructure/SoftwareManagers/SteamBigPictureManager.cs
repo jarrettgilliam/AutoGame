@@ -30,12 +30,14 @@ internal sealed class SteamBigPictureManager : ISoftwareManager
 
     public string Description => "Steam Big Picture";
 
+    public string DefaultArguments => "-start steam://open/bigpicture -fulldesktopres";
+
     // From: https://www.displayfusion.com/ScriptedFunctions/View/?ID=b21d08ca-438a-41e5-8b9d-0125b07a2abc
     public bool IsRunning(string softwarePath) =>
         this.User32Service.FindWindow("CUIEngineWin32", "Steam") != IntPtr.Zero;
 
-    public void Start(string softwarePath) =>
-        this.ProcessService.Start(softwarePath, "-start steam://open/bigpicture -fulldesktopres");
+    public void Start(string softwarePath, string? softwareArguments) =>
+        this.ProcessService.Start(softwarePath, softwareArguments);
 
     public string FindSoftwarePathOrDefault()
     {

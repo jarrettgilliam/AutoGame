@@ -10,6 +10,7 @@ internal sealed class AutoGameService : IAutoGameService
 {
     private ISoftwareManager? appliedSoftware;
     private string? appliedSoftwarePath;
+    private string? appliedSoftwareArguments;
     private IList<ILaunchCondition>? appliedLaunchConditions;
 
     public AutoGameService(
@@ -34,6 +35,7 @@ internal sealed class AutoGameService : IAutoGameService
     {
         this.appliedSoftware = this.GetSoftwareByKeyOrNull(config.SoftwareKey);
         this.appliedSoftwarePath = config.SoftwarePath;
+        this.appliedSoftwareArguments = config.SoftwareArguments;
 
         this.StopMonitoringAllLaunchConditions();
 
@@ -66,6 +68,7 @@ internal sealed class AutoGameService : IAutoGameService
         this.StopMonitoringAllLaunchConditions();
         this.appliedSoftware = null;
         this.appliedSoftwarePath = null;
+        this.appliedSoftwareArguments = null;
     }
 
     private void StopMonitoringAllLaunchConditions()
@@ -91,7 +94,7 @@ internal sealed class AutoGameService : IAutoGameService
             if (this.appliedSoftwarePath is not null &&
                 this.appliedSoftware?.IsRunning(this.appliedSoftwarePath) == false)
             {
-                this.appliedSoftware.Start(this.appliedSoftwarePath);
+                this.appliedSoftware.Start(this.appliedSoftwarePath, this.appliedSoftwareArguments);
             }
         }
         catch (Exception ex)

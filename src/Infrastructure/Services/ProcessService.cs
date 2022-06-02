@@ -10,11 +10,8 @@ internal sealed class ProcessService : IProcessService
     public IProcess NewProcess() =>
         new ProcessWrapper(new Process());
 
-    public IProcess Start(string fileName) =>
-        new ProcessWrapper(Process.Start(fileName));
-
-    public IProcess Start(string fileName, string arguments) =>
-        new ProcessWrapper(Process.Start(fileName, arguments));
+    public IProcess Start(string fileName, string? arguments) =>
+        new ProcessWrapper(Process.Start(fileName, arguments ?? ""));
 
     public IProcess[] GetProcessesByName(string? processName) =>
         Process.GetProcessesByName(processName).Select(p => new ProcessWrapper(p)).ToArray();

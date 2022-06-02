@@ -52,6 +52,12 @@ public class PlayniteFullscreenManagerTests
     }
 
     [Fact]
+    public void DefaultArguments_IsCorrect()
+    {
+        Assert.Equal("--startfullscreen", this.sut.DefaultArguments);
+    }
+
+    [Fact]
     public void IsRunning_ReturnsTrue()
     {
         this.processServiceMock
@@ -74,15 +80,16 @@ public class PlayniteFullscreenManagerTests
     [Fact]
     public void Start_StartsProcess()
     {
-        this.sut.Start(SOFTWARE_PATH);
+        string customArgs = "--my-custom-arguments";
+        this.sut.Start(SOFTWARE_PATH, customArgs);
 
-        this.processServiceMock.Verify(x => x.Start(SOFTWARE_PATH, "--startfullscreen"), Times.Once);
+        this.processServiceMock.Verify(x => x.Start(SOFTWARE_PATH, customArgs), Times.Once);
     }
 
     [Fact]
     public void Start_SetsForegroundWindow()
     {
-        this.sut.Start("");
+        this.sut.Start("", "");
         
         this.windowServiceMock.Verify(
             x => x.RepeatTryForceForegroundWindowByTitle("Playnite", It.IsAny<TimeSpan>()),

@@ -263,6 +263,7 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
             {
                 ISoftwareManager? s = this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey);
                 c.SoftwarePath = s?.FindSoftwarePathOrDefault();
+                c.SoftwareArguments = s?.DefaultArguments;
             }
         }
         catch (Exception ex)

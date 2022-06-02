@@ -21,6 +21,7 @@ public class ConfigTests
     [InlineData(nameof(Config.EnableTraceLogging), true)]
     [InlineData(nameof(Config.SoftwareKey), "TheKey")]
     [InlineData(nameof(Config.SoftwarePath), "ThePath")]
+    [InlineData(nameof(Config.SoftwareArguments), "--arguments")]
     [InlineData(nameof(Config.LaunchWhenGameControllerConnected), true)]
     [InlineData(nameof(Config.LaunchWhenParsecConnected), true)]
     public void Property_Works(string propertyName, object newValue)
