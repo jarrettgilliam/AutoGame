@@ -280,9 +280,9 @@ public class MainWindowViewModelTests
     public void OnBrowseSoftwarePath_EmptyExecutableName_ExeFilter()
     {
         this.softwareManagerMock.Setup(x => x.FindSoftwarePathOrDefault()).Returns("");
-        
+
         this.sut.BrowseSoftwarePathCommand.Execute(null);
-        
+
         Assert.Equal($"{this.softwareManagerMock.Object.Description}|*.exe", this.openFileDialogParms.Filter);
     }
 
@@ -292,9 +292,9 @@ public class MainWindowViewModelTests
         this.autoGameServiceMock
             .Setup(x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()))
             .Returns<ISoftwareManager>(null);
-        
+
         this.sut.BrowseSoftwarePathCommand.Execute(null);
-        
+
         this.dialogServiceMock.Verify(
             x => x.ShowOpenFileDialog(It.IsAny<OpenFileDialogParms>(), out It.Ref<string?>.IsAny),
             Times.Never);
@@ -328,7 +328,7 @@ public class MainWindowViewModelTests
     public void OnCancel_ValidatesConfig()
     {
         this.sut.CancelCommand.Execute(null);
-        
+
         this.configServiceMock.Verify(
             x => x.Validate(It.IsAny<Config>(), It.IsAny<IEnumerable<ISoftwareManager>>()),
             Times.Once);
@@ -341,6 +341,18 @@ public class MainWindowViewModelTests
 
         this.loggingServiceMock.VerifySet(
             x => x.EnableTraceLogging = true, Times.Once());
+    }
+
+    [Fact]
+    public void TryLoadConfig_UpgradesConfig()
+    {
+        this.sut.CancelCommand.Execute(null);
+
+        this.configServiceMock
+            .Verify(x => x.Upgrade(
+                    this.savedConfigMock,
+                    this.softwareManagerMock.Object),
+                Times.Once);
     }
 
     [Fact]
@@ -422,7 +434,7 @@ public class MainWindowViewModelTests
         this.sut.Config.SoftwareKey = SoftwareKey;
 
         Assert.Equal(
-            this.defaultConfigMock.SoftwareArguments, 
+            this.defaultConfigMock.SoftwareArguments,
             this.sut.Config.SoftwareArguments);
     }
 

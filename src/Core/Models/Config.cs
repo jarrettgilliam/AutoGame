@@ -3,6 +3,7 @@
 using Prism.Mvvm;
 using System.Collections;
 using System.ComponentModel;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 public class Config : BindableBase, INotifyDataErrorInfo
@@ -52,7 +53,6 @@ public class Config : BindableBase, INotifyDataErrorInfo
         set => this.SetProperty(ref this.softwareArguments, value);
     }
 
-    [JsonPropertyName("LaunchWhenGamepadConnected")]
     public bool LaunchWhenGameControllerConnected
     {
         get => this.launchWhenGameControllerConnected;
@@ -64,6 +64,11 @@ public class Config : BindableBase, INotifyDataErrorInfo
         get => this.launchWhenParsecConnected;
         set => this.SetProperty(ref this.launchWhenParsecConnected, value);
     }
+    
+    public int Version { get; set; }
+    
+    [JsonExtensionData]
+    public IDictionary<string, JsonElement>? JsonExtensionData { get; set; }
 
     public IEnumerable GetErrors(string? propertyName) => 
         this.allErrors.GetValueOrDefault(propertyName ?? "") ?? Array.Empty<string>();

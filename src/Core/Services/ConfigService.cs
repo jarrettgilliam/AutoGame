@@ -75,4 +75,24 @@ internal sealed class ConfigService : IConfigService
             config.AddError(nameof(config.SoftwareKey), "Unknown software");
         }
     }
+
+    public void Upgrade(Config config, ISoftwareManager? software)
+    {
+        if (config.Version == 0)
+        {
+            if (string.IsNullOrEmpty(config.SoftwareArguments))
+            {
+                config.SoftwareArguments = software?.DefaultArguments;
+            }
+
+            const string oldPropertyName = "LaunchWhenGamepadConnected";
+            if (config.JsonExtensionData?.TryGetValue(oldPropertyName, out JsonElement value) == true)
+            {
+                config.LaunchWhenGameControllerConnected = value.ValueKind == JsonValueKind.True;
+                config.JsonExtensionData.Remove(oldPropertyName);
+            }
+            
+            config.Version++;
+        }
+    }
 }

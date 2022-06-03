@@ -22,7 +22,8 @@ public class ConfigServiceTests
     {
         EnableTraceLogging = true,
         SoftwareKey = nameof(softwareMock),
-        SoftwarePath = "c:\\steam.exe",
+        SoftwarePath = $"/saved/path/to/{nameof(softwareMock)}",
+        SoftwareArguments = "--saved-arguments",
         LaunchWhenGameControllerConnected = true,
         LaunchWhenParsecConnected = true,
         IsDirty = false
@@ -69,7 +70,11 @@ public class ConfigServiceTests
 
         this.softwareMock
             .Setup(x => x.FindSoftwarePathOrDefault())
-            .Returns($"/path/to/{nameof(this.softwareMock)}");
+            .Returns($"/default/path/to/{nameof(this.softwareMock)}");
+
+        this.softwareMock
+            .SetupGet(x => x.DefaultArguments)
+            .Returns("--default-arguments");
 
         this.sut = new ConfigService(
             this.appInfoServiceMock.Object,
@@ -169,7 +174,7 @@ public class ConfigServiceTests
     [Theory]
     [InlineData("SoftwareKey")]
     [InlineData("SoftwarePath")]
-    [InlineData("LaunchWhenGamepadConnected")]
+    [InlineData("LaunchWhenGameControllerConnected")]
     [InlineData("LaunchWhenParsecConnected")]
     [InlineData("EnableTraceLogging")]
     public void Save_MaintainsPropertyNames(string serializedPropertyName)
@@ -260,6 +265,46 @@ public class ConfigServiceTests
         this.configMock.SoftwareKey = "BadKey";
         this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
         Assert.True(this.configMock.HasErrors);
+    }
+
+    [Fact]
+    public void Upgrade_Version0To1_SetsVersion()
+    {
+        this.configMock.Version = 0;
+        this.sut.Upgrade(this.configMock, this.softwareMock.Object);
+        Assert.Equal(1, this.configMock.Version);
+    }
+
+    [Fact]
+    public void Upgrade_Version0To1_AddsDefaultArguments()
+    {
+        this.configMock.Version = 0;
+        this.configMock.SoftwareArguments = null;
+
+        this.sut.Upgrade(this.configMock, this.softwareMock.Object);
+
+        Assert.Equal(
+            this.softwareMock.Object.DefaultArguments,
+            this.configMock.SoftwareArguments);
+    }
+
+    [Fact]
+    public void Upgrade_Version0To1_MovesLaunchWhenGamepadConnected()
+    {
+        const string oldPropertyName = "LaunchWhenGamepadConnected";
+        JsonDocument extensionData = JsonDocument.Parse($"{{ \"{oldPropertyName}\": true }}");
+        
+        this.configMock.Version = 0;
+        this.configMock.LaunchWhenGameControllerConnected = false;
+        this.configMock.JsonExtensionData = new Dictionary<string, JsonElement>
+        {
+            { oldPropertyName, extensionData.RootElement.GetProperty(oldPropertyName) }
+        };
+
+        this.sut.Upgrade(this.configMock, this.softwareMock.Object);
+
+        Assert.True(this.configMock.LaunchWhenGameControllerConnected);
+        Assert.DoesNotContain(oldPropertyName, this.configMock.JsonExtensionData.Keys);
     }
 
     private bool ConfigsAreEqual(Config? left, Config? right)

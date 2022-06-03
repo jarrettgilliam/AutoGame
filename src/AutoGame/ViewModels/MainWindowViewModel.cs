@@ -222,6 +222,7 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
 
         if (c != null)
         {
+            this.ConfigService.Upgrade(c, this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey));
             this.Config = c;
             this.LoggingService.EnableTraceLogging = c.EnableTraceLogging;
         }
