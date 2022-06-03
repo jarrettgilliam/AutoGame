@@ -2,7 +2,7 @@
 
 using NAudio.CoreAudioApi;
 
-internal interface IAudioSessionManager
+public interface IAudioSessionManager
 {
     event AudioSessionManager.SessionCreatedDelegate? OnSessionCreated;
     IReadOnlyList<AudioSessionControl> Sessions { get; }

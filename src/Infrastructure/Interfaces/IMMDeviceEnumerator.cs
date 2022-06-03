@@ -2,7 +2,7 @@
 
 using NAudio.CoreAudioApi;
 
-internal interface IMMDeviceEnumerator : IDisposable
+public interface IMMDeviceEnumerator : IDisposable
 {
     IMMDevice GetDefaultAudioEndpoint(DataFlow dataFlow, Role role);
 
