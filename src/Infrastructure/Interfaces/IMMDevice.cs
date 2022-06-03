@@ -1,6 +1,6 @@
 ﻿namespace AutoGame.Infrastructure.Interfaces;
 
-public interface IMMDevice : IDisposable
+internal interface IMMDevice : IDisposable
 {
     IAudioEndpointVolume AudioEndpointVolume { get; }
     

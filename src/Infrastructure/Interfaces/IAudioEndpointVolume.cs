@@ -2,7 +2,7 @@
 
 using NAudio.CoreAudioApi;
 
-public interface IAudioEndpointVolume
+internal interface IAudioEndpointVolume
 {
     event AudioEndpointVolumeNotificationDelegate? OnVolumeNotification;
     bool Mute { get; }

@@ -1,6 +1,6 @@
 ﻿namespace AutoGame.Infrastructure.Interfaces;
 
-public interface IGameControllerService
+internal interface IGameControllerService
 {
     event EventHandler? GameControllerAdded;
 
