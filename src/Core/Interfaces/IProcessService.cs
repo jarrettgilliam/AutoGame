@@ -6,5 +6,5 @@ public interface IProcessService
     
     IProcess Start(string fileName, string? arguments);
 
-    IProcess[] GetProcessesByName(string? processName);
+    IDisposableList<IProcess> GetProcessesByName(string? processName);
 }

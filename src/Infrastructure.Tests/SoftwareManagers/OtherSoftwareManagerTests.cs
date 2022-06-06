@@ -1,9 +1,9 @@
 ﻿namespace AutoGame.Infrastructure.Tests.SoftwareManagers;
 
-using System;
 using System.IO;
 using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
+using AutoGame.Core.Models;
 using AutoGame.Infrastructure.SoftwareManagers;
 
 public class OtherSoftwareManagerTests
@@ -30,6 +30,10 @@ public class OtherSoftwareManagerTests
         this.pathMock
             .Setup(x => x.ChangeExtension(It.IsAny<string>(), It.IsAny<string>()))
             .Returns<string, string>(Path.ChangeExtension);
+        
+        this.processServiceMock
+            .Setup(x => x.Start(It.IsAny<string>(), It.IsAny<string?>()))
+            .Returns(this.processMock.Object);
 
         this.sut = new OtherSoftwareManager(
             this.processServiceMock.Object,
@@ -59,7 +63,7 @@ public class OtherSoftwareManagerTests
     {
         this.processServiceMock
             .Setup(x => x.GetProcessesByName(SOFTWARE_NAME))
-            .Returns(new[] { this.processMock.Object });
+            .Returns(new DisposableList<IProcess> { this.processMock.Object });
 
         Assert.True(this.sut.IsRunning(SOFTWARE_PATH));
     }
@@ -69,9 +73,21 @@ public class OtherSoftwareManagerTests
     {
         this.processServiceMock
             .Setup(x => x.GetProcessesByName(It.IsAny<string?>()))
-            .Returns(Array.Empty<IProcess>());
+            .Returns(new DisposableList<IProcess>());
 
         Assert.False(this.sut.IsRunning(SOFTWARE_PATH));
+    }
+
+    [Fact]
+    public void IsRunning_DisposesProcesses()
+    {
+        this.processServiceMock
+            .Setup(x => x.GetProcessesByName(SOFTWARE_NAME))
+            .Returns(new DisposableList<IProcess> { this.processMock.Object });
+
+        this.sut.IsRunning(SOFTWARE_PATH);
+        
+        this.processMock.Verify(x => x.Dispose(), Times.Once);
     }
 
     [Fact]
@@ -81,5 +97,13 @@ public class OtherSoftwareManagerTests
         this.sut.Start(SOFTWARE_PATH, customArgs);
 
         this.processServiceMock.Verify(x => x.Start(SOFTWARE_PATH, customArgs), Times.Once);
+    }
+
+    [Fact]
+    public void Start_DisposesProcesses()
+    {
+        this.sut.Start(SOFTWARE_PATH, null);
+        
+        this.processMock.Verify(x => x.Dispose(), Times.Once);
     }
 }

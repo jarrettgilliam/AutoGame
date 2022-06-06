@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
+using AutoGame.Core.Models;
 using AutoGame.Infrastructure.SoftwareManagers;
 using Moq;
 using Xunit;
@@ -32,6 +33,10 @@ public class PlayniteFullscreenManagerTests
         this.fileSystemMock
             .SetupGet(x => x.Path)
             .Returns(this.pathMock.Object);
+        
+        this.processServiceMock
+            .Setup(x => x.Start(It.IsAny<string>(), It.IsAny<string?>()))
+            .Returns(this.processMock.Object);
         
         this.sut = new PlayniteFullscreenManager(
             this.windowServiceMock.Object,
@@ -62,7 +67,7 @@ public class PlayniteFullscreenManagerTests
     {
         this.processServiceMock
             .Setup(x => x.GetProcessesByName(SOFTWARE_NAME))
-            .Returns(new[] { this.processMock.Object });
+            .Returns(new DisposableList<IProcess> { this.processMock.Object });
 
         Assert.True(this.sut.IsRunning(SOFTWARE_PATH));
     }
@@ -72,9 +77,21 @@ public class PlayniteFullscreenManagerTests
     {
         this.processServiceMock
             .Setup(x => x.GetProcessesByName(It.IsAny<string?>()))
-            .Returns(Array.Empty<IProcess>());
+            .Returns(new DisposableList<IProcess>());
 
         Assert.False(this.sut.IsRunning(SOFTWARE_PATH));
+    }
+
+    [Fact]
+    public void IsRunning_DisposesProcesses()
+    {
+        this.processServiceMock
+            .Setup(x => x.GetProcessesByName(SOFTWARE_NAME))
+            .Returns(new DisposableList<IProcess> { this.processMock.Object });
+
+        this.sut.IsRunning(SOFTWARE_PATH);
+        
+        this.processMock.Verify(x => x.Dispose(), Times.Once);
     }
 
     [Fact]
@@ -94,6 +111,14 @@ public class PlayniteFullscreenManagerTests
         this.windowServiceMock.Verify(
             x => x.RepeatTryForceForegroundWindowByTitle("Playnite", It.IsAny<TimeSpan>()),
             Times.Once());
+    }
+
+    [Fact]
+    public void Start_DisposesProcesses()
+    {
+        this.sut.Start(SOFTWARE_PATH, null);
+        
+        this.processMock.Verify(x => x.Dispose(), Times.Once);
     }
 
     [Fact]

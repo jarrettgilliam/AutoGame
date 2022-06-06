@@ -63,8 +63,6 @@ public abstract class BaseWindow : Window
             this.notifyIcon.Dispose();
             this.notifyIcon = null;
         }
-
-        this.ViewModel?.Dispose();
     }
 
     private static void OnShowWindowChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

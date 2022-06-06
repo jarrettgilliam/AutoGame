@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using AutoGame.Core.Interfaces;
+using AutoGame.Core.Models;
 
 internal sealed class ProcessService : IProcessService
 {
@@ -13,8 +14,10 @@ internal sealed class ProcessService : IProcessService
     public IProcess Start(string fileName, string? arguments) =>
         new ProcessWrapper(Process.Start(fileName, arguments ?? ""));
 
-    public IProcess[] GetProcessesByName(string? processName) =>
-        Process.GetProcessesByName(processName).Select(p => new ProcessWrapper(p)).ToArray();
+    public IDisposableList<IProcess> GetProcessesByName(string? processName) =>
+        new DisposableList<IProcess>(
+            Process.GetProcessesByName(processName)
+                .Select(p => new ProcessWrapper(p)));
     
     private sealed class ProcessWrapper : IProcess
     {

@@ -48,6 +48,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        this.serviceProvider.Dispose();
         Application.Current.DispatcherUnhandledException -= this.Current_DispatcherUnhandledException;
     }
 

@@ -11,7 +11,7 @@ using AutoGame.Core.Models;
 using Prism.Commands;
 using Prism.Mvvm;
 
-internal sealed class MainWindowViewModel : BindableBase, IDisposable
+internal sealed class MainWindowViewModel : BindableBase
 {
     private Config config;
     private WindowState windowState;
@@ -94,20 +94,6 @@ internal sealed class MainWindowViewModel : BindableBase, IDisposable
     {
         get => this.notifyIconVisible;
         set => this.SetProperty(ref this.notifyIconVisible, value);
-    }
-
-    public void Dispose()
-    {
-        try
-        {
-            this.AutoGameService.Dispose();
-        }
-        catch (Exception ex)
-        {
-            this.LoggingService.LogException("disposing main window view model", ex);
-        }
-
-        this.LoggingService.Dispose();
     }
 
     private void OnLoaded()

@@ -31,12 +31,14 @@ internal sealed class OtherSoftwareManager : ISoftwareManager
             software = this.FileSystem.Path.ChangeExtension(software, null);
         }
 
-        return this.ProcessService.GetProcessesByName(software).Any();
+        using IDisposableList<IProcess> procs = this.ProcessService.GetProcessesByName(software);
+        
+        return procs.Any();
     }
 
     public void Start(string softwarePath, string? softwareArguments)
     {
-        this.ProcessService.Start(softwarePath, softwareArguments);
+        this.ProcessService.Start(softwarePath, softwareArguments).Dispose();
     }
 
     public string FindSoftwarePathOrDefault() => "";

@@ -18,7 +18,7 @@ internal sealed class PlayniteFullscreenManager : ISoftwareManager
         this.FileSystem = fileSystem;
         this.ProcessService = processService;
     }
-        
+
     private IWindowService WindowService { get; }
     private IFileSystem FileSystem { get; }
     private IProcessService ProcessService { get; }
@@ -29,12 +29,15 @@ internal sealed class PlayniteFullscreenManager : ISoftwareManager
 
     public string DefaultArguments => "--startfullscreen";
 
-    public bool IsRunning(string softwarePath) =>
-        this.ProcessService.GetProcessesByName(PLAYNITE_FULLSCREEN_APP).Any();
+    public bool IsRunning(string softwarePath)
+    {
+        using IDisposableList<IProcess> procs = this.ProcessService.GetProcessesByName(PLAYNITE_FULLSCREEN_APP);
+        return procs.Any();
+    }
 
     public void Start(string softwarePath, string? softwareArguments)
     {
-        this.ProcessService.Start(softwarePath, softwareArguments);
+        this.ProcessService.Start(softwarePath, softwareArguments).Dispose();
         this.WindowService.RepeatTryForceForegroundWindowByTitle("Playnite", TimeSpan.FromSeconds(5));
     }
 

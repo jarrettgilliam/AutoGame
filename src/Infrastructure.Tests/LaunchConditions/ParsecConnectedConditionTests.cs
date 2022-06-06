@@ -50,8 +50,8 @@ public class ParsecConnectedConditionTests
         this.processServiceMock
             .Setup(x => x.GetProcessesByName(It.IsAny<string?>()))
             .Returns(() => this.suppressConditionMet
-                ? Array.Empty<IProcess>()
-                : new[] { this.processMock.Object });
+                ? new DisposableList<IProcess>()
+                : new DisposableList<IProcess> { this.processMock.Object });
 
         this.audioSessionControlMock = new AudioSessionControlMock
         {
@@ -99,6 +99,14 @@ public class ParsecConnectedConditionTests
         using var helper = new LaunchConditionTestHelper(this.sut);
 
         Assert.Equal(1, helper.FiredCount);
+    }
+
+    [Fact]
+    public void ActiveUDPPortAndAudioSession_Disposes_ParsecdProcesses()
+    {
+        using var helper = new LaunchConditionTestHelper(this.sut);
+
+        this.processMock.Verify(x => x.Dispose(), Times.Exactly(2));
     }
 
     [Fact]
@@ -206,6 +214,26 @@ public class ParsecConnectedConditionTests
             this.audioSessionControlMock);
 
         Assert.Equal(1, helper.FiredCount);
+    }
+
+    [Fact]
+    public void AudioSessionCreated_Disposes_ParsecdProcesses()
+    {
+        this.audioSessionControls.Clear();
+        this.suppressConditionMet = true;
+
+        using var helper = new LaunchConditionTestHelper(this.sut);
+
+        this.processMock.Verify(x => x.Dispose(), Times.Never);
+
+        this.suppressConditionMet = false;
+        this.audioSessionControls.Add(new AudioSessionControl(this.audioSessionControlMock));
+        this.audioSessionManagerMock.Raise(
+            x => x.OnSessionCreated += null,
+            this.audioSessionManagerMock.Object,
+            this.audioSessionControlMock);
+
+        this.processMock.Verify(x => x.Dispose(), Times.Exactly(2));
     }
 
     [Fact]

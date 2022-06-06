@@ -19,6 +19,7 @@ public class SteamBigPictureManagerTests
     private readonly Mock<IFileSystem> fileSystemMock = new();
     private readonly Mock<IPath> pathMock = new();
     private readonly Mock<IProcessService> processServiceMock = new();
+    private readonly Mock<IProcess> processMock = new();
     private readonly Mock<IRegistryService> registryServiceMock = new();
     
     public SteamBigPictureManagerTests()
@@ -37,6 +38,10 @@ public class SteamBigPictureManagerTests
         this.fileSystemMock
             .SetupGet(x => x.Path)
             .Returns(this.pathMock.Object);
+        
+        this.processServiceMock
+            .Setup(x => x.Start(It.IsAny<string>(), It.IsAny<string?>()))
+            .Returns(this.processMock.Object);
 
         this.sut = new SteamBigPictureManager(
             this.loggingServiceMock.Object,
@@ -95,6 +100,14 @@ public class SteamBigPictureManagerTests
         this.processServiceMock.Verify(
             x => x.Start(SOFTWARE_PATH, customArgs),
             Times.Once);
+    }
+
+    [Fact]
+    public void Start_DisposesProcesses()
+    {
+        this.sut.Start(SOFTWARE_PATH, null);
+        
+        this.processMock.Verify(x => x.Dispose(), Times.Once);
     }
 
     [Fact]

@@ -61,7 +61,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
         // Listen for Parsec audio session state changes
         this.mmDevice.AudioSessionManager.OnSessionCreated += this.AudioSessionManager_OnSessionCreated;
-        this.RegisterParsecAudioSessionEventClient(this.GetAudioSessions(this.GetParsecdProcesses()).ToArray());
+        this.RegisterParsecAudioSessionEventClient(this.GetAudioSessions().ToArray());
 
         this.CheckConditionMet();
     }
@@ -99,7 +99,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         try
         {
             var session = new AudioSessionControl(newSession);
-            IProcess[] parsecProcs = this.GetParsecdProcesses();
+            using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
 
             if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
             {
@@ -155,7 +155,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         {
             this.mmDevice.AudioEndpointVolume.OnVolumeNotification -= this.AudioEndpointVolume_OnVolumeNotification;
             this.mmDevice.AudioSessionManager.OnSessionCreated -= this.AudioSessionManager_OnSessionCreated;
-            this.UnRegisterParsecAudioSessionEventClient(this.GetAudioSessions(this.GetParsecdProcesses()).ToArray());
+            this.UnRegisterParsecAudioSessionEventClient(this.GetAudioSessions().ToArray());
             this.mmDevice.Dispose();
             this.mmDevice = null;
         }
@@ -163,15 +163,15 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
     private bool GetIsConnected()
     {
-        IProcess[] parsecProcs = this.GetParsecdProcesses();
+        using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
 
         return this.HasAnyActiveUDPPorts(parsecProcs) &&
                this.HasAnyActiveAudioSessions(parsecProcs);
     }
 
-    private IProcess[] GetParsecdProcesses() => this.ProcessService.GetProcessesByName("parsecd");
+    private IDisposableList<IProcess> GetParsecdProcesses() => this.ProcessService.GetProcessesByName("parsecd");
 
-    private bool HasAnyActiveUDPPorts(IProcess[] parsecProcs)
+    private bool HasAnyActiveUDPPorts(IEnumerable<IProcess> parsecProcs)
     {
         IList<Port> ports = this.NetStatPortsService.GetNetStatPorts();
 
@@ -181,7 +181,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         return hasPorts;
     }
 
-    private bool IsParsecUDPPort(Port port, IProcess[] parsecProcs)
+    private bool IsParsecUDPPort(Port port, IEnumerable<IProcess> parsecProcs)
     {
         if (port.Protocol != "UDP")
         {
@@ -196,7 +196,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         return true;
     }
 
-    private bool HasAnyActiveAudioSessions(IProcess[] parsecProcs)
+    private bool HasAnyActiveAudioSessions(IEnumerable<IProcess> parsecProcs)
     {    
         const int MaxRetries = 3;
         TimeSpan retryInterval = TimeSpan.FromMilliseconds(100);
@@ -221,7 +221,13 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         return hasAudioSession;
     }
 
-    private IEnumerable<AudioSessionControl> GetAudioSessions(IProcess[] parsecProcs)
+    private IEnumerable<AudioSessionControl> GetAudioSessions()
+    {
+        using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
+        return this.GetAudioSessions(parsecProcs);
+    }
+
+    private IEnumerable<AudioSessionControl> GetAudioSessions(IEnumerable<IProcess> parsecProcs)
     {
         foreach (IMMDevice mmd in this.MMDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
         {

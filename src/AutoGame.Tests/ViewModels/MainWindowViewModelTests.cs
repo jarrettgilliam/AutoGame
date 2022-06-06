@@ -537,12 +537,4 @@ public class MainWindowViewModelTests
         Assert.True(this.sut.ShowWindow);
         Assert.False(this.sut.NotifyIconVisible);
     }
-
-    [Fact]
-    public void Dispose_Works()
-    {
-        this.sut.Dispose();
-        this.autoGameServiceMock.Verify(x => x.Dispose(), Times.Once);
-        this.loggingServiceMock.Verify(x => x.Dispose(), Times.Once);
-    }
 }

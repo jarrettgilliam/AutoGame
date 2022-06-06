@@ -37,7 +37,7 @@ internal sealed class SteamBigPictureManager : ISoftwareManager
         this.User32Service.FindWindow("CUIEngineWin32", "Steam") != IntPtr.Zero;
 
     public void Start(string softwarePath, string? softwareArguments) =>
-        this.ProcessService.Start(softwarePath, softwareArguments);
+        this.ProcessService.Start(softwarePath, softwareArguments).Dispose();
 
     public string FindSoftwarePathOrDefault()
     {
