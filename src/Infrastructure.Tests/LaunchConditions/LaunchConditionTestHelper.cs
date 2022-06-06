@@ -2,7 +2,6 @@
 
 using System;
 using AutoGame.Core.Interfaces;
-using IDisposable = ABI.System.IDisposable;
 
 internal class LaunchConditionTestHelper : IDisposable
 {
