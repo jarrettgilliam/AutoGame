@@ -2,50 +2,35 @@
 
 using System;
 using System.Linq;
-using Windows.Gaming.Input;
 using AutoGame.Infrastructure.Interfaces;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
 
-internal sealed class WindowsGameControllerService : IGameControllerService
+internal sealed class WindowsGameControllerService : IGameControllerService, IDisposable
 {
-    private readonly object addRemoveLock = new();
-    private bool subscribedToLowLevelEvent;
-    private event EventHandler? gameControllerAdded;
-
-    public event EventHandler? GameControllerAdded
+    public WindowsGameControllerService()
     {
-        add
+        this.NativeWindow = new NativeWindow(new NativeWindowSettings
         {
-            lock (this.addRemoveLock)
-            {
-                this.gameControllerAdded += value;
-
-                if (this.gameControllerAdded is not null && 
-                    !this.subscribedToLowLevelEvent)
-                {
-                    RawGameController.RawGameControllerAdded += this.InternalOnRawGameControllerAdded;
-                    this.subscribedToLowLevelEvent = true;
-                }
-            }
-        }
-        remove
-        {
-            lock (this.addRemoveLock)
-            {
-                this.gameControllerAdded -= value;
-
-                if (this.gameControllerAdded is null &&
-                    this.subscribedToLowLevelEvent)
-                {
-                    RawGameController.RawGameControllerAdded -= this.InternalOnRawGameControllerAdded;
-                    this.subscribedToLowLevelEvent = false;
-                }
-            }
-        }
+            StartVisible = false,
+        });
+        
+        this.NativeWindow.JoystickConnected += this.NativeWindow_OnJoystickConnected;
     }
 
-    public bool HasAnyGameControllers =>
-        RawGameController.RawGameControllers.Any();
+    public event EventHandler? GameControllerAdded;
 
-    private void InternalOnRawGameControllerAdded(object? sender, RawGameController e) =>
-        this.gameControllerAdded?.Invoke(this, EventArgs.Empty);
+    public bool HasAnyGameControllers => this.NativeWindow.JoystickStates.Any(x => x is not null);
+
+    private void NativeWindow_OnJoystickConnected(JoystickEventArgs obj)
+    {
+        this.GameControllerAdded?.Invoke(this, EventArgs.Empty);
+    }
+
+    private NativeWindow NativeWindow { get; }
+
+    public void Dispose()
+    {
+        this.NativeWindow.Dispose();
+    }
 }
