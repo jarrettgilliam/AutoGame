@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>Nullable</WarningsAsErrors>
+        <Version>1.0.0</Version>
         <AssemblyName>AutoGame.Core</AssemblyName>
         <RootNamespace>AutoGame.Core</RootNamespace>
     </PropertyGroup>
