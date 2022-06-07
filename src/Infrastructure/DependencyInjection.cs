@@ -26,7 +26,7 @@ public static class DependencyInjection
         services.AddSingleton<ISleepService, SleepService>();
         services.AddSingleton<ISystemEventsService, SystemEventsService>();
         services.AddSingleton<IWindowService, WindowService>();
-        services.AddSingleton<IGameControllerService, WindowsGameControllerService>();
+        services.AddSingleton<IGameControllerService, GameControllerService>();
         services.AddSingleton<IRegistryService, WindowsRegistryService>();
         services.AddSingleton<IUser32Service, WindowsUser32Service>();
     }
