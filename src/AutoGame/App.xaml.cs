@@ -1,7 +1,9 @@
 ﻿namespace AutoGame;
 
 using System;
+using System.Diagnostics;
 using System.IO.Abstractions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using AutoGame.Core;
@@ -31,7 +33,9 @@ public partial class App : Application
         {
             base.OnStartup(e);
 
-            Application.Current.DispatcherUnhandledException += this.Current_DispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += this.OnCurrentDomainUnhandledException;
+            TaskScheduler.UnobservedTaskException += this.OnTaskSchedulerUnobservedTaskException;
+            this.DispatcherUnhandledException += this.OnDispatcherUnhandledException;
 
             var window = new MainWindow
             {
@@ -49,7 +53,9 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         this.serviceProvider.Dispose();
-        Application.Current.DispatcherUnhandledException -= this.Current_DispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException -= this.OnCurrentDomainUnhandledException;
+        TaskScheduler.UnobservedTaskException -= this.OnTaskSchedulerUnobservedTaskException;
+        this.Dispatcher.UnhandledException -= this.OnDispatcherUnhandledException;
     }
 
     public void ConfigureServices(IServiceCollection services)
@@ -61,13 +67,27 @@ public partial class App : Application
         services.AddInfrastructure();
     }
 
-    private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) =>
-        this.LogExceptionAndExit("unhandled exception", e.Exception);
+    private void OnCurrentDomainUnhandledException(object? sender, UnhandledExceptionEventArgs e) =>
+        this.LogExceptionAndExit("app domain unhandled exception", e.ExceptionObject as Exception);
 
-    private void LogExceptionAndExit(string message, Exception exception)
+    private void OnTaskSchedulerUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e) =>
+        this.LogExceptionAndExit("task scheduler unhandled exception", e.Exception);
+
+    private void OnDispatcherUnhandledException(object? sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        var loggingService = this.serviceProvider.GetService<ILoggingService>();
+        if (!Debugger.IsAttached)
+        {
+            e.Handled = true;
+            this.LogExceptionAndExit("dispatcher unhandled exception", e.Exception);
+        }
+    }
+
+    private void LogExceptionAndExit(string message, Exception? exception)
+    {
+        exception ??= new Exception("Unknown exception");
         
+        var loggingService = this.serviceProvider.GetService<ILoggingService>();
+
         if (loggingService is not null)
         {
             loggingService.LogException(message, exception);
@@ -76,7 +96,7 @@ public partial class App : Application
         {
             MessageBox.Show(exception.ToString(), $"Error {message}", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-        
+
         Environment.Exit(1);
     }
 }
