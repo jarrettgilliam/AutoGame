@@ -1,31 +1,52 @@
-$version = $args[0]
-$srcPath = "$PSScriptRoot\..\src"
-$slnPath = "$srcPath\AutoGame.sln"
-$installerProjectPath = "$srcPath\Installer\Installer.vdproj"
-$installerReleaseDir = "$srcPath\Installer\Release"
+try
+{
+    $version = $args[0]
+    $srcPath = "$PSScriptRoot\..\src"
+    $slnPath = "$srcPath\AutoGame.sln"
+    $installerProjectPath = "$srcPath\Installer\Installer.vdproj"
+    $installerReleaseDir = "$srcPath\Installer\Release"
+    $startPath = $PWD
 
-# Make sure version was passed in
-if ([string]::IsNullOrWhiteSpace($version)) {
-    Write-Error "Version was not specified"
-    exit 2
-}
+    Set-Location -Path $srcPath
 
-# Make sure the working directory is clean
-$gitStatus = git status --porcelain
-if (![string]::IsNullOrWhiteSpace($gitStatus)) {
-    Write-Error "The git working directory is not clean"
-    exit 1
-}
+    # Make sure version was passed in
+    if ( [string]::IsNullOrWhiteSpace($version))
+    {
+        Write-Error "Version was not specified"
+        exit 1
+    }
 
-try {
+    # Make sure the working directory is clean
+    $gitStatus = git status --porcelain
+
+    if (!$?)
+    {
+        Write-Error "git status failed"
+        exit 2
+    }
+
+    if (![string]::IsNullOrWhiteSpace($gitStatus))
+    {
+        Write-Error "The git working directory is not clean"
+        exit 3
+    }
+
+    dotnet test $slnPath
+
+    if (!$?)
+    {
+        Write-Error "One or more tests failed"
+        exit 4
+    }
+
     # Set version on assemblies
     Get-ChildItem -Path $srcPath -Filter *.csproj -Recurse -File |
-    Foreach-Object {
-        $path = $_.FullName
-        (Get-Content $path) | ForEach-Object {
-            $_ -replace '(?<=<Version>)\d(\.\d)+(?=</Version>)', "$version"
-        } | Set-Content $path
-    }
+            Foreach-Object {
+                $path = $_.FullName
+                (Get-Content $path) | ForEach-Object {
+                    $_ -replace '(?<=<Version>)\d(\.\d)+(?=</Version>)', "$version"
+                } | Set-Content $path
+            }
 
     # Set version and generate GUIDs on the installer project
     $productGuid = [GUID]::NewGuid().ToString().ToUpper()
@@ -51,6 +72,11 @@ try {
     # Reset version changes
     git reset --hard HEAD
 }
-catch [System.Exception] {
+catch [System.Exception]
+{
     Write-Error $_.ToString()
+}
+finally
+{
+    Set-Location -Path $startPath
 }
