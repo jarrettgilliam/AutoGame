@@ -1,6 +1,7 @@
 ﻿namespace AutoGame.Infrastructure.LaunchConditions;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -16,10 +17,11 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     private readonly object checkConditionLock = new();
 
     private bool wasConnected;
-    private bool wasMuted;
+
+    private readonly ParsecAudioSessionEventsHandler audioEventClient = new();
+    private readonly ParsecMMNotificationClient mmNotificationClient = new();
     
-    private IMMDevice? mmDevice;
-    private readonly IAudioSessionEventsHandler audioEventClient;
+    internal ConcurrentDictionary<string, AudioSessionControl> registeredAudioSessions = new();
 
     public ParsecConnectedCondition(
         ILoggingService loggingService,
@@ -35,12 +37,10 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         this.ProcessService = processService;
         this.SystemEventsService = systemEventsService;
         this.MMDeviceEnumerator = mmDeviceEnumerator;
-            
-        this.audioEventClient = new ParsecAudioSessionEventsHandler(loggingService, this.CheckConditionMet);
     }
 
     public event EventHandler? ConditionMet;
-    
+
     private ILoggingService LoggingService { get; }
     private INetStatPortsService NetStatPortsService { get; }
     private ISleepService SleepService { get; }
@@ -50,20 +50,16 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
     public void StartMonitoring()
     {
-        // Listen for display setting changes
         this.SystemEventsService.DisplaySettingsChanged += this.SystemEvents_DisplaySettingsChanged;
-
-        // Listen for mute/unmute changes
-        // From: https://stackoverflow.com/q/27650935/987968
-        this.mmDevice = this.MMDeviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-        this.mmDevice.AudioEndpointVolume.OnVolumeNotification += this.AudioEndpointVolume_OnVolumeNotification;
-        this.wasMuted = this.mmDevice.AudioEndpointVolume.Mute;
-
-        // Listen for Parsec audio session state changes
-        this.mmDevice.AudioSessionManager.OnSessionCreated += this.AudioSessionManager_OnSessionCreated;
-        this.RegisterParsecAudioSessionEventClient(this.GetAudioSessions().ToArray());
-
+        this.RegisterAudioEvents();
         this.CheckConditionMet();
+    }
+
+    public void StopMonitoring()
+    {
+        this.SystemEventsService.DisplaySettingsChanged -= this.SystemEvents_DisplaySettingsChanged;
+        this.UnRegisterAudioEvents();
+        this.wasConnected = false;
     }
 
     private void SystemEvents_DisplaySettingsChanged(object? sender, EventArgs e)
@@ -78,32 +74,132 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         }
     }
 
-    private void AudioEndpointVolume_OnVolumeNotification(AudioVolumeNotificationData data)
+    private IDisposableList<IProcess> GetParsecdProcesses() =>
+        this.ProcessService.GetProcessesByName("parsecd");
+
+    private void RegisterAudioEvents()
     {
-        try
+        this.audioEventClient.StateChanged += this.OnAudioSessionStateChanged;
+        this.mmNotificationClient.DeviceStateChanged += this.OnMMDeviceStateChanged;
+
+        using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
+
+        this.MMDeviceEnumerator.RegisterEndpointNotificationCallback(this.mmNotificationClient);
+
+        foreach (IMMDevice mmd in this.MMDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active | DeviceState.Disabled))
         {
-            if (this.wasMuted != data.Muted)
-            {
-                this.CheckConditionMet();
-                this.wasMuted = data.Muted;
-            }
-        }
-        catch (Exception ex)
-        {
-            this.LoggingService.LogException("handling volume notification", ex);
+            this.RegisterMMDeviceEvents(mmd, parsecProcs);
         }
     }
 
-    private void AudioSessionManager_OnSessionCreated(object sender, IAudioSessionControl newSession)
+    private void RegisterMMDeviceEvents(IMMDevice mmd, IList<IProcess> parsecProcs)
+    {
+        mmd.AudioSessionManager.OnSessionCreated += this.OnAudioSessionSessionCreated;
+        this.Trace($"Listening for new sessions on {mmd.FriendlyName} ({mmd.ID})");
+
+        foreach (AudioSessionControl session in mmd.AudioSessionManager.Sessions)
+        {
+            if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
+            {
+                this.RegisterAudioSessionEventClient(session);
+            }
+        }
+    }
+
+    private void RegisterAudioSessionEventClient(AudioSessionControl session)
+    {
+        session.RegisterEventClient(this.audioEventClient);
+        
+        // Hold onto these so they don't get garbage collected
+        this.registeredAudioSessions[session.GetSessionIdentifier] = session;
+        this.Trace($"Listening for session state changes on {session.DisplayName} ({session.GetSessionIdentifier})");
+    }
+
+    private void UnRegisterAudioEvents()
+    {
+        this.audioEventClient.StateChanged -= this.OnAudioSessionStateChanged;
+        this.mmNotificationClient.DeviceStateChanged -= this.OnMMDeviceStateChanged;
+
+        using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
+
+        this.MMDeviceEnumerator.UnregisterEndpointNotificationCallback(this.mmNotificationClient);
+
+        foreach (IMMDevice mmd in this.MMDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active | DeviceState.Disabled))
+        {
+            this.UnRegisterMMDeviceEvents(mmd, parsecProcs);
+            mmd.Dispose();
+        }
+
+        // Clear out any remaining sessions
+        ConcurrentDictionary<string, AudioSessionControl> oldAudioSession = Interlocked.Exchange(
+            ref this.registeredAudioSessions,
+            new ConcurrentDictionary<string, AudioSessionControl>());
+
+        foreach (AudioSessionControl session in oldAudioSession.Values)
+        {
+            session.UnRegisterEventClient(this.audioEventClient);
+        }
+    }
+
+    private void UnRegisterMMDeviceEvents(IMMDevice mmd, IList<IProcess> parsecProcs)
+    {
+        mmd.AudioSessionManager.OnSessionCreated -= this.OnAudioSessionSessionCreated;
+
+        foreach (AudioSessionControl session in mmd.AudioSessionManager.Sessions)
+        {
+            if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
+            {
+                this.UnRegisterAudioSessionEventClient(session.GetSessionIdentifier);
+            }
+        }
+    }
+
+    private void UnRegisterAudioSessionEventClient(string sessionIdentifier)
+    {
+        if (this.registeredAudioSessions.TryRemove(sessionIdentifier, out AudioSessionControl? session))
+        {
+            session.UnRegisterEventClient(this.audioEventClient);
+        }
+    }
+
+    private void OnMMDeviceStateChanged(object? sender, ParsecMMNotificationClient.DeviceStateChangedArgs e)
     {
         try
         {
-            var session = new AudioSessionControl(newSession);
+            if (e.NewState is not DeviceState.Active and not DeviceState.Disabled)
+            {
+                return;
+            }
+
+            IMMDevice mmd = this.MMDeviceEnumerator.GetDevice(e.DeviceId);
+
+            if (mmd.DataFlow != DataFlow.Render)
+            {
+                return;
+            }
+
+            using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
+
+            this.RegisterMMDeviceEvents(mmd, parsecProcs);
+        }
+        catch (Exception ex)
+        {
+            this.LoggingService.LogException("handling multimedia device state changed", ex);
+        }
+    }
+
+    private void OnAudioSessionSessionCreated(object sender, IAudioSessionControl newSession)
+    {
+        AudioSessionControl? session = null;
+
+        try
+        {
+            session = new AudioSessionControl(newSession);
             using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
 
             if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
             {
-                this.RegisterParsecAudioSessionEventClient(session);
+                this.RegisterAudioSessionEventClient(session);
                 this.CheckConditionMet();
             }
         }
@@ -111,31 +207,36 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         {
             this.LoggingService.LogException("handling audio session created", ex);
         }
-    }
-
-    private void RegisterParsecAudioSessionEventClient(params AudioSessionControl[] sessions)
-    {
-        foreach (AudioSessionControl session in sessions)
+        finally
         {
-            session.RegisterEventClient(this.audioEventClient);
+            this.Trace($"{session?.DisplayName ?? "Unknown Name"} " +
+                       $"({(session != null ? session.GetProcessID : "Unknown PID")})");
         }
     }
 
-    private void UnRegisterParsecAudioSessionEventClient(params AudioSessionControl[] sessions)
+    private void OnAudioSessionStateChanged(object? sender, AudioSessionState state)
     {
-        foreach (AudioSessionControl session in sessions)
+        try
         {
-            session.UnRegisterEventClient(this.audioEventClient);
+            this.CheckConditionMet();
+        }
+        catch (Exception ex)
+        {
+            this.LoggingService.LogException("handling audio session state change", ex);
+        }
+        finally
+        {
+            this.Trace(state.ToString());
         }
     }
 
-    private void CheckConditionMet()
+    private void CheckConditionMet([CallerMemberName] string? source = null)
     {
         lock (this.checkConditionLock)
         {
             bool isConnected = this.GetIsConnected();
 
-            this.Trace($"{nameof(isConnected)}={isConnected}; {nameof(this.wasConnected)}={this.wasConnected}");
+            this.Trace($"from {source}; {nameof(isConnected)}={isConnected}; {nameof(this.wasConnected)}={this.wasConnected}");
             if (!this.wasConnected && isConnected)
             {
                 this.Trace($"{nameof(this.ConditionMet)} fired");
@@ -143,21 +244,6 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
             }
 
             this.wasConnected = isConnected;
-        }
-    }
-
-    public void StopMonitoring()
-    {
-        this.wasConnected = false;
-        this.SystemEventsService.DisplaySettingsChanged -= this.SystemEvents_DisplaySettingsChanged;
-
-        if (this.mmDevice != null)
-        {
-            this.mmDevice.AudioEndpointVolume.OnVolumeNotification -= this.AudioEndpointVolume_OnVolumeNotification;
-            this.mmDevice.AudioSessionManager.OnSessionCreated -= this.AudioSessionManager_OnSessionCreated;
-            this.UnRegisterParsecAudioSessionEventClient(this.GetAudioSessions().ToArray());
-            this.mmDevice.Dispose();
-            this.mmDevice = null;
         }
     }
 
@@ -169,9 +255,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
                this.HasAnyActiveAudioSessions(parsecProcs);
     }
 
-    private IDisposableList<IProcess> GetParsecdProcesses() => this.ProcessService.GetProcessesByName("parsecd");
-
-    private bool HasAnyActiveUDPPorts(IEnumerable<IProcess> parsecProcs)
+    private bool HasAnyActiveUDPPorts(IList<IProcess> parsecProcs)
     {
         IList<Port> ports = this.NetStatPortsService.GetNetStatPorts();
 
@@ -181,118 +265,41 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         return hasPorts;
     }
 
-    private bool IsParsecUDPPort(Port port, IEnumerable<IProcess> parsecProcs)
+    private bool IsParsecUDPPort(Port port, IList<IProcess> parsecProcs) =>
+        port.Protocol == "UDP" && parsecProcs.Any(proc => proc.Id == port.ProcessId);
+
+    private bool HasAnyActiveAudioSessions(IList<IProcess> parsecProcs)
     {
-        if (port.Protocol != "UDP")
-        {
-            return false;
-        }
-
-        if (!parsecProcs.Any(proc => proc.Id == port.ProcessId))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool HasAnyActiveAudioSessions(IEnumerable<IProcess> parsecProcs)
-    {    
         const int MaxRetries = 3;
         TimeSpan retryInterval = TimeSpan.FromMilliseconds(100);
-        
         bool hasAudioSession = false;
-
         int i = 1;
-        for (; i <= MaxRetries; i++)
+
+        try
         {
-            hasAudioSession = this.GetAudioSessions(parsecProcs)
-                .Any(s => s.State == AudioSessionState.AudioSessionStateActive);
-
-            if (hasAudioSession)
+            for (; i <= MaxRetries; i++)
             {
-                break;
-            }
-
-            this.SleepService.Sleep(retryInterval);
-        }
-
-        this.Trace($"returned {hasAudioSession}; {i} attempt(s)");
-        return hasAudioSession;
-    }
-
-    private IEnumerable<AudioSessionControl> GetAudioSessions()
-    {
-        using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
-        return this.GetAudioSessions(parsecProcs);
-    }
-
-    private IEnumerable<AudioSessionControl> GetAudioSessions(IEnumerable<IProcess> parsecProcs)
-    {
-        foreach (IMMDevice mmd in this.MMDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
-        {
-            foreach (AudioSessionControl session in mmd.AudioSessionManager.Sessions)
-            {
-                if (parsecProcs.Any(proc => proc.Id == session.GetProcessID))
+                if (this.MMDeviceEnumerator
+                    .EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)
+                    .SelectMany(mmd => mmd.AudioSessionManager.Sessions)
+                    .Any(session => session.State == AudioSessionState.AudioSessionStateActive &&
+                                    parsecProcs.Any(proc => proc.Id == session.GetProcessID)))
                 {
-                    yield return session;
+                    hasAudioSession = true;
+                    break;
                 }
+
+                this.SleepService.Sleep(retryInterval);
             }
+
+            return hasAudioSession;
+        }
+        finally
+        {
+            this.Trace($"returned {hasAudioSession}; {i} attempt(s)");
         }
     }
 
     private void Trace(string message, [CallerMemberName] string? member = null) =>
         this.LoggingService.Log($"{nameof(ParsecConnectedCondition)}.{member} {message}", LogLevel.Trace);
-
-    private class ParsecAudioSessionEventsHandler : IAudioSessionEventsHandler
-    {
-
-        public ParsecAudioSessionEventsHandler(
-            ILoggingService loggingService,
-            Action checkConditionMet)
-        {
-            this.LoggingService = loggingService;
-            this.CheckConditionMet = checkConditionMet;
-        }
-
-        private ILoggingService LoggingService { get; }
-
-        private Action CheckConditionMet { get; }
-
-        public void OnChannelVolumeChanged(uint channelCount, IntPtr newVolumes, uint channelIndex)
-        {
-        }
-
-        public void OnDisplayNameChanged(string displayName)
-        {
-        }
-
-        public void OnGroupingParamChanged(ref Guid groupingId)
-        {
-        }
-
-        public void OnIconPathChanged(string iconPath)
-        {
-        }
-
-        public void OnSessionDisconnected(AudioSessionDisconnectReason disconnectReason)
-        {
-        }
-
-        public void OnStateChanged(AudioSessionState state)
-        {
-            try
-            {
-                this.CheckConditionMet();
-            }
-            catch (Exception ex)
-            {
-                this.LoggingService.LogException("handling audio session state changed", ex);
-            }
-        }
-
-        public void OnVolumeChanged(float volume, bool isMuted)
-        {
-        }
-    }
 }

@@ -4,16 +4,23 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoGame.Infrastructure.Interfaces;
 using NAudio.CoreAudioApi;
+using NAudio.CoreAudioApi.Interfaces;
 
 internal sealed class MMDeviceEnumeratorWrapper : IMMDeviceEnumerator
 {
     private readonly MMDeviceEnumerator mmDeviceEnumerator = new();
 
-    public IMMDevice GetDefaultAudioEndpoint(DataFlow dataFlow, Role role) =>
-        new MMDeviceWrapper(this.mmDeviceEnumerator.GetDefaultAudioEndpoint(dataFlow, role));
-
     public IEnumerable<IMMDevice> EnumerateAudioEndPoints(DataFlow dataFlow, DeviceState dwStateMask) =>
         this.mmDeviceEnumerator.EnumerateAudioEndPoints(dataFlow, dwStateMask).Select(d => new MMDeviceWrapper(d));
+
+    public int RegisterEndpointNotificationCallback(IMMNotificationClient client) =>
+        this.mmDeviceEnumerator.RegisterEndpointNotificationCallback(client);
+
+    public int UnregisterEndpointNotificationCallback(IMMNotificationClient client) =>
+        this.mmDeviceEnumerator.UnregisterEndpointNotificationCallback(client);
+
+    public IMMDevice GetDevice(string id) =>
+        new MMDeviceWrapper(this.mmDeviceEnumerator.GetDevice(id));
 
     public void Dispose() =>
         this.mmDeviceEnumerator.Dispose();
@@ -23,39 +30,25 @@ internal sealed class MMDeviceEnumeratorWrapper : IMMDeviceEnumerator
         private readonly MMDevice mmDevice;
 
         public MMDeviceWrapper(MMDevice mmDevice)
-        {
+        {   
             this.mmDevice = mmDevice;
         }
 
-        public IAudioEndpointVolume AudioEndpointVolume =>
-            new AudioEndpointVolumeWrapper(this.mmDevice.AudioEndpointVolume);
+        public string ID => this.mmDevice.ID;
+
+        public DataFlow DataFlow => this.mmDevice.DataFlow;
+
+        public string FriendlyName => this.mmDevice.FriendlyName;
 
         public IAudioSessionManager AudioSessionManager =>
             new AudioSessionManagerWrapper(this.mmDevice.AudioSessionManager);
 
         public void Dispose() => this.mmDevice.Dispose();
 
-        private class AudioEndpointVolumeWrapper : IAudioEndpointVolume
-        {
-            private readonly AudioEndpointVolume audioEndpointVolume;
-
-            public AudioEndpointVolumeWrapper(AudioEndpointVolume audioEndpointVolume)
-            {
-                this.audioEndpointVolume = audioEndpointVolume;
-            }
-
-            public event AudioEndpointVolumeNotificationDelegate? OnVolumeNotification
-            {
-                add => this.audioEndpointVolume.OnVolumeNotification += value;
-                remove => this.audioEndpointVolume.OnVolumeNotification -= value;
-            }
-
-            public bool Mute => this.audioEndpointVolume.Mute;
-        }
-
         private class AudioSessionManagerWrapper : IAudioSessionManager
         {
             private readonly AudioSessionManager audioSessionManager;
+
             public AudioSessionManagerWrapper(AudioSessionManager audioSessionManager)
             {
                 this.audioSessionManager = audioSessionManager;

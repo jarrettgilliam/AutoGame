@@ -1,8 +1,14 @@
 ﻿namespace AutoGame.Infrastructure.Interfaces;
 
+using NAudio.CoreAudioApi;
+
 public interface IMMDevice : IDisposable
 {
-    IAudioEndpointVolume AudioEndpointVolume { get; }
+    string ID { get; }
+    
+    DataFlow DataFlow { get; }
+    
+    string FriendlyName { get; }
     
     IAudioSessionManager AudioSessionManager { get; }
 }
