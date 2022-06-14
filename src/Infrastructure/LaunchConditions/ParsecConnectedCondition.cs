@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using AutoGame.Core.Enums;
@@ -15,13 +17,15 @@ using NAudio.CoreAudioApi.Interfaces;
 internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 {
     private readonly object checkConditionLock = new();
-
     private bool wasConnected;
 
     private readonly ParsecAudioSessionEventsHandler audioEventClient = new();
     private readonly ParsecMMNotificationClient mmNotificationClient = new();
-    
     internal ConcurrentDictionary<string, AudioSessionControl> registeredAudioSessions = new();
+    
+    private readonly string ParsecLogFileName;
+    private readonly string ParsecLogDirectory;
+    private IFileSystemWatcher? parsecLogWatcher;
 
     public ParsecConnectedCondition(
         ILoggingService loggingService,
@@ -29,7 +33,8 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         ISleepService sleepService,
         IProcessService processService,
         ISystemEventsService systemEventsService,
-        IMMDeviceEnumerator mmDeviceEnumerator)
+        IMMDeviceEnumerator mmDeviceEnumerator,
+        IFileSystem fileSystem)
     {
         this.LoggingService = loggingService;
         this.NetStatPortsService = netStatPortsService;
@@ -37,6 +42,11 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         this.ProcessService = processService;
         this.SystemEventsService = systemEventsService;
         this.MMDeviceEnumerator = mmDeviceEnumerator;
+        this.FileSystem = fileSystem;
+
+        this.ParsecLogFileName = "log.txt";
+        this.ParsecLogDirectory = this.FileSystem.Path.Join(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Parsec");
     }
 
     public event EventHandler? ConditionMet;
@@ -47,11 +57,13 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     private IProcessService ProcessService { get; }
     private ISystemEventsService SystemEventsService { get; }
     private IMMDeviceEnumerator MMDeviceEnumerator { get; }
+    private IFileSystem FileSystem { get; }
 
     public void StartMonitoring()
     {
         this.SystemEventsService.DisplaySettingsChanged += this.SystemEvents_DisplaySettingsChanged;
         this.RegisterAudioEvents();
+        this.WatchParsecLogFile();
         this.CheckConditionMet();
     }
 
@@ -59,6 +71,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     {
         this.SystemEventsService.DisplaySettingsChanged -= this.SystemEvents_DisplaySettingsChanged;
         this.UnRegisterAudioEvents();
+        this.StopWatchingParsecLogFile();
         this.wasConnected = false;
     }
 
@@ -71,6 +84,39 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         catch (Exception ex)
         {
             this.LoggingService.LogException("handling display settings changed", ex);
+        }
+    }
+
+    private void WatchParsecLogFile()
+    {
+        this.FileSystem.Directory.CreateDirectory(this.ParsecLogDirectory);
+        
+        this.parsecLogWatcher = this.FileSystem.FileSystemWatcher.CreateNew(
+            this.ParsecLogDirectory, this.ParsecLogFileName);
+        
+        this.parsecLogWatcher.Changed += this.OnParsecLogWatcherEvent;
+        this.parsecLogWatcher.EnableRaisingEvents = true;
+    }
+
+    private void StopWatchingParsecLogFile()
+    {
+        if (this.parsecLogWatcher != null)
+        {
+            this.parsecLogWatcher.Changed -= this.OnParsecLogWatcherEvent;
+            this.parsecLogWatcher.Dispose();
+            this.parsecLogWatcher = null;
+        }
+    }
+
+    private void OnParsecLogWatcherEvent(object sender, FileSystemEventArgs e)
+    {
+        try
+        {
+            this.CheckConditionMet();
+        }
+        catch (Exception ex)
+        {
+            this.LoggingService.LogException("handling a Parsec log file event", ex);
         }
     }
 
@@ -109,7 +155,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     private void RegisterAudioSessionEventClient(AudioSessionControl session)
     {
         session.RegisterEventClient(this.audioEventClient);
-        
+
         // Hold onto these so they don't get garbage collected
         this.registeredAudioSessions[session.GetSessionIdentifier] = session;
         this.Trace($"Listening for session state changes on {session.DisplayName} ({session.GetSessionIdentifier})");

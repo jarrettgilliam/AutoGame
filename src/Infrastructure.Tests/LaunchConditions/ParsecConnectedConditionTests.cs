@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Infrastructure.Interfaces;
@@ -21,16 +23,25 @@ public class ParsecConnectedConditionTests
     private readonly Mock<IProcessService> processServiceMock = new();
     private readonly Mock<IProcess> processMock = new();
     private readonly Mock<ISystemEventsService> systemEventsServiceMock = new();
-
     private readonly Mock<IMMDeviceEnumerator> mmDeviceEnumeratorMock = new();
     private readonly Mock<IMMDevice> mmDeviceMock = new();
     private readonly Mock<IAudioSessionManager> audioSessionManagerMock = new();
+    private readonly Mock<IFileSystem> fileSystemMock = new();
+    private readonly Mock<IPath> pathMock = new();
+    private readonly Mock<IDirectory> directoryMock = new();
+    private readonly Mock<IFileSystemWatcherFactory> fileSystemWatcherFactoryMock = new();
+    private readonly Mock<IFileSystemWatcher> fileSystemWatcherMock = new();
 
     private readonly List<Port> netstatPorts;
     private readonly List<AudioSessionControl> audioSessionControls;
 
     private readonly AudioSessionControlMock audioSessionControlMock;
     private IMMNotificationClient? mmNotificationClient;
+
+    private const string ParsecLogFileName = "log.txt";
+
+    private static readonly string ParsecLogDirectory =
+        Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Parsec");
 
     private bool suppressConditionMet;
 
@@ -87,13 +98,36 @@ public class ParsecConnectedConditionTests
             .Setup(x => x.GetDevice(It.IsAny<string>()))
             .Returns(this.mmDeviceMock.Object);
 
+        this.fileSystemMock
+            .SetupGet(x => x.Path)
+            .Returns(this.pathMock.Object);
+
+        this.fileSystemMock
+            .SetupGet(x => x.Directory)
+            .Returns(this.directoryMock.Object);
+
+        this.fileSystemMock
+            .SetupGet(x => x.FileSystemWatcher)
+            .Returns(this.fileSystemWatcherFactoryMock.Object);
+
+        this.fileSystemWatcherFactoryMock
+            .Setup(x => x.CreateNew(ParsecLogDirectory, ParsecLogFileName))
+            .Returns(this.fileSystemWatcherMock.Object);
+
+        this.pathMock
+            .Setup(x => x.Join(
+                It.IsAny<string>(),
+                It.IsAny<string>()))
+            .Returns<string, string>(Path.Join);
+
         this.sut = new ParsecConnectedCondition(
             this.loggingServiceMock.Object,
             this.netStatPortsServiceMock.Object,
             this.sleepServiceMock.Object,
             this.processServiceMock.Object,
             this.systemEventsServiceMock.Object,
-            this.mmDeviceEnumeratorMock.Object);
+            this.mmDeviceEnumeratorMock.Object,
+            this.fileSystemMock.Object);
     }
 
     [Fact]
@@ -168,9 +202,9 @@ public class ParsecConnectedConditionTests
     public void HasAnyActiveAudioSessions_DoesntMatchParsecdId_ReturnsFalse()
     {
         this.audioSessionControlMock.ProcessId = OTHER_PROC_ID;
-        
+
         using var helper = new LaunchConditionTestHelper(this.sut);
-        
+
         Assert.Equal(0, helper.FiredCount);
     }
 
@@ -200,7 +234,7 @@ public class ParsecConnectedConditionTests
     public void RegisterAudioSessionEventClient_StoresAudioSessionControl()
     {
         using var helper = new LaunchConditionTestHelper(this.sut);
-        
+
         Assert.Single(this.sut.registeredAudioSessions);
     }
 
@@ -218,9 +252,9 @@ public class ParsecConnectedConditionTests
             .VerifyAdd(
                 x => x.OnSessionCreated += It.IsAny<AudioSessionManager.SessionCreatedDelegate>(),
                 Times.Once);
-        
+
         this.mmNotificationClient!.OnDeviceStateChanged("", newState);
-        
+
         this.audioSessionManagerMock
             .VerifyAdd(
                 x => x.OnSessionCreated += It.IsAny<AudioSessionManager.SessionCreatedDelegate>(),
@@ -240,9 +274,9 @@ public class ParsecConnectedConditionTests
             .VerifyAdd(
                 x => x.OnSessionCreated += It.IsAny<AudioSessionManager.SessionCreatedDelegate>(),
                 Times.Once);
-        
+
         this.mmNotificationClient!.OnDeviceStateChanged("", newState);
-        
+
         this.audioSessionManagerMock
             .VerifyAdd(
                 x => x.OnSessionCreated += It.IsAny<AudioSessionManager.SessionCreatedDelegate>(),
@@ -342,6 +376,31 @@ public class ParsecConnectedConditionTests
     }
 
     [Fact]
+    public void OnParsecLogWatcherEvent_Fires_ConditionMet()
+    {
+        this.suppressConditionMet = true;
+        using var helper = new LaunchConditionTestHelper(this.sut);
+        this.suppressConditionMet = false;
+
+        Assert.Equal(0, helper.FiredCount);
+
+        this.fileSystemWatcherMock.VerifySet(x => x.EnableRaisingEvents = true, Times.Once);
+
+        this.fileSystemWatcherMock.Raise(x => x.Changed += null,
+            new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""));
+
+        Assert.Equal(1, helper.FiredCount);
+    }
+
+    [Fact]
+    public void WatchParsecLogFile_CreatesDirectory()
+    {
+        using var helper = new LaunchConditionTestHelper(this.sut);
+
+        this.directoryMock.Verify(x => x.CreateDirectory(ParsecLogDirectory), Times.Once);
+    }
+
+    [Fact]
     public void AudioSessionProcessIdMismatch_DoesntFire_ConditionMet()
     {
         this.audioSessionControlMock.ProcessId = 8888;
@@ -382,6 +441,11 @@ public class ParsecConnectedConditionTests
         Assert.Null(this.audioSessionControlMock.EventClient);
 
         this.mmDeviceMock.Verify(x => x.Dispose(), Times.Once);
+        
+        this.fileSystemWatcherMock.VerifyRemove(
+            x => x.Changed -= It.IsAny<FileSystemEventHandler>(), Times.Once);
+        
+        this.fileSystemWatcherMock.Verify(x => x.Dispose(), Times.Once);
     }
 
     [Fact]
