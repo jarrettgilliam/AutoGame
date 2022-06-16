@@ -134,7 +134,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigFalse_CreatesDefaultConfiguration()
+    public async Task OnLoaded_TryLoadConfigFalse_CreatesDefaultConfiguration()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
         List<string?> propertyChanges = new();
@@ -143,7 +143,7 @@ public class MainWindowViewModelTests
             x => x.CreateDefault(It.IsAny<ISoftwareManager>()),
             Times.Exactly(1));
 
-        this.sut.LoadedCommand.Execute(null);
+        await this.sut.LoadedCommand.ExecuteAsync();
 
         this.configServiceMock.Verify(
             x => x.CreateDefault(It.IsAny<ISoftwareManager>()),
@@ -153,71 +153,71 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigFalse_DoesntSaveConfiguration()
+    public async Task OnLoaded_TryLoadConfigFalse_DoesntSaveConfiguration()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
 
-        this.sut.LoadedCommand.Execute(null);
+        await this.sut.LoadedCommand.ExecuteAsync();
 
         this.configServiceMock.Verify(x => x.Save(It.IsAny<Config>()), Times.Never);
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigFalse_DoesntApplyConfiguration()
+    public async Task OnLoaded_TryLoadConfigFalse_DoesntApplyConfiguration()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
 
-        this.sut.LoadedCommand.Execute(null);
+        await this.sut.LoadedCommand.ExecuteAsync();
 
         this.autoGameServiceMock.Verify(x => x.ApplyConfiguration(It.IsAny<Config>()), Times.Never);
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigFalse_DoesntMinimize()
+    public async Task OnLoaded_TryLoadConfigFalse_DoesntMinimize()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
 
-        this.sut.LoadedCommand.Execute(null);
+        await this.sut.LoadedCommand.ExecuteAsync();
 
         Assert.NotEqual(WindowState.Minimized, this.sut.WindowState);
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigTrue_AppliesConfiguration()
+    public async Task OnLoaded_TryLoadConfigTrue_AppliesConfiguration()
     {
-        this.sut.LoadedCommand.Execute(null);
+        await this.sut.LoadedCommand.ExecuteAsync();
 
         this.autoGameServiceMock.Verify(x => x.ApplyConfiguration(this.savedConfigMock), Times.Once);
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigTrue_DoesntLoadDefaultConfig()
+    public async Task OnLoaded_TryLoadConfigTrue_DoesntLoadDefaultConfig()
     {
         List<string?> propertyChanges = new();
         this.sut.PropertyChanged += (_, e) => propertyChanges.Add(e.PropertyName);
 
         this.configServiceMock.Verify(x => x.CreateDefault(It.IsAny<ISoftwareManager>()), Times.Once);
 
-        this.sut.LoadedCommand.Execute(null);
+        await this.sut.LoadedCommand.ExecuteAsync();
 
         this.configServiceMock.Verify(x => x.CreateDefault(It.IsAny<ISoftwareManager>()), Times.Once);
         Assert.Equal(1, propertyChanges.Count(p => p == nameof(this.sut.Config)));
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigTrue_MinimizesWindow()
+    public async Task OnLoaded_TryLoadConfigTrue_MinimizesWindow()
     {
-        this.sut.LoadedCommand.Execute(null);
+        await this.sut.LoadedCommand.ExecuteAsync();
 
         Assert.Equal(WindowState.Minimized, this.sut.WindowState);
     }
 
     [Fact]
-    public void OnLoaded_TryApplyConfigurationFalse_DoesntMinimizeWindow()
+    public async Task OnLoaded_TryApplyConfigurationFalse_DoesntMinimizeWindow()
     {
         this.canApplyConfiguration = false;
 
-        this.sut.LoadedCommand.Execute(null);
+        await this.sut.LoadedCommand.ExecuteAsync();
 
         Assert.NotEqual(WindowState.Minimized, this.sut.WindowState);
     }

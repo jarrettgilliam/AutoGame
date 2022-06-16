@@ -22,7 +22,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     private readonly ParsecAudioSessionEventsHandler audioEventClient = new();
     private readonly ParsecMMNotificationClient mmNotificationClient = new();
     internal ConcurrentDictionary<string, AudioSessionControl> registeredAudioSessions = new();
-    
+
     private readonly string ParsecLogFileName;
     private readonly string ParsecLogDirectory;
     private IFileSystemWatcher? parsecLogWatcher;
@@ -90,10 +90,10 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     private void WatchParsecLogFile()
     {
         this.FileSystem.Directory.CreateDirectory(this.ParsecLogDirectory);
-        
+
         this.parsecLogWatcher = this.FileSystem.FileSystemWatcher.CreateNew(
             this.ParsecLogDirectory, this.ParsecLogFileName);
-        
+
         this.parsecLogWatcher.Changed += this.OnParsecLogWatcherEvent;
         this.parsecLogWatcher.EnableRaisingEvents = true;
     }
@@ -141,7 +141,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     private void RegisterMMDeviceEvents(IMMDevice mmd, IList<IProcess> parsecProcs)
     {
         mmd.AudioSessionManager.OnSessionCreated += this.OnAudioSessionSessionCreated;
-        this.Trace($"Listening for new sessions on {mmd.FriendlyName} ({mmd.ID})");
+        this.Trace(() => $"Listening for new sessions on {mmd.FriendlyName} ({mmd.ID})");
 
         foreach (AudioSessionControl session in mmd.AudioSessionManager.Sessions)
         {
@@ -158,7 +158,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
         // Hold onto these so they don't get garbage collected
         this.registeredAudioSessions[session.GetSessionIdentifier] = session;
-        this.Trace($"Listening for session state changes on {session.DisplayName} ({session.GetSessionIdentifier})");
+        this.Trace(() => $"Listening for session state changes on {session.DisplayName} ({session.GetSessionIdentifier})");
     }
 
     private void UnRegisterAudioEvents()
@@ -255,8 +255,8 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         }
         finally
         {
-            this.Trace($"{session?.DisplayName ?? "Unknown Name"} " +
-                       $"({(session != null ? session.GetProcessID : "Unknown PID")})");
+            this.Trace(() => $"{session?.DisplayName ?? "Unknown Name"} " +
+                             $"({(session != null ? session.GetProcessID : "Unknown PID")})");
         }
     }
 
@@ -272,24 +272,36 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         }
         finally
         {
-            this.Trace(state.ToString());
+            this.Trace(state.ToString);
         }
     }
 
     private void CheckConditionMet([CallerMemberName] string? source = null)
     {
-        lock (this.checkConditionLock)
+        if (Monitor.TryEnter(this.checkConditionLock))
         {
-            bool isConnected = this.GetIsConnected();
-
-            this.Trace($"from {source}; {nameof(isConnected)}={isConnected}; {nameof(this.wasConnected)}={this.wasConnected}");
-            if (!this.wasConnected && isConnected)
+            try
             {
-                this.Trace($"{nameof(this.ConditionMet)} fired");
-                this.ConditionMet?.Invoke(this, EventArgs.Empty);
-            }
+                bool isConnected = this.GetIsConnected();
+                bool fired = false;
 
-            this.wasConnected = isConnected;
+                if (!this.wasConnected && isConnected)
+                {
+                    fired = true;
+                    this.ConditionMet?.Invoke(this, EventArgs.Empty);
+                }
+
+                this.Trace(() => $"from {source}; " +
+                                 $"{nameof(isConnected)}={isConnected}; " +
+                                 $"{nameof(this.wasConnected)}={this.wasConnected}; " +
+                                 $"{nameof(fired)}={fired}");
+
+                this.wasConnected = isConnected;
+            }
+            finally
+            {
+                Monitor.Exit(this.checkConditionLock);
+            }
         }
     }
 
@@ -307,7 +319,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
         bool hasPorts = ports.Any(p => this.IsParsecUDPPort(p, parsecProcs));
 
-        this.Trace($"returned {hasPorts}");
+        this.Trace(() => $"returned {hasPorts}");
         return hasPorts;
     }
 
@@ -342,10 +354,15 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         }
         finally
         {
-            this.Trace($"returned {hasAudioSession}; {i} attempt(s)");
+            this.Trace(() => $"returned {hasAudioSession}; {i} attempt(s)");
         }
     }
 
-    private void Trace(string message, [CallerMemberName] string? member = null) =>
-        this.LoggingService.Log($"{nameof(ParsecConnectedCondition)}.{member} {message}", LogLevel.Trace);
+    private void Trace(Func<string> message, [CallerMemberName] string? member = null)
+    {
+        if (this.LoggingService.EnableTraceLogging)
+        {
+            this.LoggingService.Log($"{nameof(ParsecConnectedCondition)}.{member} {message()}", LogLevel.Trace);
+        }
+    }
 }

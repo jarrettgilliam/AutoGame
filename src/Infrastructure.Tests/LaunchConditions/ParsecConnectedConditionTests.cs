@@ -159,7 +159,7 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void NetStatProcessIdMismatch_DoesntFire_ConditionMet()
     {
-        this.netstatPorts[0].ProcessId = 8888;
+        this.netstatPorts[0] = this.netstatPorts[0] with { ProcessId = 8888 };
 
         using var helper = new LaunchConditionTestHelper(this.sut);
 
@@ -169,7 +169,7 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void NetStatNoUDPPorts_DoesntFire_ConditionMet()
     {
-        this.netstatPorts[0].Protocol = "TCP";
+        this.netstatPorts[0] = this.netstatPorts[0] with { Protocol = "TCP" };
 
         using var helper = new LaunchConditionTestHelper(this.sut);
 

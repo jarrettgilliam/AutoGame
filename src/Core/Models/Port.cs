@@ -2,8 +2,10 @@
 
 using System.Text.RegularExpressions;
 
-public record Port
+public record struct Port
 {
+    private static readonly Regex SpacesRegex = new(@"\s+");
+
     public string? Protocol;
 
     public string? LocalAddress;
@@ -17,13 +19,13 @@ public record Port
     public static bool TryParse(string? s, out Port port)
     {
         port = new Port();
-            
+
         if (string.IsNullOrEmpty(s))
         {
             return false;
         }
 
-        var tokens = new Stack<string>(Regex.Split(s, "\\s+").Reverse());
+        var tokens = new Stack<string>(SpacesRegex.Split(s).Reverse());
 
         if (string.IsNullOrEmpty(tokens.Peek()))
         {
@@ -34,7 +36,6 @@ public record Port
         {
             return false;
         }
-
 
         port.Protocol = tokens.Pop();
 

@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using AutoGame.Core.Interfaces;
@@ -31,7 +32,9 @@ internal sealed class MainWindowViewModel : BindableBase
         this.DialogService = dialogService;
         this.AutoGameService = autoGameService;
 
-        this.LoadedCommand = new DelegateCommand(this.OnLoaded);
+        this.LoadedCommand = new AsyncDelegateCommand(this.OnLoadedAsync);
+        this.LoadedCommand.OnException += this.OnAsyncDelegateCommandException;
+        
         this.NotifyIconClickCommand = new DelegateCommand(this.OnNotifyIconClick);
         this.BrowseSoftwarePathCommand = new DelegateCommand(this.OnBrowseSoftwarePath);
         this.OKCommand = new DelegateCommand(this.OnOK);
@@ -51,7 +54,7 @@ internal sealed class MainWindowViewModel : BindableBase
 
     public IAutoGameService AutoGameService { get; }
 
-    public ICommand LoadedCommand { get; }
+    public AsyncDelegateCommand LoadedCommand { get; }
 
     public ICommand NotifyIconClickCommand { get; }
 
@@ -96,7 +99,7 @@ internal sealed class MainWindowViewModel : BindableBase
         set => this.SetProperty(ref this.notifyIconVisible, value);
     }
 
-    private void OnLoaded()
+    private async Task OnLoadedAsync()
     {
         try
         {
@@ -106,8 +109,8 @@ internal sealed class MainWindowViewModel : BindableBase
 
                 if (!this.Config.HasErrors)
                 {
-                    this.AutoGameService.ApplyConfiguration(this.Config);
                     this.SetWindowState(WindowState.Minimized);
+                    await Task.Run(() => this.AutoGameService.ApplyConfiguration(this.Config));
                 }
             }
             else
@@ -279,4 +282,7 @@ internal sealed class MainWindowViewModel : BindableBase
             this.WindowState = state;
         }
     }
+
+    private void OnAsyncDelegateCommandException(object? sender, Exception e) =>
+        this.LoggingService.LogException(e.Message, e);
 }

@@ -23,7 +23,7 @@ internal sealed class WindowsUser32Service : IUser32Service
 
     private static class NativeMethods
     {
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern IntPtr FindWindow(string? sClass, string sWindow);
 
         [DllImport("user32.dll", SetLastError = true)]
