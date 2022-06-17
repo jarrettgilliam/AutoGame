@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddSingleton<IGameControllerService, GameControllerService>();
         services.AddSingleton<IRegistryService, WindowsRegistryService>();
         services.AddSingleton<IUser32Service, WindowsUser32Service>();
+        services.AddSingleton<IIpHelperApiService, IpHelperApiService>();
     }
 
     private static void AddLaunchConditions(this IServiceCollection services)

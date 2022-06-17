@@ -4,5 +4,5 @@ using AutoGame.Core.Models;
 
 public interface INetStatPortsService
 {
-    IList<Port> GetNetStatPorts();
+    IList<Port> GetUdpPorts();
 }

@@ -53,7 +53,7 @@ public class ParsecConnectedConditionTests
         };
 
         this.netStatPortsServiceMock
-            .Setup(x => x.GetNetStatPorts())
+            .Setup(x => x.GetUdpPorts())
             .Returns(this.netstatPorts);
 
         this.processMock

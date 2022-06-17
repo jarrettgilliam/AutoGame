@@ -315,7 +315,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
     private bool HasAnyActiveUDPPorts(IList<IProcess> parsecProcs)
     {
-        IList<Port> ports = this.NetStatPortsService.GetNetStatPorts();
+        IList<Port> ports = this.NetStatPortsService.GetUdpPorts();
 
         bool hasPorts = ports.Any(p => this.IsParsecUDPPort(p, parsecProcs));
 
