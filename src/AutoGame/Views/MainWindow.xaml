@@ -105,7 +105,7 @@
                     Grid.Row="1"
                     Grid.Column="2"
                     Margin="0 0 5 0"
-                    Icon="FolderOpen24"
+                    Icon="Folder24"
                     Command="{Binding BrowseSoftwarePathCommand}"
                     Height="{Binding ElementName=SoftwarePathBox, Path=ActualHeight}"
                     ToolTip="Browse" />
