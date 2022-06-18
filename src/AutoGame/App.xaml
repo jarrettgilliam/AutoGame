@@ -1,7 +1,8 @@
 ﻿<Application x:Class="AutoGame.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:autoGame="clr-namespace:AutoGame">
     <Application.Resources>
         <ResourceDictionary>
 
@@ -18,9 +19,8 @@
                     <Setter Property="ToolTipService.InitialShowDelay" Value="0" />
                 </Style>
             </ResourceDictionary>
-            
-            <BitmapImage x:Key="AppIcon" UriSource="/AutoGame;component/Icons/AutoGame.ico" />
-            <BitmapImage x:Key="AppPng" UriSource="/AutoGame;component/Icons/AutoGame.png" />
+
+            <BitmapImage x:Key="AppPng" UriSource="{x:Static autoGame:ResourceStrings.AppPng}" />
 
         </ResourceDictionary>
     </Application.Resources>

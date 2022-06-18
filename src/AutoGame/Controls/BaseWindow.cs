@@ -50,8 +50,7 @@ public abstract class BaseWindow : Window
         this.notifyIcon.Click += this.NotifyIcon_Click;
 
         StreamResourceInfo? resourceInfo =
-            System.Windows.Application.GetResourceStream(
-                new Uri("/AutoGame;component/Icons/AutoGame.ico", UriKind.Relative));
+            System.Windows.Application.GetResourceStream(ResourceStrings.AppIcon);
 
         if (resourceInfo?.Stream is null)
         {
