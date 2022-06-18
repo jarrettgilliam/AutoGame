@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Prism.Core" Version="8.1.97" />
     <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
+    <PackageReference Include="WPF-UI" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,9 +24,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Icons\AutoGame.ico">
+    <None Remove="Icons\AutoGame.ico" />
+    <Resource Include="Icons\AutoGame.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Resource>
+    <None Remove="Icons\AutoGame.png" />
+    <Resource Include="Icons\AutoGame.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

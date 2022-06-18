@@ -5,6 +5,7 @@ using System;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Resources;
 
 public abstract class BaseWindow : Window
 {
@@ -26,7 +27,7 @@ public abstract class BaseWindow : Window
 
     protected BaseWindow()
     {
-        this.Loaded += this.MainWindow_Loaded;
+        this.ContentRendered += this.MainWindow_ContentRendered;
     }
 
     public bool ShowWindow
@@ -47,7 +48,20 @@ public abstract class BaseWindow : Window
 
         this.notifyIcon = new NotifyIcon();
         this.notifyIcon.Click += this.NotifyIcon_Click;
-        this.notifyIcon.Icon = new Icon(@"Icons\AutoGame.ico");
+
+        StreamResourceInfo? resourceInfo =
+            System.Windows.Application.GetResourceStream(
+                new Uri("/AutoGame;component/Icons/AutoGame.ico", UriKind.Relative));
+
+        if (resourceInfo?.Stream is null)
+        {
+            throw new Exception("Could not find application icon");
+        }
+
+        using (resourceInfo.Stream)
+        {
+            this.notifyIcon.Icon = new Icon(resourceInfo.Stream);
+        }
     }
 
     private MainWindowViewModel? ViewModel => this.DataContext as MainWindowViewModel;
@@ -55,7 +69,7 @@ public abstract class BaseWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         base.OnClosed(e);
-        this.Loaded -= this.MainWindow_Loaded;
+        this.ContentRendered -= this.MainWindow_ContentRendered;
 
         if (this.notifyIcon is not null)
         {
@@ -82,7 +96,7 @@ public abstract class BaseWindow : Window
 
     private static void OnNotifyIconVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is BaseWindow baseWindow && 
+        if (d is BaseWindow baseWindow &&
             baseWindow.notifyIcon is not null &&
             e.NewValue is bool notifyIconVisible)
         {
@@ -90,9 +104,9 @@ public abstract class BaseWindow : Window
         }
     }
 
-    private void MainWindow_Loaded(object? sender, RoutedEventArgs e)
+    private void MainWindow_ContentRendered(object? sender, EventArgs eventArgs)
     {
-        this.Loaded -= this.MainWindow_Loaded;
+        this.ContentRendered -= this.MainWindow_ContentRendered;
         this.ViewModel?.LoadedCommand.Execute(null);
     }
 

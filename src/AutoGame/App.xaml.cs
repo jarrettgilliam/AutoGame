@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
 using AutoGame.Core;
 using AutoGame.Core.Interfaces;
@@ -12,6 +13,8 @@ using AutoGame.ViewModels;
 using AutoGame.Views;
 using AutoGame.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Wpf.Ui.Appearance;
+using Wpf.Ui.Extensions;
 
 /// <summary>
 /// Interaction logic for App.xaml
@@ -41,6 +44,8 @@ public partial class App : Application
             {
                 DataContext = this.serviceProvider.GetService<MainWindowViewModel>()
             };
+
+            this.ApplyTheme();
 
             window.Show();
         }
@@ -85,7 +90,7 @@ public partial class App : Application
     private void LogExceptionAndExit(string message, Exception? exception)
     {
         exception ??= new Exception("Unknown exception");
-        
+
         var loggingService = this.serviceProvider.GetService<ILoggingService>();
 
         if (loggingService is not null)
@@ -98,5 +103,29 @@ public partial class App : Application
         }
 
         Environment.Exit(1);
+    }
+
+    private void ApplyTheme()
+    {
+        // The watcher kept crashing on me for some reason.
+        // Only apply the theme on startup for now.
+        // Watcher.Watch(window, updateAccents: false);
+        Theme.Apply(this.GetThemeType(), updateAccent: false);
+
+        Color secondaryAccent = Color.FromRgb(0x26, 0x7F, 0x00);
+        Color tertiaryAccent = secondaryAccent.Update(15f, -12f);
+        Color primaryAccent = secondaryAccent.Update(-15f, 12f);
+        Color systemAccent = secondaryAccent.Update(-30f, 24f);
+        
+        Accent.Apply(systemAccent, primaryAccent, secondaryAccent, tertiaryAccent);
+    }
+
+    private ThemeType GetThemeType()
+    {
+        return Theme.GetSystemTheme() switch
+        {
+            SystemThemeType.Dark => ThemeType.Dark,
+            _ => ThemeType.Light,
+        };
     }
 }
