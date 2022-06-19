@@ -70,10 +70,35 @@ internal sealed class ConfigService : IConfigService
             config.AddError(nameof(config.SoftwarePath), "File not found");
         }
 
-        if (!knownSoftware.Any(x => x.Key == config.SoftwareKey))
+        ISoftwareManager? softwareManager = knownSoftware.FirstOrDefault(x => x.Key == config.SoftwareKey); 
+        
+        if (softwareManager is null)
         {
             config.AddError(nameof(config.SoftwareKey), "Unknown software");
         }
+        else if (!this.ExecutableNameMatches(config.SoftwarePath, softwareManager))
+        {
+            config.AddError(nameof(config.SoftwarePath), "Wrong software");
+        }
+    }
+
+    private bool ExecutableNameMatches(string? softwarePath, ISoftwareManager softwareManager)
+    {
+        if (string.IsNullOrEmpty(softwarePath))
+        {
+            return false;
+        }
+        
+        string defaultPath = softwareManager.FindSoftwarePathOrDefault();
+        string? defaultExecutable = this.FileSystem.Path.GetFileName(defaultPath);
+
+        if (string.IsNullOrEmpty(defaultExecutable))
+        {
+            return true;
+        }
+
+        string? softwareExecutable = this.FileSystem.Path.GetFileName(softwarePath);
+        return string.Equals(defaultExecutable, softwareExecutable);
     }
 
     public void Upgrade(Config config, ISoftwareManager? software)

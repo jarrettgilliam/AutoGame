@@ -16,6 +16,7 @@ public class ConfigServiceTests
     private readonly Mock<IFileSystem> fileSystemMock = new();
     private readonly Mock<IFile> fileMock = new();
     private readonly Mock<IDirectory> directoryMock = new();
+    private readonly Mock<IPath> pathMock = new();
     private readonly Mock<ISoftwareManager> softwareMock = new();
 
     private readonly Config configMock = new()
@@ -56,6 +57,10 @@ public class ConfigServiceTests
             .Setup(x => x.Exists(It.IsAny<string>()))
             .Returns(true);
 
+        this.pathMock
+            .Setup(x => x.GetFileName(It.IsAny<string>()))
+            .Returns<string>(Path.GetFileName);
+
         this.fileSystemMock
             .SetupGet(x => x.File)
             .Returns(this.fileMock.Object);
@@ -63,6 +68,10 @@ public class ConfigServiceTests
         this.fileSystemMock
             .SetupGet(x => x.Directory)
             .Returns(this.directoryMock.Object);
+
+        this.fileSystemMock
+            .SetupGet(x => x.Path)
+            .Returns(this.pathMock.Object);
 
         this.softwareMock
             .SetupGet(x => x.Key)
@@ -265,6 +274,23 @@ public class ConfigServiceTests
         this.configMock.SoftwareKey = "BadKey";
         this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
         Assert.True(this.configMock.HasErrors);
+    }
+
+    [Fact]
+    public void Validate_SoftwarePathWrongSoftware_ConfigErrors()
+    {
+        this.configMock.SoftwarePath = "/path/to/wrongExecutable";
+        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
+        Assert.True(this.configMock.HasErrors);
+    }
+
+    [Fact]
+    public void Validate_NoDefaultSoftwarePath_NoErrors()
+    {
+        this.softwareMock.Setup(x => x.FindSoftwarePathOrDefault()).Returns("");
+        this.configMock.SoftwarePath = "/path/to/anyExecutable";
+        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
+        Assert.False(this.configMock.HasErrors);
     }
 
     [Fact]
