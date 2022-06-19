@@ -1,6 +1,7 @@
 try
 {
     $version = $args[0]
+    $github_token = $args[1]
     $srcPath = "$PSScriptRoot\..\src"
     $slnPath = "$srcPath\AutoGame.sln"
     $installerProjectPath = "$srcPath\Installer\Installer.vdproj"
@@ -10,11 +11,13 @@ try
     Set-Location -Path $srcPath
 
     # Make sure version was passed in
-    if ( [string]::IsNullOrWhiteSpace($version))
+    if ([string]::IsNullOrWhiteSpace($version))
     {
         Write-Error "Version was not specified"
         exit 1
     }
+    
+    $version = $version.TrimStart('v');
 
     # Make sure the working directory is clean
     $gitStatus = git status --porcelain
@@ -65,6 +68,14 @@ try
 
     # Rename the output *.msi file
     Rename-Item "$installerReleaseDir\AutoGame_Setup.msi" "AutoGame_Setup_$version.msi"
+    
+    # Create a GitHub release
+    if (![string]::IsNullOrWhiteSpace($github_token))
+    {
+        $env:GITHUB_TOKEN = $github_token;
+        hub release create --draft --message "AutoGame v${version}" --attach "$installerReleaseDir\AutoGame_Setup_$version.msi" "v${version}"
+        Remove-Item Env:\GITHUB_TOKEN
+    }
 
     Write-Host "Build complete"
     Write-Host "$installerReleaseDir\AutoGame_Setup_$version.msi"
