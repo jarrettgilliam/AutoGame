@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using AutoGame.Core;
+using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.ViewModels;
 using AutoGame.Views;
@@ -48,6 +49,10 @@ public partial class App : Application
             this.ApplyTheme();
 
             window.Show();
+        }
+        catch (TypeInitializationException ex) when (ex.Message.Contains("Joysticks"))
+        {
+            this.HandleMissingCPPRedistributable(ex);
         }
         catch (Exception ex)
         {
@@ -116,7 +121,7 @@ public partial class App : Application
         Color tertiaryAccent = secondaryAccent.Update(15f, -12f);
         Color primaryAccent = secondaryAccent.Update(-15f, 12f);
         Color systemAccent = secondaryAccent.Update(-30f, 24f);
-        
+
         Accent.Apply(systemAccent, primaryAccent, secondaryAccent, tertiaryAccent);
     }
 
@@ -127,5 +132,23 @@ public partial class App : Application
             SystemThemeType.Dark => ThemeType.Dark,
             _ => ThemeType.Light,
         };
+    }
+
+    private void HandleMissingCPPRedistributable(Exception ex)
+    {
+        this.serviceProvider.GetService<ILoggingService>()?.Log($"Error during startup: {ex}", LogLevel.Error);
+
+        string message = "To run this application, you must install Visual C++ Redistributable for Visual Studio 2015." + Environment.NewLine +
+                         Environment.NewLine +
+                         "Would you like to download it now?";
+
+        var result = MessageBox.Show(message, $"{nameof(AutoGame)}.exe", MessageBoxButton.YesNo, MessageBoxImage.Error);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            Process.Start(new ProcessStartInfo("cmd", "/c start https://www.microsoft.com/en-us/download/details.aspx?id=48145"));
+        }
+
+        Environment.Exit(1);
     }
 }
