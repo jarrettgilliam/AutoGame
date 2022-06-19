@@ -243,6 +243,22 @@ public class ConfigServiceTests
         Assert.Equal(
             this.softwareMock.Object.FindSoftwarePathOrDefault(),
             config.SoftwarePath);
+        
+        Assert.Equal(
+            this.softwareMock.Object.DefaultArguments,
+            config.SoftwareArguments);
+    }
+
+    [Fact]
+    public void CreateDefault_Config_SetsVersion()
+    {
+        Config config = this.sut.CreateDefault(this.softwareMock.Object);
+
+        int defaultVersion = config.Version;
+        
+        this.sut.Upgrade(config, this.softwareMock.Object);
+        
+        Assert.Equal(defaultVersion, config.Version);
     }
 
     [Fact]

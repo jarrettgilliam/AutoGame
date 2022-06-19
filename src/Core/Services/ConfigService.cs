@@ -8,7 +8,7 @@ using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 
 internal sealed class ConfigService : IConfigService
-{
+{       
     public ConfigService(
         IAppInfoService appInfo,
         IFileSystem fileSystem)
@@ -51,8 +51,10 @@ internal sealed class ConfigService : IConfigService
     public Config CreateDefault(ISoftwareManager? software) =>
         new()
         {
+            Version = 1,
             SoftwareKey = software?.Key,
             SoftwarePath = software?.FindSoftwarePathOrDefault(),
+            SoftwareArguments = software?.DefaultArguments,
             LaunchWhenGameControllerConnected = true,
             LaunchWhenParsecConnected = true
         };
