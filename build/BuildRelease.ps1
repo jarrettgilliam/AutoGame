@@ -63,8 +63,11 @@ try
         $line
     } | Set-Content $installerProjectPath
 
+    # Find Visual Studio
+    $devenv = & vswhere.exe '-property' productPath
+    
     # Build the solution
-    devenv "$slnPath" /rebuild Release /project Installer
+    Start-Process -FilePath $devenv -ArgumentList "$slnPath /rebuild Release /project Installer" -Wait
 
     # Rename the output *.msi file
     Rename-Item "$installerReleaseDir\AutoGame_Setup.msi" "AutoGame_Setup_$version.msi"
