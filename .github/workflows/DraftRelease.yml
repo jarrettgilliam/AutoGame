@@ -1,0 +1,16 @@
+name: Draft Release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The release tag (ex: v1.0.0)'
+        type: string
+        required: true
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Release
+        run: |
+          .\build\BuildRelease.ps1 ${{ inputs.tag }} ${{ secrets.GITHUB_TOKEN }}
