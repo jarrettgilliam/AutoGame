@@ -3,16 +3,10 @@
 using AutoGame.Core.Interfaces;
 using AutoGame.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using OpenTK.Windowing.Desktop;
 
 public class AppTests
 {
     private static readonly App sut = new();
-
-    static AppTests()
-    {
-        GLFWProvider.CheckForMainThread = false;
-    }
 
     [Fact]
     public void ConfigureServices_MainWindowViewModel_IsBuildable()
