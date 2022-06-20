@@ -12,7 +12,7 @@
     WindowState="{Binding WindowState, Mode=TwoWay}"
     ShowWindow="{Binding ShowWindow, Mode=TwoWay}"
     NotifyIconVisible="{Binding NotifyIconVisible, Mode=TwoWay}"
-    MinHeight="310" Height="310" Width="625" ResizeMode="NoResize">
+    MinHeight="315" Height="315" Width="625" ResizeMode="NoResize">
     <FrameworkElement.Resources>
         <Style x:Key="ComboBoxErrorValidationStyle"
                TargetType="ComboBox"
