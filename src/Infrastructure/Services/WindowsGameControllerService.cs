@@ -5,47 +5,19 @@ using System.Linq;
 using Windows.Gaming.Input;
 using AutoGame.Infrastructure.Interfaces;
 
-internal sealed class WindowsGameControllerService : IGameControllerService
+internal sealed class WindowsGameControllerService : IGameControllerService, IDisposable
 {
-    private readonly object addRemoveLock = new();
-    private bool subscribedToLowLevelEvent;
-    private event EventHandler? gameControllerAdded;
+    public WindowsGameControllerService() =>
+        RawGameController.RawGameControllerAdded += this.OnRawGameControllerAdded;
 
-    public event EventHandler? GameControllerAdded
-    {
-        add
-        {
-            lock (this.addRemoveLock)
-            {
-                this.gameControllerAdded += value;
+    public void Dispose() =>
+        RawGameController.RawGameControllerAdded -= this.OnRawGameControllerAdded;
 
-                if (this.gameControllerAdded is not null && 
-                    !this.subscribedToLowLevelEvent)
-                {
-                    RawGameController.RawGameControllerAdded += this.InternalOnRawGameControllerAdded;
-                    this.subscribedToLowLevelEvent = true;
-                }
-            }
-        }
-        remove
-        {
-            lock (this.addRemoveLock)
-            {
-                this.gameControllerAdded -= value;
-
-                if (this.gameControllerAdded is null &&
-                    this.subscribedToLowLevelEvent)
-                {
-                    RawGameController.RawGameControllerAdded -= this.InternalOnRawGameControllerAdded;
-                    this.subscribedToLowLevelEvent = false;
-                }
-            }
-        }
-    }
+    public event EventHandler? GameControllerAdded;
 
     public bool HasAnyGameControllers =>
         RawGameController.RawGameControllers.Any();
 
-    private void InternalOnRawGameControllerAdded(object? sender, RawGameController e) =>
-        this.gameControllerAdded?.Invoke(this, EventArgs.Empty);
+    private void OnRawGameControllerAdded(object? sender, RawGameController e) =>
+        this.GameControllerAdded?.Invoke(this, EventArgs.Empty);
 }
