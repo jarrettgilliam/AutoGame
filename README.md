@@ -17,9 +17,9 @@ Configuration
 
 When AutoGame starts the first time it will show this window:
 
-![Configuration Window](https://user-images.githubusercontent.com/5099690/105436095-31433c00-5c24-11eb-8cc2-a048cf6459a1.png)
+![Configuration Window](https://user-images.githubusercontent.com/5099690/174699560-2ea994ae-cb5e-4ec7-aad3-5d4edf2eda77.png)
 
-From here you can choose your game launcher, set it's installation path, and choose when you want it to open. When you're done, click OK. Now AutoGame will run at startup and automatically minimize to the system tray.
+From here you can choose your game launcher, set it's installation path, add custom arguments, and choose when you want it to open. When you're done, click OK. Now AutoGame will run at startup and automatically minimize to the system tray.
 
 Donate
 ======
