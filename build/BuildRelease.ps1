@@ -11,12 +11,12 @@ try
     Set-Location -Path $srcPath
 
     # Make sure version was passed in
-    if ( [string]::IsNullOrWhiteSpace($version))
+    if ([string]::IsNullOrWhiteSpace($version))
     {
         Write-Error "Version was not specified"
         exit 1
     }
-
+    
     $version = $version.TrimStart('v');
 
     # Make sure the working directory is clean
@@ -65,23 +65,23 @@ try
 
     # Find Visual Studio
     $devenv = & vswhere.exe '-property' productPath
-
+    
     # Build the solution
     Start-Process -FilePath $devenv -ArgumentList "$slnPath /rebuild Release /project Installer" -Wait
 
-    # Create a self extracting archive
-    Start-Process -FilePath "$PSScriptRoot\makesfx.exe" -ArgumentList "-o -c -ic -mf -ft -wc -di -un -op $installerReleaseDir $installerReleaseDir\AutoGame_Setup_$version.exe $srcPath\AutoGame\Icons\AutoGame.ico $installerReleaseDir\setup.exe" -Wait
-
+    # Rename the output *.msi file
+    Rename-Item "$installerReleaseDir\AutoGame_Setup.msi" "AutoGame_Setup_$version.msi"
+    
     # Create a GitHub release
     if (![string]::IsNullOrWhiteSpace($github_token))
     {
         $env:GITHUB_TOKEN = $github_token;
-        hub release create --draft --message "AutoGame v${version}" --attach "$installerReleaseDir\AutoGame_Setup_$version.exe" "v${version}"
+        hub release create --draft --message "AutoGame v${version}" --attach "$installerReleaseDir\AutoGame_Setup_$version.msi" "v${version}"
         Remove-Item Env:\GITHUB_TOKEN
     }
 
     Write-Host "Build complete"
-    Write-Host "$installerReleaseDir\AutoGame_Setup_$version.exe"
+    Write-Host "$installerReleaseDir\AutoGame_Setup_$version.msi"
 
     # Reset version changes
     git reset --hard HEAD
