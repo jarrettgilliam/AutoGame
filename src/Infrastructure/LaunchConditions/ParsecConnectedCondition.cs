@@ -309,18 +309,19 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     {
         using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
 
-        return this.HasAnyActiveUDPPorts(parsecProcs) &&
+        return this.HasMoreThanTwoActiveUDPPorts(parsecProcs) &&
                this.HasAnyActiveAudioSessions(parsecProcs);
     }
 
-    private bool HasAnyActiveUDPPorts(IList<IProcess> parsecProcs)
+    private bool HasMoreThanTwoActiveUDPPorts(IList<IProcess> parsecProcs)
     {
         IList<Port> ports = this.NetStatPortsService.GetUdpPorts();
 
-        bool hasPorts = ports.Any(p => this.IsParsecUDPPort(p, parsecProcs));
+        int count = ports.Count(p => this.IsParsecUDPPort(p, parsecProcs));
+        bool result = count > 2;
 
-        this.Trace(() => $"returned {hasPorts}");
-        return hasPorts;
+        this.Trace(() => $"found {count} ports; returned {result}");
+        return result;
     }
 
     private bool IsParsecUDPPort(Port port, IList<IProcess> parsecProcs) =>

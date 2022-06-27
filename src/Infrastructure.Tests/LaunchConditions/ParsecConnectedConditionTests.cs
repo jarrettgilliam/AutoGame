@@ -49,6 +49,8 @@ public class ParsecConnectedConditionTests
     {
         this.netstatPorts = new List<Port>
         {
+            new() { Protocol = "UDP", ProcessId = PARSECD_PROC_ID },
+            new() { Protocol = "UDP", ProcessId = PARSECD_PROC_ID },
             new() { Protocol = "UDP", ProcessId = PARSECD_PROC_ID }
         };
 
@@ -157,9 +159,24 @@ public class ParsecConnectedConditionTests
     }
 
     [Fact]
+    public void NetStatTwoPorts_DoesntFire_ConditionMet()
+    {
+        this.netstatPorts.RemoveAt(2);
+        
+        Assert.Equal(2, this.netstatPorts.Count);
+
+        using var helper = new LaunchConditionTestHelper(this.sut);
+
+        Assert.Equal(0, helper.FiredCount);
+    }
+
+    [Fact]
     public void NetStatProcessIdMismatch_DoesntFire_ConditionMet()
     {
-        this.netstatPorts[0] = this.netstatPorts[0] with { ProcessId = 8888 };
+        for (int i = 0; i < this.netstatPorts.Count; i++)
+        {
+            this.netstatPorts[i] = this.netstatPorts[i] with { ProcessId = 8888 };
+        }
 
         using var helper = new LaunchConditionTestHelper(this.sut);
 
@@ -169,7 +186,10 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void NetStatNoUDPPorts_DoesntFire_ConditionMet()
     {
-        this.netstatPorts[0] = this.netstatPorts[0] with { Protocol = "TCP" };
+        for (int i = 0; i < this.netstatPorts.Count; i++)
+        {
+            this.netstatPorts[i] = this.netstatPorts[i] with { Protocol = "TCP" };
+        }
 
         using var helper = new LaunchConditionTestHelper(this.sut);
 
@@ -441,10 +461,10 @@ public class ParsecConnectedConditionTests
         Assert.Null(this.audioSessionControlMock.EventClient);
 
         this.mmDeviceMock.Verify(x => x.Dispose(), Times.Once);
-        
+
         this.fileSystemWatcherMock.VerifyRemove(
             x => x.Changed -= It.IsAny<FileSystemEventHandler>(), Times.Once);
-        
+
         this.fileSystemWatcherMock.Verify(x => x.Dispose(), Times.Once);
     }
 
