@@ -20,11 +20,9 @@ public static class DependencyInjection
     {
         services.AddSingleton<IDateTimeService, DateTimeService>();
         services.AddSingleton<IDialogService, DialogService>();
-        services.AddSingleton<IMMDeviceEnumerator, MMDeviceEnumeratorWrapper>();
         services.AddSingleton<INetStatPortsService, NetStatPortsService>();
         services.AddSingleton<IProcessService, ProcessService>();
         services.AddSingleton<ISleepService, SleepService>();
-        services.AddSingleton<ISystemEventsService, SystemEventsService>();
         services.AddSingleton<IWindowService, WindowService>();
         services.AddSingleton<IGameControllerService, WindowsGameControllerService>();
         services.AddSingleton<IRegistryService, WindowsRegistryService>();
