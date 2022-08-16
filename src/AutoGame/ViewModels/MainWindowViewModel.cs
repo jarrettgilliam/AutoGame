@@ -10,7 +10,7 @@ using AutoGame.Commands;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Prism.Commands;
+using CommunityToolkit.Mvvm.Input;
 
 public class MainWindowViewModel : ObservableObject
 {
@@ -34,10 +34,10 @@ public class MainWindowViewModel : ObservableObject
         this.LoadedCommand = new AsyncDelegateCommand(this.OnLoadedAsync);
         this.LoadedCommand.OnException += this.OnAsyncDelegateCommandException;
         
-        this.BrowseSoftwarePathCommand = new DelegateCommand(this.OnBrowseSoftwarePath);
-        this.OKCommand = new DelegateCommand(this.OnOK);
-        this.CancelCommand = new DelegateCommand(this.OnCancel);
-        this.ApplyCommand = new DelegateCommand(() => this.OnApply());
+        this.BrowseSoftwarePathCommand = new RelayCommand(this.OnBrowseSoftwarePath);
+        this.OKCommand = new RelayCommand(this.OnOK);
+        this.CancelCommand = new RelayCommand(this.OnCancel);
+        this.ApplyCommand = new RelayCommand(() => this.OnApply());
 
         this.config = this.ConfigService.CreateDefault(
             this.AutoGameService.AvailableSoftware.FirstOrDefault());
