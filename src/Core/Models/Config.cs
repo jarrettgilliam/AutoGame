@@ -1,12 +1,12 @@
 ﻿namespace AutoGame.Core.Models;
 
-using Prism.Mvvm;
 using System.Collections;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
-public class Config : BindableBase, INotifyDataErrorInfo
+public class Config : ObservableObject, INotifyDataErrorInfo
 {
     private readonly Dictionary<string, IEnumerable<string>> allErrors = new();
     private bool isDirty;

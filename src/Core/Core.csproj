@@ -11,8 +11,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-      <PackageReference Include="Prism.Core" Version="8.1.97" />
       <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
     </ItemGroup>
 
