@@ -1,0 +1,125 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AutoGame.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:interfaces="clr-namespace:AutoGame.Core.Interfaces;assembly=AutoGame.Core"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
+        mc:Ignorable="d" d:DesignHeight="315" d:DesignWidth="625"
+        x:Class="AutoGame.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/AutoGame.ico"
+        Title="AutoGame"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="{Binding ShowWindow, Mode=TwoWay}"
+        ShowWindow="{Binding ShowWindow, Mode=TwoWay}"
+        SizeToContent="Height" MaxWidth="630" CanResize="False">
+
+    <Grid RowDefinitions="*,Auto">
+        <StackPanel Grid.Row="0" Margin="5,5,5,0">
+            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto">
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="5 0 0 0"
+                    Text="Game launcher:"
+                    VerticalAlignment="Center" />
+
+                <ComboBox
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Margin="5"
+                    VerticalContentAlignment="Center"
+                    HorizontalAlignment="Stretch" 
+                    Items="{Binding AutoGameService.AvailableSoftware}"
+                    SelectedItem="{Binding SelectedSoftware, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="interfaces:ISoftwareManager">
+                            <TextBlock Text="{Binding Description}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="5 0 0 0"
+                    Text="Launcher path:"
+                    VerticalAlignment="Center" />
+
+                <TextBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    x:Name="SoftwarePathBox"
+                    Margin="5"
+                    Text="{Binding Config.SoftwarePath, Mode=TwoWay}"
+                    VerticalContentAlignment="Center" />
+
+                <Button
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    Margin="0 5 5 5"
+                    Command="{Binding BrowseSoftwarePathCommand}"
+                    Height="32"
+                    VerticalAlignment="Top"
+                    ToolTip.Tip="Browse">
+                    <ui:SymbolIcon Symbol="OpenFolder" />
+                </Button>
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="5 0 0 0"
+                    Text="Launcher arguments:"
+                    VerticalAlignment="Center" />
+
+                <TextBox
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Margin="5"
+                    Text="{Binding Config.SoftwareArguments, Mode=TwoWay}"
+                    VerticalContentAlignment="Center" />
+            </Grid>
+
+            <CheckBox
+                Margin="5"
+                Content="Start when a game controller is connected"
+                IsChecked="{Binding Config.LaunchWhenGameControllerConnected, Mode=TwoWay}"
+                VerticalContentAlignment="Center" />
+
+            <CheckBox
+                Margin="5"
+                Content="Start when a Parsec connection is established"
+                IsChecked="{Binding Config.LaunchWhenParsecConnected, Mode=TwoWay}"
+                VerticalContentAlignment="Center" />
+
+        </StackPanel>
+        <StackPanel Grid.Row="1" Margin="5,0,5,5" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel.Styles>
+                <Style Selector="Button">
+                    <Setter Property="Margin" Value="5" />
+                    <Setter Property="MinWidth" Value="75" />
+                </Style>
+            </StackPanel.Styles>
+
+            <Button
+                Content="OK"
+                Command="{Binding OKCommand}"
+                IsDefault="True" />
+
+            <Button
+                Content="Cancel"
+                Command="{Binding CancelCommand}"
+                IsCancel="True" />
+
+            <Button
+                Content="Apply"
+                Command="{Binding ApplyCommand}"
+                IsEnabled="{Binding Config.IsDirty}" />
+
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,10 +1,10 @@
-﻿namespace AutoGame;
+﻿namespace AutoGame.Commands;
 
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-internal sealed class AsyncDelegateCommand : ICommand
+public sealed class AsyncDelegateCommand : ICommand
 {
     public AsyncDelegateCommand(Func<Task> executeMethod)
     {

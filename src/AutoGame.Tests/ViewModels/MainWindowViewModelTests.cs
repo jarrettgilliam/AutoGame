@@ -2,7 +2,6 @@ namespace AutoGame.Tests.ViewModels;
 
 using System.IO.Abstractions;
 using System.Reflection;
-using System.Windows;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.ViewModels;
@@ -179,7 +178,7 @@ public class MainWindowViewModelTests
 
         await this.sut.LoadedCommand.ExecuteAsync();
 
-        Assert.NotEqual(WindowState.Minimized, this.sut.WindowState);
+        Assert.True(this.sut.ShowWindow);
     }
 
     [Fact]
@@ -209,7 +208,7 @@ public class MainWindowViewModelTests
     {
         await this.sut.LoadedCommand.ExecuteAsync();
 
-        Assert.Equal(WindowState.Minimized, this.sut.WindowState);
+        Assert.False(this.sut.ShowWindow);
     }
 
     [Fact]
@@ -219,17 +218,7 @@ public class MainWindowViewModelTests
 
         await this.sut.LoadedCommand.ExecuteAsync();
 
-        Assert.NotEqual(WindowState.Minimized, this.sut.WindowState);
-    }
-
-    [Fact]
-    public void OnNotifyIconClick_RestoresWindow()
-    {
-        this.sut.WindowState = WindowState.Minimized;
-
-        this.sut.NotifyIconClickCommand.Execute(null);
-
-        Assert.Equal(WindowState.Normal, this.sut.WindowState);
+        Assert.True(this.sut.ShowWindow);
     }
 
     [Fact]
@@ -303,18 +292,18 @@ public class MainWindowViewModelTests
     [Fact]
     public void OnOK_CanApply_MinimizesWindow()
     {
-        this.sut.WindowState = WindowState.Normal;
+        this.sut.ShowWindow = true;
         this.sut.OKCommand.Execute(null);
-        Assert.Equal(WindowState.Minimized, this.sut.WindowState);
+        Assert.False(this.sut.ShowWindow);
     }
 
     [Fact]
     public void OnOK_CannotApply_DoesntMinimizeWindow()
     {
         this.canApplyConfiguration = false;
-        this.sut.WindowState = WindowState.Normal;
+        this.sut.ShowWindow = true;
         this.sut.OKCommand.Execute(null);
-        Assert.Equal(WindowState.Normal, this.sut.WindowState);
+        Assert.True(this.sut.ShowWindow);
     }
 
     [Fact]
@@ -358,9 +347,9 @@ public class MainWindowViewModelTests
     [Fact]
     public void OnCancel_MinimizesWindow()
     {
-        this.sut.WindowState = WindowState.Normal;
+        this.sut.ShowWindow = true;
         this.sut.CancelCommand.Execute(null);
-        Assert.Equal(WindowState.Minimized, this.sut.WindowState);
+        Assert.False(this.sut.ShowWindow);
     }
 
     [Fact]
@@ -457,7 +446,7 @@ public class MainWindowViewModelTests
 
         this.autoGameServiceMock.Verify(
             x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()),
-            Times.Once);
+            Times.AtLeastOnce);
     }
 
     [Fact]
@@ -474,67 +463,12 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void SetWindowState_Restore_PropertyOrderCorrect()
-    {
-        this.sut.WindowState = WindowState.Minimized;
-        this.sut.ShowWindow = false;
-        this.sut.NotifyIconVisible = true;
-
-        List<string?> propertyChanges = new();
-        this.sut.PropertyChanged += (_, args) => propertyChanges.Add(args.PropertyName);
-
-        this.sut.NotifyIconClickCommand.Execute(null);
-
-        Assert.Collection(propertyChanges,
-            p => Assert.Equal(nameof(this.sut.NotifyIconVisible), p),
-            p => Assert.Equal(nameof(this.sut.ShowWindow), p),
-            p => Assert.Equal(nameof(this.sut.WindowState), p));
-    }
-
-    [Fact]
-    public void SetWindowState_Minimize_PropertyOrderCorrect()
-    {
-        this.sut.NotifyIconVisible = false;
-        this.sut.ShowWindow = true;
-        this.sut.WindowState = WindowState.Normal;
-
-        List<string?> propertyChanges = new();
-        this.sut.PropertyChanged += (_, args) => propertyChanges.Add(args.PropertyName);
-
-        this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
-        this.sut.CancelCommand.Execute(null);
-
-        Assert.Collection(propertyChanges,
-            p => Assert.Equal(nameof(this.sut.WindowState), p),
-            p => Assert.Equal(nameof(this.sut.ShowWindow), p),
-            p => Assert.Equal(nameof(this.sut.NotifyIconVisible), p));
-    }
-
-    [Fact]
     public void SetWindowState_Minimize_PropertyValueCorrect()
     {
-        this.sut.WindowState = WindowState.Normal;
         this.sut.ShowWindow = true;
-        this.sut.NotifyIconVisible = false;
 
         this.sut.CancelCommand.Execute(null);
 
-        Assert.Equal(WindowState.Minimized, this.sut.WindowState);
         Assert.False(this.sut.ShowWindow);
-        Assert.True(this.sut.NotifyIconVisible);
-    }
-
-    [Fact]
-    public void SetWindowState_Restore_PropertyValueCorrect()
-    {
-        this.sut.WindowState = WindowState.Minimized;
-        this.sut.ShowWindow = false;
-        this.sut.NotifyIconVisible = true;
-
-        this.sut.NotifyIconClickCommand.Execute(null);
-
-        Assert.Equal(WindowState.Normal, this.sut.WindowState);
-        Assert.True(this.sut.ShowWindow);
-        Assert.False(this.sut.NotifyIconVisible);
     }
 }

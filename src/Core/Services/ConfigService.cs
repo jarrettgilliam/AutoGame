@@ -62,21 +62,20 @@ internal sealed class ConfigService : IConfigService
     public void Validate(Config config, IEnumerable<ISoftwareManager> knownSoftware)
     {
         config.ClearAllErrors();
-
-        if (string.IsNullOrEmpty(config.SoftwarePath))
+        
+        ISoftwareManager? softwareManager = knownSoftware.FirstOrDefault(x => x.Key == config.SoftwareKey);
+        
+        if (softwareManager is null)
+        {
+            config.AddError(nameof(config.SoftwareKey), "Unknown software");
+        }
+        else if (string.IsNullOrEmpty(config.SoftwarePath))
         {
             config.AddError(nameof(config.SoftwarePath), "Required");
         }
         else if (!this.FileSystem.File.Exists(config.SoftwarePath))
         {
             config.AddError(nameof(config.SoftwarePath), "File not found");
-        }
-
-        ISoftwareManager? softwareManager = knownSoftware.FirstOrDefault(x => x.Key == config.SoftwareKey); 
-        
-        if (softwareManager is null)
-        {
-            config.AddError(nameof(config.SoftwareKey), "Unknown software");
         }
         else if (!this.ExecutableNameMatches(config.SoftwarePath, softwareManager))
         {

@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{D99963FE-79C8-4428-93C2-3B72C6A52DAB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoGame", "AutoGame\AutoGame.csproj", "{EC2AEEE9-FA85-449B-B0B1-BEF83CAAEDE5}"
-EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "Installer\Installer.vdproj", "{8F3E523B-BB98-455D-9535-CD3CBDB9C26E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8726517D-94EC-47C4-8B5E-59C5D9ECE220}"
@@ -26,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "Core.Tests\Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{9772F0E3-65BE-4EE8-8A9E-D800AF1510AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoGame", "AutoGame\AutoGame.csproj", "{27208B88-2563-4BCD-9761-C22D24DA00E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,10 +36,6 @@ Global
 		{D99963FE-79C8-4428-93C2-3B72C6A52DAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D99963FE-79C8-4428-93C2-3B72C6A52DAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D99963FE-79C8-4428-93C2-3B72C6A52DAB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EC2AEEE9-FA85-449B-B0B1-BEF83CAAEDE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EC2AEEE9-FA85-449B-B0B1-BEF83CAAEDE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EC2AEEE9-FA85-449B-B0B1-BEF83CAAEDE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EC2AEEE9-FA85-449B-B0B1-BEF83CAAEDE5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8F3E523B-BB98-455D-9535-CD3CBDB9C26E}.Debug|Any CPU.ActiveCfg = Debug
 		{8F3E523B-BB98-455D-9535-CD3CBDB9C26E}.Release|Any CPU.ActiveCfg = Release
 		{8F3E523B-BB98-455D-9535-CD3CBDB9C26E}.Release|Any CPU.Build.0 = Release
@@ -63,6 +59,10 @@ Global
 		{9772F0E3-65BE-4EE8-8A9E-D800AF1510AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9772F0E3-65BE-4EE8-8A9E-D800AF1510AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9772F0E3-65BE-4EE8-8A9E-D800AF1510AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27208B88-2563-4BCD-9761-C22D24DA00E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27208B88-2563-4BCD-9761-C22D24DA00E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27208B88-2563-4BCD-9761-C22D24DA00E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27208B88-2563-4BCD-9761-C22D24DA00E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
