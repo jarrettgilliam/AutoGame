@@ -5,19 +5,18 @@ using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
+using AutoGame.Commands;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Prism.Commands;
-using Prism.Mvvm;
 
-internal sealed class MainWindowViewModel : BindableBase
+public class MainWindowViewModel : ObservableObject
 {
     private Config config;
-    private WindowState windowState;
     private bool showWindow = true;
-    private bool notifyIconVisible;
+    private ISoftwareManager? selectedSoftware;
 
     public MainWindowViewModel(
         ILoggingService loggingService,
@@ -35,7 +34,6 @@ internal sealed class MainWindowViewModel : BindableBase
         this.LoadedCommand = new AsyncDelegateCommand(this.OnLoadedAsync);
         this.LoadedCommand.OnException += this.OnAsyncDelegateCommandException;
         
-        this.NotifyIconClickCommand = new DelegateCommand(this.OnNotifyIconClick);
         this.BrowseSoftwarePathCommand = new DelegateCommand(this.OnBrowseSoftwarePath);
         this.OKCommand = new DelegateCommand(this.OnOK);
         this.CancelCommand = new DelegateCommand(this.OnCancel);
@@ -55,8 +53,6 @@ internal sealed class MainWindowViewModel : BindableBase
     public IAutoGameService AutoGameService { get; }
 
     public AsyncDelegateCommand LoadedCommand { get; }
-
-    public ICommand NotifyIconClickCommand { get; }
 
     public ICommand BrowseSoftwarePathCommand { get; }
 
@@ -81,22 +77,22 @@ internal sealed class MainWindowViewModel : BindableBase
         }
     }
 
-    public WindowState WindowState
-    {
-        get => this.windowState;
-        set => this.SetProperty(ref this.windowState, value);
-    }
-
     public bool ShowWindow
     {
         get => this.showWindow;
         set => this.SetProperty(ref this.showWindow, value);
     }
 
-    public bool NotifyIconVisible
+    public ISoftwareManager? SelectedSoftware
     {
-        get => this.notifyIconVisible;
-        set => this.SetProperty(ref this.notifyIconVisible, value);
+        get => this.selectedSoftware;
+        set
+        {
+            if (this.SetProperty(ref this.selectedSoftware, value))
+            {
+                this.Config.SoftwareKey = value?.Key;
+            }
+        }
     }
 
     private async Task OnLoadedAsync()
@@ -109,7 +105,7 @@ internal sealed class MainWindowViewModel : BindableBase
 
                 if (!this.Config.HasErrors)
                 {
-                    this.SetWindowState(WindowState.Minimized);
+                    this.ShowWindow = false;
                     await Task.Run(() => this.AutoGameService.ApplyConfiguration(this.Config));
                 }
             }
@@ -124,18 +120,6 @@ internal sealed class MainWindowViewModel : BindableBase
         catch (Exception ex)
         {
             this.LoggingService.LogException("handling application loaded", ex);
-        }
-    }
-
-    private void OnNotifyIconClick()
-    {
-        try
-        {
-            this.SetWindowState(WindowState.Normal);
-        }
-        catch (Exception ex)
-        {
-            this.LoggingService.LogException("handling tray icon click", ex);
         }
     }
 
@@ -182,7 +166,7 @@ internal sealed class MainWindowViewModel : BindableBase
         {
             if (this.OnApply())
             {
-                this.SetWindowState(WindowState.Minimized);
+                this.ShowWindow = false;
             }
         }
         catch (Exception ex)
@@ -197,7 +181,7 @@ internal sealed class MainWindowViewModel : BindableBase
         {
             this.TryLoadConfig();
             this.ConfigService.Validate(this.Config, this.AutoGameService.AvailableSoftware);
-            this.SetWindowState(WindowState.Minimized);
+            this.ShowWindow = false;
         }
         catch (Exception ex)
         {
@@ -213,6 +197,7 @@ internal sealed class MainWindowViewModel : BindableBase
         {
             this.ConfigService.Upgrade(c, this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey));
             this.Config = c;
+            this.SelectedSoftware = this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey);
             this.LoggingService.EnableTraceLogging = c.EnableTraceLogging;
         }
 
@@ -252,6 +237,7 @@ internal sealed class MainWindowViewModel : BindableBase
             if (e.PropertyName == nameof(this.Config.SoftwareKey) && sender is Config c)
             {
                 ISoftwareManager? s = this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey);
+                this.SelectedSoftware = s;
                 c.SoftwarePath = s?.FindSoftwarePathOrDefault();
                 c.SoftwareArguments = s?.DefaultArguments;
             }
@@ -259,27 +245,6 @@ internal sealed class MainWindowViewModel : BindableBase
         catch (Exception ex)
         {
             this.LoggingService.LogException("handling config software key changed", ex);
-        }
-    }
-
-    private void SetWindowState(WindowState state)
-    {
-        if (this.WindowState == state)
-        {
-            return;
-        }
-
-        if (state == WindowState.Minimized)
-        {
-            this.WindowState = state;
-            this.ShowWindow = false;
-            this.NotifyIconVisible = true;
-        }
-        else
-        {
-            this.NotifyIconVisible = false;
-            this.ShowWindow = true;
-            this.WindowState = state;
         }
     }
 
