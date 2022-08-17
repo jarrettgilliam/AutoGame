@@ -1,6 +1,7 @@
 ﻿namespace AutoGame.ViewModels;
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
@@ -33,8 +34,10 @@ public class MainWindowViewModel : ObservableObject
 
         this.LoadedCommand = new AsyncDelegateCommand(this.OnLoadedAsync);
         this.LoadedCommand.OnException += this.OnAsyncDelegateCommandException;
-        
-        this.BrowseSoftwarePathCommand = new RelayCommand(this.OnBrowseSoftwarePath);
+
+        this.BrowseSoftwarePathCommand = new AsyncDelegateCommand(this.OnBrowseSoftwarePath);
+        this.BrowseSoftwarePathCommand.OnException += this.OnAsyncDelegateCommandException;
+
         this.OKCommand = new RelayCommand(this.OnOK);
         this.CancelCommand = new RelayCommand(this.OnCancel);
         this.ApplyCommand = new RelayCommand(() => this.OnApply());
@@ -54,7 +57,7 @@ public class MainWindowViewModel : ObservableObject
 
     public AsyncDelegateCommand LoadedCommand { get; }
 
-    public ICommand BrowseSoftwarePathCommand { get; }
+    public AsyncDelegateCommand BrowseSoftwarePathCommand { get; }
 
     public ICommand OKCommand { get; }
 
@@ -123,7 +126,7 @@ public class MainWindowViewModel : ObservableObject
         }
     }
 
-    private void OnBrowseSoftwarePath()
+    private async Task OnBrowseSoftwarePath()
     {
         try
         {
@@ -141,7 +144,8 @@ public class MainWindowViewModel : ObservableObject
             {
                 FileName = executable,
                 InitialDirectory = this.FileSystem.Path.GetDirectoryName(this.Config.SoftwarePath),
-                Filter = $"{software.Description}|{(string.IsNullOrEmpty(executable) ? "*.exe" : executable)}"
+                FilterName = software.Description,
+                FilterExtensions = new List<string> { "exe" }
             };
 
             if (string.IsNullOrEmpty(parms.InitialDirectory))
@@ -149,7 +153,7 @@ public class MainWindowViewModel : ObservableObject
                 parms.InitialDirectory = this.FileSystem.Path.GetDirectoryName(defaultPath);
             }
 
-            if (this.DialogService.ShowOpenFileDialog(parms, out string? selectedFileName))
+            if (await this.DialogService.ShowOpenFileDialog(parms) is { } selectedFileName)
             {
                 this.Config.SoftwarePath = selectedFileName;
             }
