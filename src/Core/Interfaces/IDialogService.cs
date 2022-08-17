@@ -4,7 +4,7 @@ using AutoGame.Core.Models;
 
 public interface IDialogService
 {
-    bool ShowOpenFileDialog(OpenFileDialogParms parms, out string? selectedFileName);
+    Task<string?> ShowOpenFileDialog(OpenFileDialogParms parms);
 
     void ShowMessageBox(MessageBoxParms parms);
 }

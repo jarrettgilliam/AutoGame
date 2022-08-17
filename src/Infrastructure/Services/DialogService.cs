@@ -1,41 +1,88 @@
 ﻿namespace AutoGame.Infrastructure.Services;
 
-using System.Windows;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
-using Microsoft.Win32;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using FluentAvalonia.Styling;
+using MessageBox.Avalonia.BaseWindows.Base;
+using MessageBox.Avalonia.DTO;
+using MessageBox.Avalonia.Enums;
+using MessageBox.Avalonia.ViewModels;
+using MessageBox.Avalonia.Views;
 
 internal sealed class DialogService : IDialogService
 {
-    public bool ShowOpenFileDialog(OpenFileDialogParms parms, out string? selectedFileName)
+    public async Task<string?> ShowOpenFileDialog(OpenFileDialogParms parms)
     {
         var dialog = new OpenFileDialog
         {
-            FileName = parms.FileName,
-            InitialDirectory = parms.InitialDirectory,
-            Filter = parms.Filter
+            InitialFileName = parms.FileName,
+            Directory = parms.InitialDirectory,
+            Filters = new List<FileDialogFilter>
+            {
+                new()
+                {
+                    Name = parms.FilterName,
+                    Extensions = parms.FilterExtensions
+                }
+            }
         };
-        
-        bool result = dialog.ShowDialog() ?? false;
 
-        selectedFileName = result ? dialog.FileName : null;
-        
-        return result;
+        if (!(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime))
+        {
+            return null;
+        }
+
+        string[]? selectedFiles = await dialog.ShowAsync(lifetime.MainWindow).ConfigureAwait(false);
+
+        return selectedFiles?.FirstOrDefault();
     }
 
-    public void ShowMessageBox(MessageBoxParms parms) =>
-        MessageBox.Show(
-            parms.Message,
-            parms.Title,
-            MessageBoxButton.OK,
-            this.GetMessageBoxImageForLogLevel(parms.Icon));
+    public void ShowMessageBox(MessageBoxParms parms)
+    {
+        var stdParms = new MessageBoxStandardParams
+        {
+            ContentMessage = parms.Message,
+            ContentTitle = parms.Title,
+            ButtonDefinitions = ButtonEnum.Ok,
+            Icon = this.GetIconForLogLevel(parms.Icon),
+            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            MaxWidth = 600
+        };
+        
+        if (AvaloniaLocator.Current.GetService<IAssetLoader>() is { } assets)
+        {
+           stdParms.WindowIcon = new WindowIcon(
+               new Bitmap(assets.Open(new Uri(@"avares://AutoGame/Assets/AutoGame.ico"))));
+        }
+        
+        _ = this.GetMessageBoxStandardWindow(stdParms).Show();
+    }
 
-    private MessageBoxImage GetMessageBoxImageForLogLevel(LogLevel level) =>
+    private Icon GetIconForLogLevel(LogLevel level) =>
         level switch
         {
-            LogLevel.Trace => MessageBoxImage.Information,
-            LogLevel.Error => MessageBoxImage.Error,
+            LogLevel.Trace => Icon.Info,
+            LogLevel.Error => Icon.Error,
             _ => default
         };
+
+    // Copied from MessageBoxManager and added a call to ForceWin32WindowToTheme
+    private IMsBoxWindow<ButtonResult> GetMessageBoxStandardWindow(MessageBoxStandardParams @params)
+    {
+        MsBoxStandardWindow boxStandardWindow = new MsBoxStandardWindow();
+
+        if (AvaloniaLocator.Current.GetService<FluentAvaloniaTheme>() is { } theme)
+        {
+            theme.ForceWin32WindowToTheme(boxStandardWindow);
+        }
+
+        boxStandardWindow.DataContext = new MsBoxStandardViewModel(@params, boxStandardWindow);
+        return new MsBoxWindowBase<MsBoxStandardWindow, ButtonResult>(boxStandardWindow);
+    }
 }

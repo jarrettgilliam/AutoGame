@@ -11,7 +11,6 @@ using FluentAvalonia.Styling;
 using FluentAvalonia.UI.Media;
 using System;
 using System.Threading.Tasks;
-using System.Windows;
 using AutoGame.Core.Interfaces;
 using Application = Avalonia.Application;
 using Window = Avalonia.Controls.Window;
@@ -85,7 +84,8 @@ public class App : Application
         }
         else
         {
-            MessageBox.Show(exception.ToString(), $"Error {message}", MessageBoxButton.OK, MessageBoxImage.Error);
+            Console.Error.WriteLine(message);
+            Console.Error.WriteLine(exception.ToString());
         }
 
         Environment.Exit(1);
