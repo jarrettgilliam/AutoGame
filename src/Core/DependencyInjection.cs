@@ -8,7 +8,6 @@ public static class DependencyInjection
 {
     public static void AddCore(this IServiceCollection services)
     {
-        services.AddSingleton<IAppInfoService, AppInfoService>();
         services.AddSingleton<IAutoGameService, AutoGameService>();
         services.AddSingleton<IConfigService, ConfigService>();
         services.AddSingleton<ILoggingService, LoggingService>();

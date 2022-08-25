@@ -1,7 +1,11 @@
 ﻿namespace AutoGame.Core.Tests.Services;
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -159,7 +163,7 @@ public class ConfigServiceTests
     {
         this.sut.Save(this.configMock);
 
-        Config savedConfig = JsonSerializer.Deserialize<Config>(
+        var savedConfig = JsonSerializer.Deserialize<Config>(
             Encoding.UTF8.GetString(this.saveMemoryStream.ToArray()))!;
 
         savedConfig.IsDirty = false;
@@ -243,7 +247,7 @@ public class ConfigServiceTests
         Assert.Equal(
             this.softwareMock.Object.FindSoftwarePathOrDefault(),
             config.SoftwarePath);
-        
+
         Assert.Equal(
             this.softwareMock.Object.DefaultArguments,
             config.SoftwareArguments);
@@ -255,9 +259,9 @@ public class ConfigServiceTests
         Config config = this.sut.CreateDefault(this.softwareMock.Object);
 
         int defaultVersion = config.Version;
-        
+
         this.sut.Upgrade(config, this.softwareMock.Object);
-        
+
         Assert.Equal(defaultVersion, config.Version);
     }
 
@@ -335,7 +339,7 @@ public class ConfigServiceTests
     {
         const string oldPropertyName = "LaunchWhenGamepadConnected";
         JsonDocument extensionData = JsonDocument.Parse($"{{ \"{oldPropertyName}\": true }}");
-        
+
         this.configMock.Version = 0;
         this.configMock.LaunchWhenGameControllerConnected = false;
         this.configMock.JsonExtensionData = new Dictionary<string, JsonElement>

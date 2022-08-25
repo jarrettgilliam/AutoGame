@@ -1,27 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <WarningsAsErrors>Nullable</WarningsAsErrors>
-    <Version>1.0.0</Version>
-    <UseWPF>true</UseWPF>
-    <AssemblyName>AutoGame.Infrastructure</AssemblyName>
-    <RootNamespace>AutoGame.Infrastructure</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>nullable</WarningsAsErrors>
+        <Version>1.0.0</Version>
+        <AssemblyName>AutoGame.Infrastructure</AssemblyName>
+        <RootNamespace>AutoGame.Infrastructure</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.17" />
-    <PackageReference Include="FluentAvaloniaUI" Version="1.4.1" />
-    <PackageReference Include="MessageBox.Avalonia" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-    <PackageReference Include="OpenTK.Windowing.Desktop" Version="4.7.4" />
-    <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="0.10.17"/>
+        <PackageReference Include="FluentAvaloniaUI" Version="1.4.1"/>
+        <PackageReference Include="MessageBox.Avalonia" Version="2.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0"/>
+        <PackageReference Include="OpenTK.Windowing.Desktop" Version="4.7.4"/>
+        <PackageReference Include="System.IO.Abstractions" Version="17.0.10"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Core\Core.csproj"/>
+    </ItemGroup>
 
 </Project>

@@ -1,5 +1,7 @@
 ﻿namespace AutoGame.Core.Models;
 
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using AutoGame.Core.Interfaces;
 

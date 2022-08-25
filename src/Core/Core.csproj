@@ -2,24 +2,23 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <WarningsAsErrors>Nullable</WarningsAsErrors>
+        <WarningsAsErrors>nullable</WarningsAsErrors>
         <Version>1.0.0</Version>
         <AssemblyName>AutoGame.Core</AssemblyName>
         <RootNamespace>AutoGame.Core</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-      <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+        <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Enums\Role.cs" />
-      <Compile Remove="Enums\DeviceState.cs" />
-      <Compile Remove="Enums\DataFlow.cs" />
+        <Compile Remove="Enums\Role.cs" />
+        <Compile Remove="Enums\DeviceState.cs" />
+        <Compile Remove="Enums\DataFlow.cs" />
     </ItemGroup>
 
 </Project>

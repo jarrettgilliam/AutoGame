@@ -3,5 +3,5 @@
 public enum LogLevel
 {
     Trace,
-    Error,
+    Error
 }

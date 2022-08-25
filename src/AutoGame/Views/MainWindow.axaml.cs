@@ -56,10 +56,10 @@ public partial class MainWindow : CoreWindow
     protected override Size MeasureOverride(Size availableSize)
     {
         // Copied from Window.cs
-        var sizeToContent = this.SizeToContent;
-        var clientSize = this.ClientSize;
-        var constraint = clientSize;
-        var maxAutoSize = this.PlatformImpl?.MaxAutoSizeHint ?? Size.Infinity;
+        SizeToContent sizeToContent = this.SizeToContent;
+        Size clientSize = this.ClientSize;
+        Size constraint = clientSize;
+        Size maxAutoSize = this.PlatformImpl?.MaxAutoSizeHint ?? Size.Infinity;
 
         if (this.MaxWidth > 0 && this.MaxWidth < maxAutoSize.Width)
         {
@@ -81,7 +81,7 @@ public partial class MainWindow : CoreWindow
             constraint = constraint.WithHeight(maxAutoSize.Height);
         }
 
-        var result = base.MeasureOverride(constraint);
+        Size result = base.MeasureOverride(constraint);
 
         if (!sizeToContent.HasAllFlags(SizeToContent.Width))
         {

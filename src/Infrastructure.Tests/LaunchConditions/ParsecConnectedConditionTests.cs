@@ -116,7 +116,7 @@ public class ParsecConnectedConditionTests
     public void NetStatTwoPorts_DoesntFire_ConditionMet()
     {
         this.netstatPorts.RemoveAt(2);
-        
+
         Assert.Equal(2, this.netstatPorts.Count);
 
         using var helper = new LaunchConditionTestHelper(this.sut);

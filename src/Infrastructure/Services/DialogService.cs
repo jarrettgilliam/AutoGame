@@ -1,5 +1,9 @@
 ﻿namespace AutoGame.Infrastructure.Services;
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
@@ -54,13 +58,13 @@ internal sealed class DialogService : IDialogService
             WindowStartupLocation = WindowStartupLocation.CenterScreen,
             MaxWidth = 600
         };
-        
+
         if (AvaloniaLocator.Current.GetService<IAssetLoader>() is { } assets)
         {
-           stdParms.WindowIcon = new WindowIcon(
-               new Bitmap(assets.Open(new Uri(@"avares://AutoGame/Assets/AutoGame.ico"))));
+            stdParms.WindowIcon = new WindowIcon(
+                new Bitmap(assets.Open(new Uri(@"avares://AutoGame/Assets/AutoGame.ico"))));
         }
-        
+
         _ = this.GetMessageBoxStandardWindow(stdParms).Show();
     }
 
@@ -75,7 +79,7 @@ internal sealed class DialogService : IDialogService
     // Copied from MessageBoxManager and added a call to ForceWin32WindowToTheme
     private IMsBoxWindow<ButtonResult> GetMessageBoxStandardWindow(MessageBoxStandardParams @params)
     {
-        MsBoxStandardWindow boxStandardWindow = new MsBoxStandardWindow();
+        var boxStandardWindow = new MsBoxStandardWindow();
 
         if (AvaloniaLocator.Current.GetService<FluentAvaloniaTheme>() is { } theme)
         {

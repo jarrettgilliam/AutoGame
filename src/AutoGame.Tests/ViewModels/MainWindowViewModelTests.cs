@@ -1,7 +1,11 @@
 namespace AutoGame.Tests.ViewModels;
 
+using System.Collections.Generic;
 using System.IO.Abstractions;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.ViewModels;
@@ -92,12 +96,13 @@ public class MainWindowViewModelTests
             .SetupGet(x => x.Description)
             .Returns(SoftwareDescription);
 
+        this.softwareManagerMock
+            .SetupGet(x => x.Key)
+            .Returns(SoftwareKey);
+
         this.dialogServiceMock
             .Setup(x => x.ShowOpenFileDialog(It.IsAny<OpenFileDialogParms>()))
-            .Callback((OpenFileDialogParms parms) =>
-            {
-                this.openFileDialogParms = parms;
-            })
+            .Callback((OpenFileDialogParms parms) => { this.openFileDialogParms = parms; })
             .Returns(() => Task.FromResult(this.fileSelected ? this.savedConfigMock.SoftwarePath : null));
 
         this.fileSystemMock
@@ -132,7 +137,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public async Task OnLoaded_TryLoadConfigFalse_CreatesDefaultConfiguration()
+    public void OnLoaded_TryLoadConfigFalse_CreatesDefaultConfiguration()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
         List<string?> propertyChanges = new();
@@ -141,7 +146,7 @@ public class MainWindowViewModelTests
             x => x.CreateDefault(It.IsAny<ISoftwareManager>()),
             Times.Exactly(1));
 
-        await this.sut.LoadedCommand.ExecuteAsync();
+        this.sut.LoadedCommand.Execute(null);
 
         this.configServiceMock.Verify(
             x => x.CreateDefault(It.IsAny<ISoftwareManager>()),
@@ -151,71 +156,71 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public async Task OnLoaded_TryLoadConfigFalse_DoesntSaveConfiguration()
+    public void OnLoaded_TryLoadConfigFalse_DoesntSaveConfiguration()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
 
-        await this.sut.LoadedCommand.ExecuteAsync();
+        this.sut.LoadedCommand.Execute(null);
 
         this.configServiceMock.Verify(x => x.Save(It.IsAny<Config>()), Times.Never);
     }
 
     [Fact]
-    public async Task OnLoaded_TryLoadConfigFalse_DoesntApplyConfiguration()
+    public void OnLoaded_TryLoadConfigFalse_DoesntApplyConfiguration()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
 
-        await this.sut.LoadedCommand.ExecuteAsync();
+        this.sut.LoadedCommand.Execute(null);
 
         this.autoGameServiceMock.Verify(x => x.ApplyConfiguration(It.IsAny<Config>()), Times.Never);
     }
 
     [Fact]
-    public async Task OnLoaded_TryLoadConfigFalse_DoesntMinimize()
+    public void OnLoaded_TryLoadConfigFalse_DoesntMinimize()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
 
-        await this.sut.LoadedCommand.ExecuteAsync();
+        this.sut.LoadedCommand.Execute(null);
 
         Assert.True(this.sut.ShowWindow);
     }
 
     [Fact]
-    public async Task OnLoaded_TryLoadConfigTrue_AppliesConfiguration()
+    public void OnLoaded_TryLoadConfigTrue_AppliesConfiguration()
     {
-        await this.sut.LoadedCommand.ExecuteAsync();
+        this.sut.LoadedCommand.Execute(null);
 
         this.autoGameServiceMock.Verify(x => x.ApplyConfiguration(this.savedConfigMock), Times.Once);
     }
 
     [Fact]
-    public async Task OnLoaded_TryLoadConfigTrue_DoesntLoadDefaultConfig()
+    public void OnLoaded_TryLoadConfigTrue_DoesntLoadDefaultConfig()
     {
         List<string?> propertyChanges = new();
         this.sut.PropertyChanged += (_, e) => propertyChanges.Add(e.PropertyName);
 
         this.configServiceMock.Verify(x => x.CreateDefault(It.IsAny<ISoftwareManager>()), Times.Once);
 
-        await this.sut.LoadedCommand.ExecuteAsync();
+        this.sut.LoadedCommand.Execute(null);
 
         this.configServiceMock.Verify(x => x.CreateDefault(It.IsAny<ISoftwareManager>()), Times.Once);
         Assert.Equal(1, propertyChanges.Count(p => p == nameof(this.sut.Config)));
     }
 
     [Fact]
-    public async Task OnLoaded_TryLoadConfigTrue_MinimizesWindow()
+    public void OnLoaded_TryLoadConfigTrue_MinimizesWindow()
     {
-        await this.sut.LoadedCommand.ExecuteAsync();
+        this.sut.LoadedCommand.Execute(null);
 
         Assert.False(this.sut.ShowWindow);
     }
 
     [Fact]
-    public async Task OnLoaded_TryApplyConfigurationFalse_DoesntMinimizeWindow()
+    public void OnLoaded_TryApplyConfigurationFalse_DoesntMinimizeWindow()
     {
         this.canApplyConfiguration = false;
 
-        await this.sut.LoadedCommand.ExecuteAsync();
+        this.sut.LoadedCommand.Execute(null);
 
         Assert.True(this.sut.ShowWindow);
     }
@@ -229,7 +234,7 @@ public class MainWindowViewModelTests
         Assert.Equal(ExecutableName, this.openFileDialogParms.FileName);
         Assert.Equal(CustomDirectory, this.openFileDialogParms.InitialDirectory);
         Assert.Equal(SoftwareDescription, this.openFileDialogParms.FilterName);
-        
+
         Assert.Collection(this.openFileDialogParms.FilterExtensions,
             x => Assert.Equal("exe", x));
     }
@@ -422,9 +427,9 @@ public class MainWindowViewModelTests
     [Fact]
     public void OnConfigSoftwareKeyChanged_OtherChanged_DoNothing()
     {
+        this.sut.Config = this.savedConfigMock;
         this.savedConfigMock.SoftwareKey = null;
         this.savedConfigMock.SoftwarePath = null;
-        this.sut.Config = this.savedConfigMock;
 
         this.sut.Config.LaunchWhenParsecConnected = !this.sut.Config.LaunchWhenParsecConnected;
 
@@ -447,11 +452,15 @@ public class MainWindowViewModelTests
         Config oldConfig = this.sut.Config;
         this.sut.Config = this.savedConfigMock;
 
+        this.autoGameServiceMock.Verify(
+            x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()),
+            Times.Once);
+
         oldConfig.SoftwareKey = "NewKey";
 
         this.autoGameServiceMock.Verify(
             x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()),
-            Times.Never);
+            Times.Once);
     }
 
     [Fact]

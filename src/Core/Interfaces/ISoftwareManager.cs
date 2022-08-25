@@ -5,7 +5,7 @@ public interface ISoftwareManager
     string Key { get; }
 
     string Description { get; }
-    
+
     string DefaultArguments { get; }
 
     bool IsRunning(string softwarePath);
