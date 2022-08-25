@@ -1,5 +1,7 @@
 namespace AutoGame.Core.Tests.Services;
 
+using System;
+using System.IO;
 using System.IO.Abstractions;
 using System.Text;
 using AutoGame.Core.Enums;
@@ -51,7 +53,7 @@ public class LoggingServiceTests
     [Fact]
     public void Log_Error_Writes()
     {
-        DateTimeOffset dtOffset = DateTimeOffset.MinValue;
+        var dtOffset = DateTimeOffset.MinValue;
         const LogLevel level = LogLevel.Error;
         const string error = "Error message";
 

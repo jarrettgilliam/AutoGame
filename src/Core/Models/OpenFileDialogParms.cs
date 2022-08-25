@@ -1,5 +1,7 @@
 ﻿namespace AutoGame.Core.Models;
 
+using System.Collections.Generic;
+
 public struct OpenFileDialogParms
 {
     public string? FileName { get; set; }

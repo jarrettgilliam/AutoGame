@@ -1,6 +1,8 @@
 namespace AutoGame.Core.Tests.Models;
 
+using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using AutoGame.Core.Models;
 

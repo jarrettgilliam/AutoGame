@@ -1,3 +1,3 @@
 ﻿using System.Runtime.CompilerServices;
 
-[assembly:InternalsVisibleTo("AutoGame.Core.Tests")]
+[assembly: InternalsVisibleTo("AutoGame.Core.Tests")]

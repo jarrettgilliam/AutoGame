@@ -14,11 +14,11 @@ internal sealed class ProcessService : IProcessService
         new DisposableList<IProcess>(
             Process.GetProcessesByName(processName)
                 .Select(p => new ProcessWrapper(p)));
-    
+
     private sealed class ProcessWrapper : IProcess
     {
         private readonly Process process;
-        
+
         public ProcessWrapper(Process process)
         {
             this.process = process;

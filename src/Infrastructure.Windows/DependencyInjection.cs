@@ -1,0 +1,35 @@
+﻿// ReSharper disable once CheckNamespace
+
+namespace AutoGame.Infrastructure;
+
+using AutoGame.Core.Interfaces;
+using AutoGame.Infrastructure.Windows.Interfaces;
+using AutoGame.Infrastructure.Windows.Services;
+using AutoGame.Infrastructure.Windows.SoftwareManagers;
+using Microsoft.Extensions.DependencyInjection;
+
+public static class DependencyInjection
+{
+    public static void AddPlatformInfrastructure(this IServiceCollection services)
+    {
+        services.AddServices();
+        services.AddSoftwareManagers();
+    }
+
+    private static void AddServices(this IServiceCollection services)
+    {
+        services.AddSingleton<IAppInfoService, AppInfoService>();
+        services.AddSingleton<IIpHelperApiService, IpHelperApiService>();
+        services.AddSingleton<INetStatPortsService, WindowsNetStatPortsService>();
+        services.AddSingleton<IRegistryService, WindowsRegistryService>();
+        services.AddSingleton<IUser32Service, WindowsUser32Service>();
+        services.AddSingleton<IWindowService, WindowService>();
+    }
+
+    private static void AddSoftwareManagers(this IServiceCollection services)
+    {
+        services.AddSingleton<ISoftwareManager, SteamBigPictureManager>();
+        services.AddSingleton<ISoftwareManager, PlayniteFullscreenManager>();
+        services.AddSingleton<ISoftwareManager, OtherSoftwareManager>();
+    }
+}

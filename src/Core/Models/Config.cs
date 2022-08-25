@@ -1,7 +1,10 @@
 ﻿namespace AutoGame.Core.Models;
 
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -26,8 +29,7 @@ public class Config : ObservableObject, INotifyDataErrorInfo
         set => this.SetProperty(ref this.isDirty, value);
     }
 
-    [JsonIgnore]
-    public bool HasErrors => this.allErrors.Any();
+    [JsonIgnore] public bool HasErrors => this.allErrors.Any();
 
     public bool EnableTraceLogging
     {
@@ -64,13 +66,12 @@ public class Config : ObservableObject, INotifyDataErrorInfo
         get => this.launchWhenParsecConnected;
         set => this.SetProperty(ref this.launchWhenParsecConnected, value);
     }
-    
-    public int Version { get; set; }
-    
-    [JsonExtensionData]
-    public IDictionary<string, JsonElement>? JsonExtensionData { get; set; }
 
-    public IEnumerable GetErrors(string? propertyName) => 
+    public int Version { get; set; }
+
+    [JsonExtensionData] public IDictionary<string, JsonElement>? JsonExtensionData { get; set; }
+
+    public IEnumerable GetErrors(string? propertyName) =>
         this.allErrors.GetValueOrDefault(propertyName ?? "") ?? Array.Empty<string>();
 
     public void AddError(string propertyName, string error)

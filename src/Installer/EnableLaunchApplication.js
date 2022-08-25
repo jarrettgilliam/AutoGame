@@ -103,8 +103,7 @@ try {
     }
 
     database.Commit();
-}
-catch (e) {
+} catch (e) {
     WScript.StdErr.WriteLine(e);
     WScript.Quit(1);
 }

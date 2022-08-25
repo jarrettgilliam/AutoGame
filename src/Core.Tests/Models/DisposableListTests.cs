@@ -1,5 +1,7 @@
 ﻿namespace AutoGame.Core.Tests.Models;
 
+using System;
+using System.Collections.Generic;
 using AutoGame.Core.Models;
 
 public class DisposableListTests

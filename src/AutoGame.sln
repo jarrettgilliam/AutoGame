@@ -26,6 +26,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "Integra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoGame", "AutoGame\AutoGame.csproj", "{27208B88-2563-4BCD-9761-C22D24DA00E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Windows", "Infrastructure.Windows\Infrastructure.Windows.csproj", "{219733FB-BE9B-4A61-A6F4-4ABA6519A524}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Windows.Tests", "Infrastructure.Windows.Tests\Infrastructure.Windows.Tests.csproj", "{C32D6597-D8DF-4721-9662-77C027CD03D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,14 @@ Global
 		{27208B88-2563-4BCD-9761-C22D24DA00E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27208B88-2563-4BCD-9761-C22D24DA00E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27208B88-2563-4BCD-9761-C22D24DA00E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{219733FB-BE9B-4A61-A6F4-4ABA6519A524}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{219733FB-BE9B-4A61-A6F4-4ABA6519A524}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{219733FB-BE9B-4A61-A6F4-4ABA6519A524}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{219733FB-BE9B-4A61-A6F4-4ABA6519A524}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C32D6597-D8DF-4721-9662-77C027CD03D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C32D6597-D8DF-4721-9662-77C027CD03D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C32D6597-D8DF-4721-9662-77C027CD03D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C32D6597-D8DF-4721-9662-77C027CD03D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +84,7 @@ Global
 		{4B423071-6CF4-4B94-BA09-37530A69923A} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
 		{BDA1BDEE-DA4B-4326-8D16-92566963CE01} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
 		{9772F0E3-65BE-4EE8-8A9E-D800AF1510AA} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
+		{C32D6597-D8DF-4721-9662-77C027CD03D4} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {71A5D191-D50D-490B-AC00-64F1DF15F2DE}

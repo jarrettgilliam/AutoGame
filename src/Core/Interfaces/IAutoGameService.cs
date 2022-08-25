@@ -1,5 +1,7 @@
 ﻿namespace AutoGame.Core.Interfaces;
 
+using System;
+using System.Collections.Generic;
 using AutoGame.Core.Models;
 
 public interface IAutoGameService : IDisposable

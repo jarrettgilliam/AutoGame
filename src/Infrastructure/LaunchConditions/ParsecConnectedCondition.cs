@@ -6,6 +6,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;

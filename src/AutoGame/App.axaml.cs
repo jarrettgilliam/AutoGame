@@ -1,22 +1,20 @@
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml;
-using AutoGame.ViewModels;
-using AutoGame.Views;
-using System.IO.Abstractions;
-using AutoGame.Core;
-using Microsoft.Extensions.DependencyInjection;
-using AutoGame.Infrastructure;
-using FluentAvalonia.Styling;
-using FluentAvalonia.UI.Media;
-using System;
-using System.Threading.Tasks;
-using AutoGame.Core.Interfaces;
-using Application = Avalonia.Application;
-using Window = Avalonia.Controls.Window;
-
 namespace AutoGame;
 
+using System;
+using System.IO.Abstractions;
+using System.Threading.Tasks;
+using AutoGame.Core;
+using AutoGame.Core.Interfaces;
+using AutoGame.Infrastructure;
+using AutoGame.ViewModels;
+using AutoGame.Views;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Markup.Xaml;
+using FluentAvalonia.Styling;
+using FluentAvalonia.UI.Media;
+using Microsoft.Extensions.DependencyInjection;
 
 public class App : Application
 {
@@ -64,6 +62,7 @@ public class App : Application
 
         services.AddCore();
         services.AddInfrastructure();
+        services.AddPlatformInfrastructure();
     }
 
     private void OnCurrentDomainUnhandledException(object? sender, UnhandledExceptionEventArgs e) =>
@@ -97,7 +96,7 @@ public class App : Application
         {
             theme.ForceWin32WindowToTheme(window);
 
-            var color = Color2.FromRGB(27, 89, 0);
+            Color2 color = Color2.FromRGB(27, 89, 0);
 
             if (theme.RequestedTheme == FluentAvaloniaTheme.LightModeString)
             {

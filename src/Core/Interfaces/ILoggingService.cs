@@ -1,5 +1,6 @@
 ﻿namespace AutoGame.Core.Interfaces;
 
+using System;
 using AutoGame.Core.Enums;
 
 public interface ILoggingService : IDisposable

@@ -1,5 +1,6 @@
 ﻿namespace AutoGame.Core.Tests.Services;
 
+using System;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Core.Services;

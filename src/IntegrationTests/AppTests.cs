@@ -1,5 +1,7 @@
 ﻿namespace AutoGame.IntegrationTests;
 
+using System.Collections.Generic;
+using System.Linq;
 using AutoGame.Core.Interfaces;
 using AutoGame.ViewModels;
 using Microsoft.Extensions.DependencyInjection;

@@ -21,7 +21,7 @@ internal sealed class LoggingService : ILoggingService
         this.DateTimeService = dateTimeService;
         this.FileSystem = fileSystem;
         this.DialogService = dialogService;
-        
+
         this.logWriter = new Lazy<StreamWriter>(() =>
         {
             this.FileSystem.Directory.CreateDirectory(this.AppInfo.AppDataFolder);

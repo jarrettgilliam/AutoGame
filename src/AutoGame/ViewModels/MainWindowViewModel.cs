@@ -32,8 +32,7 @@ public class MainWindowViewModel : ObservableObject
         this.DialogService = dialogService;
         this.AutoGameService = autoGameService;
 
-        this.LoadedCommand = new AsyncDelegateCommand(this.OnLoadedAsync);
-        this.LoadedCommand.OnException += this.OnAsyncDelegateCommandException;
+        this.LoadedCommand = new RelayCommand(this.OnLoaded);
 
         this.BrowseSoftwarePathCommand = new AsyncDelegateCommand(this.OnBrowseSoftwarePath);
         this.BrowseSoftwarePathCommand.OnException += this.OnAsyncDelegateCommandException;
@@ -55,7 +54,7 @@ public class MainWindowViewModel : ObservableObject
 
     public IAutoGameService AutoGameService { get; }
 
-    public AsyncDelegateCommand LoadedCommand { get; }
+    public ICommand LoadedCommand { get; }
 
     public AsyncDelegateCommand BrowseSoftwarePathCommand { get; }
 
@@ -71,11 +70,12 @@ public class MainWindowViewModel : ObservableObject
 
         set
         {
-            var oldValue = this.config;
+            Config? oldValue = this.config;
             if (this.SetProperty(ref this.config, value))
             {
                 oldValue.PropertyChanged -= this.OnConfigSoftwareKeyChanged;
                 value.PropertyChanged += this.OnConfigSoftwareKeyChanged;
+                this.SelectedSoftware = this.AutoGameService.GetSoftwareByKeyOrNull(value.SoftwareKey);
             }
         }
     }
@@ -98,7 +98,7 @@ public class MainWindowViewModel : ObservableObject
         }
     }
 
-    private async Task OnLoadedAsync()
+    private void OnLoaded()
     {
         try
         {
@@ -109,7 +109,7 @@ public class MainWindowViewModel : ObservableObject
                 if (!this.Config.HasErrors)
                 {
                     this.ShowWindow = false;
-                    await Task.Run(() => this.AutoGameService.ApplyConfiguration(this.Config));
+                    this.AutoGameService.ApplyConfiguration(this.Config);
                 }
             }
             else
@@ -201,7 +201,6 @@ public class MainWindowViewModel : ObservableObject
         {
             this.ConfigService.Upgrade(c, this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey));
             this.Config = c;
-            this.SelectedSoftware = this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey);
             this.LoggingService.EnableTraceLogging = c.EnableTraceLogging;
         }
 

@@ -1,6 +1,7 @@
-﻿using AutoGame.Core.Models;
+﻿namespace AutoGame.Core.Interfaces;
 
-namespace AutoGame.Core.Interfaces;
+using System.Collections.Generic;
+using AutoGame.Core.Models;
 
 public interface IConfigService
 {
