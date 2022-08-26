@@ -1,4 +1,4 @@
-﻿namespace AutoGame.Infrastructure.Windows.Services;
+namespace AutoGame.Infrastructure.macOS.Services;
 
 using System;
 using System.IO.Abstractions;
@@ -10,11 +10,13 @@ internal sealed class AppInfoService : IAppInfoService
     public AppInfoService(IFileSystem fileSystem)
     {
         this.FileSystem = fileSystem;
-
+        
         this.AppDataFolder =
             this.FileSystem.Path.Join(
                 Environment.GetFolderPath(
-                    Environment.SpecialFolder.LocalApplicationData),
+                    Environment.SpecialFolder.Personal),
+                "Library",
+                "Application Support",
                 nameof(AutoGame));
 
         this.ConfigFilePath =
@@ -26,15 +28,16 @@ internal sealed class AppInfoService : IAppInfoService
             this.FileSystem.Path.Join(
                 this.AppDataFolder,
                 "Log.txt");
-
+        
         this.ParsecLogDirectory =
             this.FileSystem.Path.Join(
                 Environment.GetFolderPath(
-                    Environment.SpecialFolder.ApplicationData),
-                "Parsec");
+                    Environment.SpecialFolder.Personal),
+                ".parsec");
     }
 
     private IFileSystem FileSystem { get; }
+
     public string AppDataFolder { get; }
     public string ConfigFilePath { get; }
     public string LogFilePath { get; }

@@ -7,4 +7,6 @@ public interface IAppInfoService
     string ConfigFilePath { get; }
 
     string LogFilePath { get; }
+    
+    string ParsecLogDirectory { get; }
 }

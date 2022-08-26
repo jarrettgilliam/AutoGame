@@ -30,6 +30,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Windows", "I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Windows.Tests", "Infrastructure.Windows.Tests\Infrastructure.Windows.Tests.csproj", "{C32D6597-D8DF-4721-9662-77C027CD03D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.macOS", "Infrastructure.macOS\Infrastructure.macOS.csproj", "{1DB0C75C-37A1-45E7-A02B-596C00C48904}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.macOS.Tests", "Infrastructure.macOS.Tests\Infrastructure.macOS.Tests.csproj", "{CD077E72-D5F5-4B1D-B5FD-AF0C91D263CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +79,14 @@ Global
 		{C32D6597-D8DF-4721-9662-77C027CD03D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C32D6597-D8DF-4721-9662-77C027CD03D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C32D6597-D8DF-4721-9662-77C027CD03D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DB0C75C-37A1-45E7-A02B-596C00C48904}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DB0C75C-37A1-45E7-A02B-596C00C48904}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DB0C75C-37A1-45E7-A02B-596C00C48904}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DB0C75C-37A1-45E7-A02B-596C00C48904}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD077E72-D5F5-4B1D-B5FD-AF0C91D263CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD077E72-D5F5-4B1D-B5FD-AF0C91D263CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD077E72-D5F5-4B1D-B5FD-AF0C91D263CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD077E72-D5F5-4B1D-B5FD-AF0C91D263CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,6 +97,7 @@ Global
 		{BDA1BDEE-DA4B-4326-8D16-92566963CE01} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
 		{9772F0E3-65BE-4EE8-8A9E-D800AF1510AA} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
 		{C32D6597-D8DF-4721-9662-77C027CD03D4} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
+		{CD077E72-D5F5-4B1D-B5FD-AF0C91D263CC} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {71A5D191-D50D-490B-AC00-64F1DF15F2DE}
