@@ -1,6 +1,7 @@
 ﻿namespace AutoGame.Infrastructure;
 
 using AutoGame.Core.Interfaces;
+using AutoGame.Core.Services;
 using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.LaunchConditions;
 using AutoGame.Infrastructure.Services;
@@ -18,9 +19,10 @@ public static class DependencyInjection
     {
         services.AddSingleton<IDateTimeService, DateTimeService>();
         services.AddSingleton<IDialogService, DialogService>();
-        services.AddSingleton<IProcessService, ProcessService>();
-        services.AddSingleton<ISleepService, SleepService>();
         services.AddSingleton<IGameControllerService, GameControllerService>();
+        services.AddSingleton<IProcessService, ProcessService>();
+        services.AddSingleton<IRuntimeInformation, RuntimeInformationWrapper>();
+        services.AddSingleton<ISleepService, SleepService>();
     }
 
     private static void AddLaunchConditions(this IServiceCollection services)

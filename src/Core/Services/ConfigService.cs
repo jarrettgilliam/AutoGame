@@ -5,22 +5,26 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 
-internal sealed class ConfigService : IConfigService
-{       
+public class ConfigService : IConfigService
+{
     public ConfigService(
         IAppInfoService appInfo,
-        IFileSystem fileSystem)
+        IFileSystem fileSystem,
+        IRuntimeInformation runtimeInformation)
     {
         this.AppInfo = appInfo;
         this.FileSystem = fileSystem;
+        this.RuntimeInformation = runtimeInformation;
     }
 
     private IAppInfoService AppInfo { get; }
-    private IFileSystem FileSystem { get; }
+    protected IFileSystem FileSystem { get; }
+    private IRuntimeInformation RuntimeInformation { get; }
 
     public Config? GetConfigOrNull()
     {
@@ -64,9 +68,9 @@ internal sealed class ConfigService : IConfigService
     public void Validate(Config config, IEnumerable<ISoftwareManager> knownSoftware)
     {
         config.ClearAllErrors();
-        
+
         ISoftwareManager? softwareManager = knownSoftware.FirstOrDefault(x => x.Key == config.SoftwareKey);
-        
+
         if (softwareManager is null)
         {
             config.AddError(nameof(config.SoftwareKey), "Unknown software");
@@ -75,7 +79,7 @@ internal sealed class ConfigService : IConfigService
         {
             config.AddError(nameof(config.SoftwarePath), "Required");
         }
-        else if (!this.FileSystem.File.Exists(config.SoftwarePath))
+        else if (!this.ExecutableExists(config.SoftwarePath))
         {
             config.AddError(nameof(config.SoftwarePath), "File not found");
         }
@@ -85,13 +89,18 @@ internal sealed class ConfigService : IConfigService
         }
     }
 
+    private bool ExecutableExists(string softwarePath) =>
+        this.RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+            ? softwarePath.EndsWith(".app") && this.FileSystem.Directory.Exists(softwarePath)
+            : this.FileSystem.File.Exists(softwarePath);
+
     private bool ExecutableNameMatches(string? softwarePath, ISoftwareManager softwareManager)
     {
         if (string.IsNullOrEmpty(softwarePath))
         {
             return false;
         }
-        
+
         string defaultPath = softwareManager.FindSoftwarePathOrDefault();
         string? defaultExecutable = this.FileSystem.Path.GetFileName(defaultPath);
 
@@ -119,7 +128,7 @@ internal sealed class ConfigService : IConfigService
                 config.LaunchWhenGameControllerConnected = value.ValueKind == JsonValueKind.True;
                 config.JsonExtensionData.Remove(oldPropertyName);
             }
-            
+
             config.Version++;
         }
     }

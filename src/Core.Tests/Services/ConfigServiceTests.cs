@@ -7,6 +7,7 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using AutoGame.Core.Interfaces;
@@ -22,6 +23,7 @@ public class ConfigServiceTests
     private readonly Mock<IDirectory> directoryMock = new();
     private readonly Mock<IPath> pathMock = new();
     private readonly Mock<ISoftwareManager> softwareMock = new();
+    private readonly Mock<IRuntimeInformation> runtimeInformationMock = new();
 
     private readonly Config configMock = new()
     {
@@ -89,9 +91,14 @@ public class ConfigServiceTests
             .SetupGet(x => x.DefaultArguments)
             .Returns("--default-arguments");
 
+        this.runtimeInformationMock
+            .Setup(x => x.IsOSPlatform(OSPlatform.Windows))
+            .Returns(true);
+
         this.sut = new ConfigService(
             this.appInfoServiceMock.Object,
-            this.fileSystemMock.Object);
+            this.fileSystemMock.Object,
+            this.runtimeInformationMock.Object);
     }
 
     [Fact]
@@ -220,7 +227,7 @@ public class ConfigServiceTests
             }
         });
 
-        this.sut = new ConfigService(this.appInfoServiceMock.Object, fsMock);
+        this.sut = new ConfigService(this.appInfoServiceMock.Object, fsMock, this.runtimeInformationMock.Object);
         this.sut.Save(this.configMock);
 
         string configFileText = fsMock.File.ReadAllText(

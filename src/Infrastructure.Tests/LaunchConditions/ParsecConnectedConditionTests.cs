@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
+using System.Runtime.InteropServices;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
+using AutoGame.Core.Services;
 using AutoGame.Infrastructure.LaunchConditions;
 
 public class ParsecConnectedConditionTests
@@ -24,6 +26,8 @@ public class ParsecConnectedConditionTests
     private readonly Mock<IDirectory> directoryMock = new();
     private readonly Mock<IFileSystemWatcherFactory> fileSystemWatcherFactoryMock = new();
     private readonly Mock<IFileSystemWatcher> fileSystemWatcherMock = new();
+    private readonly Mock<IAppInfoService> appInfoServiceMock = new();
+    private readonly Mock<IRuntimeInformation> runtimeInformationMock = new();
 
     private readonly List<Port> netstatPorts;
 
@@ -79,11 +83,21 @@ public class ParsecConnectedConditionTests
                 It.IsAny<string>()))
             .Returns<string, string>(Path.Join);
 
+        this.appInfoServiceMock
+            .SetupGet(x => x.ParsecLogDirectory)
+            .Returns(ParsecLogDirectory);
+
+        this.runtimeInformationMock
+            .Setup(x => x.IsOSPlatform(OSPlatform.Windows))
+            .Returns(true);
+
         this.sut = new ParsecConnectedCondition(
             this.loggingServiceMock.Object,
             this.netStatPortsServiceMock.Object,
             this.processServiceMock.Object,
-            this.fileSystemMock.Object);
+            this.fileSystemMock.Object,
+            this.appInfoServiceMock.Object,
+            this.runtimeInformationMock.Object);
     }
 
     [Fact]

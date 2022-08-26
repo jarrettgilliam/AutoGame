@@ -6,34 +6,35 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
+using AutoGame.Core.Services;
 
 internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 {
+    private const string ParsecLogFileName = "log.txt";
+    
     private readonly object checkConditionLock = new();
     private bool wasConnected;
-
-    private readonly string ParsecLogFileName;
-    private readonly string ParsecLogDirectory;
     private IFileSystemWatcher? parsecLogWatcher;
 
     public ParsecConnectedCondition(
         ILoggingService loggingService,
         INetStatPortsService netStatPortsService,
         IProcessService processService,
-        IFileSystem fileSystem)
+        IFileSystem fileSystem,
+        IAppInfoService appInfoService,
+        IRuntimeInformation runtimeInformation)
     {
         this.LoggingService = loggingService;
         this.NetStatPortsService = netStatPortsService;
         this.ProcessService = processService;
         this.FileSystem = fileSystem;
-
-        this.ParsecLogFileName = "log.txt";
-        this.ParsecLogDirectory = this.FileSystem.Path.Join(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Parsec");
+        this.AppInfoService = appInfoService;
+        this.RuntimeInformation = runtimeInformation;
     }
 
     public event EventHandler? ConditionMet;
@@ -42,6 +43,8 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     private INetStatPortsService NetStatPortsService { get; }
     private IProcessService ProcessService { get; }
     private IFileSystem FileSystem { get; }
+    private IAppInfoService AppInfoService { get; }
+    private IRuntimeInformation RuntimeInformation { get; }
 
     public void StartMonitoring()
     {
@@ -53,14 +56,15 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     {
         this.StopWatchingParsecLogFile();
         this.wasConnected = false;
+        
     }
 
     private void WatchParsecLogFile()
     {
-        this.FileSystem.Directory.CreateDirectory(this.ParsecLogDirectory);
+        this.FileSystem.Directory.CreateDirectory(this.AppInfoService.ParsecLogDirectory);
 
         this.parsecLogWatcher = this.FileSystem.FileSystemWatcher.CreateNew(
-            this.ParsecLogDirectory, this.ParsecLogFileName);
+            this.AppInfoService.ParsecLogDirectory, ParsecLogFileName);
 
         this.parsecLogWatcher.Changed += this.OnParsecLogWatcherEvent;
         this.parsecLogWatcher.EnableRaisingEvents = true;
@@ -124,15 +128,18 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     {
         using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
 
-        return this.HasMoreThanTwoActiveUDPPorts(parsecProcs);
+        return this.HasCorrectNumberOfActiveUDPPorts(parsecProcs);
     }
 
-    private bool HasMoreThanTwoActiveUDPPorts(IList<IProcess> parsecProcs)
+    private bool HasCorrectNumberOfActiveUDPPorts(IList<IProcess> parsecProcs)
     {
         IList<Port> ports = this.NetStatPortsService.GetUdpPorts();
 
         int count = ports.Count(p => this.IsParsecUDPPort(p, parsecProcs));
-        bool result = count > 2;
+
+        bool result = this.RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? count > 2
+            : count == 1;
 
         this.Trace(() => $"found {count} ports; returned {result}");
         return result;

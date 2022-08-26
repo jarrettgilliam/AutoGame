@@ -1,6 +1,7 @@
 namespace AutoGame.Views;
 
 using System;
+using System.Threading.Tasks;
 using AutoGame.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
@@ -50,7 +51,9 @@ public partial class MainWindow : CoreWindow
     private void OnOpened(object? sender, EventArgs e)
     {
         this.Opened -= this.OnOpened;
-        this.ViewModel?.LoadedCommand.Execute(null);
+        Task.Delay(1).ContinueWith(
+            _ => this.ViewModel?.LoadedCommand.Execute(null),
+            TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     protected override Size MeasureOverride(Size availableSize)

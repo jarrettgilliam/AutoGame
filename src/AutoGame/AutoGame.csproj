@@ -35,6 +35,7 @@
         <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
 
         <ProjectReference Include="..\Infrastructure.Windows\Infrastructure.Windows.csproj" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+        <ProjectReference Include="..\Infrastructure.macOS\Infrastructure.macOS.csproj" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
     </ItemGroup>
     <ItemGroup>
         <AvaloniaResource Include="Assets\AutoGame.ico" />
