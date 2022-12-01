@@ -1,38 +1,40 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30611.23
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{D99963FE-79C8-4428-93C2-3B72C6A52DAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{D99963FE-79C8-4428-93C2-3B72C6A52DAB}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "Installer\Installer.vdproj", "{8F3E523B-BB98-455D-9535-CD3CBDB9C26E}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "src\Installer\Installer.vdproj", "{8F3E523B-BB98-455D-9535-CD3CBDB9C26E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8726517D-94EC-47C4-8B5E-59C5D9ECE220}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BE4C5421-2738-4272-9CB5-4C097A83DD44}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.Tests", "tests\Infrastructure.Tests\Infrastructure.Tests.csproj", "{F51B4241-678A-40E2-B029-816188522ED3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "src\Core\Core.csproj", "{E02BD446-5E8A-49CD-B859-0769FF71B495}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoGame.Tests", "tests\AutoGame.Tests\AutoGame.Tests.csproj", "{4B423071-6CF4-4B94-BA09-37530A69923A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Tests", "tests\Core.Tests\Core.Tests.csproj", "{BDA1BDEE-DA4B-4326-8D16-92566963CE01}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests", "tests\IntegrationTests\IntegrationTests.csproj", "{9772F0E3-65BE-4EE8-8A9E-D800AF1510AA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoGame", "src\AutoGame\AutoGame.csproj", "{27208B88-2563-4BCD-9761-C22D24DA00E0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.Windows", "src\Infrastructure.Windows\Infrastructure.Windows.csproj", "{219733FB-BE9B-4A61-A6F4-4ABA6519A524}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.Windows.Tests", "tests\Infrastructure.Windows.Tests\Infrastructure.Windows.Tests.csproj", "{C32D6597-D8DF-4721-9662-77C027CD03D4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.macOS", "src\Infrastructure.macOS\Infrastructure.macOS.csproj", "{1DB0C75C-37A1-45E7-A02B-596C00C48904}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.macOS.Tests", "tests\Infrastructure.macOS.Tests\Infrastructure.macOS.Tests.csproj", "{CD077E72-D5F5-4B1D-B5FD-AF0C91D263CC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{80F7390E-D7A5-442C-BA77-674E8D115E93}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BCD0D834-8E0F-4F35-A412-067FD59C26EC}"
 	ProjectSection(SolutionItems) = preProject
-		Installer\EnableLaunchApplication.js = Installer\EnableLaunchApplication.js
+		src\Installer\EnableLaunchApplication.js = src\Installer\EnableLaunchApplication.js
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{BE4C5421-2738-4272-9CB5-4C097A83DD44}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.Tests", "Infrastructure.Tests\Infrastructure.Tests.csproj", "{F51B4241-678A-40E2-B029-816188522ED3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{E02BD446-5E8A-49CD-B859-0769FF71B495}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoGame.Tests", "AutoGame.Tests\AutoGame.Tests.csproj", "{4B423071-6CF4-4B94-BA09-37530A69923A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "Core.Tests\Core.Tests.csproj", "{BDA1BDEE-DA4B-4326-8D16-92566963CE01}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{9772F0E3-65BE-4EE8-8A9E-D800AF1510AA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoGame", "AutoGame\AutoGame.csproj", "{27208B88-2563-4BCD-9761-C22D24DA00E0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Windows", "Infrastructure.Windows\Infrastructure.Windows.csproj", "{219733FB-BE9B-4A61-A6F4-4ABA6519A524}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Windows.Tests", "Infrastructure.Windows.Tests\Infrastructure.Windows.Tests.csproj", "{C32D6597-D8DF-4721-9662-77C027CD03D4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.macOS", "Infrastructure.macOS\Infrastructure.macOS.csproj", "{1DB0C75C-37A1-45E7-A02B-596C00C48904}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.macOS.Tests", "Infrastructure.macOS.Tests\Infrastructure.macOS.Tests.csproj", "{CD077E72-D5F5-4B1D-B5FD-AF0C91D263CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,11 +94,17 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{D99963FE-79C8-4428-93C2-3B72C6A52DAB} = {80F7390E-D7A5-442C-BA77-674E8D115E93}
+		{8F3E523B-BB98-455D-9535-CD3CBDB9C26E} = {80F7390E-D7A5-442C-BA77-674E8D115E93}
 		{F51B4241-678A-40E2-B029-816188522ED3} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
+		{E02BD446-5E8A-49CD-B859-0769FF71B495} = {80F7390E-D7A5-442C-BA77-674E8D115E93}
 		{4B423071-6CF4-4B94-BA09-37530A69923A} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
 		{BDA1BDEE-DA4B-4326-8D16-92566963CE01} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
 		{9772F0E3-65BE-4EE8-8A9E-D800AF1510AA} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
+		{27208B88-2563-4BCD-9761-C22D24DA00E0} = {80F7390E-D7A5-442C-BA77-674E8D115E93}
+		{219733FB-BE9B-4A61-A6F4-4ABA6519A524} = {80F7390E-D7A5-442C-BA77-674E8D115E93}
 		{C32D6597-D8DF-4721-9662-77C027CD03D4} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
+		{1DB0C75C-37A1-45E7-A02B-596C00C48904} = {80F7390E-D7A5-442C-BA77-674E8D115E93}
 		{CD077E72-D5F5-4B1D-B5FD-AF0C91D263CC} = {BE4C5421-2738-4272-9CB5-4C097A83DD44}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
