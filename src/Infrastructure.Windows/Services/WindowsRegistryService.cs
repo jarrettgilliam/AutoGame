@@ -1,6 +1,5 @@
 ﻿namespace AutoGame.Infrastructure.Windows.Services;
 
-using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.Windows.Interfaces;
 using Microsoft.Win32;
 

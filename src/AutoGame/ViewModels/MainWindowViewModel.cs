@@ -70,7 +70,7 @@ public class MainWindowViewModel : ObservableObject
 
         set
         {
-            Config? oldValue = this.config;
+            Config oldValue = this.config;
             if (this.SetProperty(ref this.config, value))
             {
                 oldValue.PropertyChanged -= this.OnConfigSoftwareKeyChanged;

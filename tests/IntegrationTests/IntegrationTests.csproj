@@ -23,8 +23,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\AutoGame\AutoGame.csproj"/>
-        <ProjectReference Include="..\Core\Core.csproj"/>
+        <ProjectReference Include="..\..\src\AutoGame\AutoGame.csproj"/>
+        <ProjectReference Include="..\..\src\Core\Core.csproj"/>
     </ItemGroup>
 
 </Project>
