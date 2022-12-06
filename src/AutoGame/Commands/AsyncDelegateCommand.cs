@@ -15,7 +15,11 @@ public sealed class AsyncDelegateCommand : ICommand
 
     public event EventHandler<Exception>? OnException;
 
-    public event EventHandler? CanExecuteChanged;
+    event EventHandler? ICommand.CanExecuteChanged
+    {
+        add { }
+        remove { }
+    }
 
     public bool CanExecute(object? parameter) => true;
 
