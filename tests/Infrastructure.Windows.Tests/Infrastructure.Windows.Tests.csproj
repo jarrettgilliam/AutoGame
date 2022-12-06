@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <IsPackable>false</IsPackable>
-        <AssemblyName>AutoGame.Infrastructure.Windows.Tests</AssemblyName>
-        <RootNamespace>AutoGame.Infrastructure.Windows.Tests</RootNamespace>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>nullable</WarningsAsErrors>
+        <AssemblyName>AutoGame.Infrastructure.Windows.Tests</AssemblyName>
+        <RootNamespace>AutoGame.Infrastructure.Windows.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
