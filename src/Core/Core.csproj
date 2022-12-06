@@ -16,9 +16,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="Enums\Role.cs" />
-        <Compile Remove="Enums\DeviceState.cs" />
-        <Compile Remove="Enums\DataFlow.cs" />
+        <InternalsVisibleTo Include="$(AssemblyName).Tests" />
     </ItemGroup>
-
 </Project>
