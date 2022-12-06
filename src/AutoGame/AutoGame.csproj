@@ -40,4 +40,8 @@
     <ItemGroup>
         <AvaloniaResource Include="Assets\AutoGame.ico" />
     </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="$(AssemblyName).IntegrationTests" />
+    </ItemGroup>
 </Project>
