@@ -6,18 +6,22 @@ using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using AutoGame.Commands;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-public class MainWindowViewModel : ObservableObject
+public sealed partial class MainWindowViewModel : ObservableObject
 {
     private Config config;
     private bool showWindow = true;
     private ISoftwareManager? selectedSoftware;
+
+    #nullable disable
+    // This constructor exists only for auto completion in the axaml
+    // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
+    internal MainWindowViewModel() { }
+    #nullable restore
 
     public MainWindowViewModel(
         ILoggingService loggingService,
@@ -32,19 +36,12 @@ public class MainWindowViewModel : ObservableObject
         this.DialogService = dialogService;
         this.AutoGameService = autoGameService;
 
-        this.LoadedCommand = new RelayCommand(this.OnLoaded);
-
-        this.BrowseSoftwarePathCommand = new AsyncDelegateCommand(this.OnBrowseSoftwarePath);
-        this.BrowseSoftwarePathCommand.OnException += this.OnAsyncDelegateCommandException;
-
-        this.OKCommand = new RelayCommand(this.OnOK);
-        this.CancelCommand = new RelayCommand(this.OnCancel);
-        this.ApplyCommand = new RelayCommand(() => this.OnApply());
+        this.BrowseSoftwarePathCommand = new AsyncRelayCommand(this.BrowseSoftwarePath);
 
         this.config = this.ConfigService.CreateDefault(
             this.AutoGameService.AvailableSoftware.FirstOrDefault());
 
-        this.config.PropertyChanged += this.OnConfigSoftwareKeyChanged;
+        this.config.PropertyChanged += this.OnConfigPropertyChanged;
     }
 
     private ILoggingService LoggingService { get; }
@@ -54,15 +51,7 @@ public class MainWindowViewModel : ObservableObject
 
     public IAutoGameService AutoGameService { get; }
 
-    public ICommand LoadedCommand { get; }
-
-    public AsyncDelegateCommand BrowseSoftwarePathCommand { get; }
-
-    public ICommand OKCommand { get; }
-
-    public ICommand CancelCommand { get; }
-
-    public ICommand ApplyCommand { get; }
+    public IAsyncRelayCommand BrowseSoftwarePathCommand { get; }
 
     public Config Config
     {
@@ -73,8 +62,8 @@ public class MainWindowViewModel : ObservableObject
             Config oldValue = this.config;
             if (this.SetProperty(ref this.config, value))
             {
-                oldValue.PropertyChanged -= this.OnConfigSoftwareKeyChanged;
-                value.PropertyChanged += this.OnConfigSoftwareKeyChanged;
+                oldValue.PropertyChanged -= this.OnConfigPropertyChanged;
+                value.PropertyChanged += this.OnConfigPropertyChanged;
                 this.SelectedSoftware = this.AutoGameService.GetSoftwareByKeyOrNull(value.SoftwareKey);
             }
         }
@@ -98,7 +87,8 @@ public class MainWindowViewModel : ObservableObject
         }
     }
 
-    private void OnLoaded()
+    [RelayCommand]
+    private void Loaded()
     {
         try
         {
@@ -126,7 +116,7 @@ public class MainWindowViewModel : ObservableObject
         }
     }
 
-    private async Task OnBrowseSoftwarePath()
+    private async Task BrowseSoftwarePath()
     {
         try
         {
@@ -164,11 +154,12 @@ public class MainWindowViewModel : ObservableObject
         }
     }
 
-    private void OnOK()
+    [RelayCommand]
+    private void OK()
     {
         try
         {
-            if (this.OnApply())
+            if (this.ApplyInternal())
             {
                 this.ShowWindow = false;
             }
@@ -179,7 +170,8 @@ public class MainWindowViewModel : ObservableObject
         }
     }
 
-    private void OnCancel()
+    [RelayCommand]
+    private void Cancel()
     {
         try
         {
@@ -197,17 +189,22 @@ public class MainWindowViewModel : ObservableObject
     {
         Config? c = this.ConfigService.GetConfigOrNull();
 
-        if (c != null)
+        if (c is null)
         {
-            this.ConfigService.Upgrade(c, this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey));
-            this.Config = c;
-            this.LoggingService.EnableTraceLogging = c.EnableTraceLogging;
+            return false;
         }
 
-        return c != null;
+        this.ConfigService.Upgrade(c, this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey));
+        this.Config = c;
+        this.LoggingService.EnableTraceLogging = c.EnableTraceLogging;
+
+        return true;
     }
 
-    private bool OnApply()
+    [RelayCommand]
+    private void Apply() => this.ApplyInternal();
+
+    private bool ApplyInternal()
     {
         try
         {
@@ -233,7 +230,7 @@ public class MainWindowViewModel : ObservableObject
         }
     }
 
-    private void OnConfigSoftwareKeyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnConfigPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         try
         {
@@ -247,10 +244,7 @@ public class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling config software key changed", ex);
+            this.LoggingService.LogException("handling config property changed", ex);
         }
     }
-
-    private void OnAsyncDelegateCommandException(object? sender, Exception e) =>
-        this.LoggingService.LogException(e.Message, e);
 }

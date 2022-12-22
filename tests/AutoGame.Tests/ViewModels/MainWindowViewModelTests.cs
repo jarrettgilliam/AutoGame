@@ -229,7 +229,7 @@ public class MainWindowViewModelTests
     public async Task OnBrowseSoftwarePath_FullSoftwarePath_SetsPropertiesCorrectly()
     {
         this.sut.Config = this.savedConfigMock;
-        await this.sut.BrowseSoftwarePathCommand.ExecuteAsync();
+        await this.sut.BrowseSoftwarePathCommand.ExecuteAsync(null);
 
         Assert.Equal(ExecutableName, this.openFileDialogParms.FileName);
         Assert.Equal(CustomDirectory, this.openFileDialogParms.InitialDirectory);
@@ -245,7 +245,7 @@ public class MainWindowViewModelTests
         this.savedConfigMock.SoftwarePath = null;
 
         this.sut.Config = this.savedConfigMock;
-        await this.sut.BrowseSoftwarePathCommand.ExecuteAsync();
+        await this.sut.BrowseSoftwarePathCommand.ExecuteAsync(null);
 
         Assert.Equal(DefaultDirectory, this.openFileDialogParms.InitialDirectory);
     }
@@ -256,7 +256,7 @@ public class MainWindowViewModelTests
         Assert.Equal(this.defaultConfigMock.SoftwarePath, this.sut.Config.SoftwarePath);
 
         this.fileSelected = true;
-        await this.sut.BrowseSoftwarePathCommand.ExecuteAsync();
+        await this.sut.BrowseSoftwarePathCommand.ExecuteAsync(null);
 
         Assert.Equal(this.savedConfigMock.SoftwarePath, this.sut.Config.SoftwarePath);
     }
@@ -267,7 +267,7 @@ public class MainWindowViewModelTests
         Assert.Equal(this.defaultConfigMock.SoftwarePath, this.sut.Config.SoftwarePath);
 
         this.fileSelected = false;
-        await this.sut.BrowseSoftwarePathCommand.ExecuteAsync();
+        await this.sut.BrowseSoftwarePathCommand.ExecuteAsync(null);
 
         Assert.Equal(this.defaultConfigMock.SoftwarePath, this.sut.Config.SoftwarePath);
     }
@@ -279,7 +279,7 @@ public class MainWindowViewModelTests
             .Setup(x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()))
             .Returns<ISoftwareManager>(null);
 
-        await this.sut.BrowseSoftwarePathCommand.ExecuteAsync();
+        await this.sut.BrowseSoftwarePathCommand.ExecuteAsync(null);
 
         this.dialogServiceMock.Verify(
             x => x.ShowOpenFileDialog(It.IsAny<OpenFileDialogParms>()),

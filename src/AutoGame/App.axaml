@@ -1,8 +1,11 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sty="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
-             xmlns:viewModels="clr-namespace:AutoGame.ViewModels"
+             xmlns:vm="clr-namespace:AutoGame.ViewModels"
              x:Class="AutoGame.App">
+    <Design.DataContext>
+        <vm:AppViewModel />
+    </Design.DataContext>
 
     <Application.Styles>
         <sty:FluentAvaloniaTheme />
@@ -12,7 +15,6 @@
             <TrayIcon
                 Icon="/Assets/AutoGame.ico"
                 ToolTipText="AutoGame"
-                x:DataType="viewModels:AppViewModel"
                 Command="{Binding ToggleWindowCommand}">
                 <TrayIcon.Menu>
                     <NativeMenu>
