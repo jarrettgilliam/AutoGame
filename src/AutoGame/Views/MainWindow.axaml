@@ -7,13 +7,15 @@
         xmlns:ui="using:FluentAvalonia.UI.Controls"
         mc:Ignorable="d" d:DesignHeight="315" d:DesignWidth="625"
         x:Class="AutoGame.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/AutoGame.ico"
         Title="AutoGame"
         WindowStartupLocation="CenterScreen"
         ShowInTaskbar="{Binding ShowWindow, Mode=TwoWay}"
         ShowWindow="{Binding ShowWindow, Mode=TwoWay}"
         SizeToContent="Height" MaxWidth="630" CanResize="False">
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
 
     <Grid RowDefinitions="*,Auto">
         <StackPanel Grid.Row="0" Margin="5,5,5,0">
