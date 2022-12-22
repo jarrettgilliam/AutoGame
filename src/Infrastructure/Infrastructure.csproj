@@ -10,12 +10,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="0.10.17" />
-        <PackageReference Include="FluentAvaloniaUI" Version="1.4.1" />
-        <PackageReference Include="MessageBox.Avalonia" Version="2.0.1" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-        <PackageReference Include="OpenTK.Windowing.Desktop" Version="4.7.4" />
-        <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
+        <PackageReference Include="Avalonia" Version="0.10.18" />
+        <PackageReference Include="FluentAvaloniaUI" Version="1.4.5" />
+        <PackageReference Include="MessageBox.Avalonia" Version="2.1.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+        <PackageReference Include="OpenTK.Windowing.Desktop" Version="4.7.5" />
+        <PackageReference Include="System.IO.Abstractions" Version="19.1.5" />
     </ItemGroup>
 
     <ItemGroup>
