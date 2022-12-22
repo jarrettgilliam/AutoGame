@@ -7,6 +7,7 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -36,7 +37,8 @@ public class ConfigServiceTests
         IsDirty = false
     };
 
-    private readonly MemoryStream saveMemoryStream = new();
+    private readonly MockFileSystemStream saveMemoryStream;
+    private readonly MockFileSystemStream readMemoryStream;
 
     public ConfigServiceTests()
     {
@@ -48,15 +50,19 @@ public class ConfigServiceTests
             .SetupGet(x => x.ConfigFilePath)
             .Returns(@"C:\AutoGame\config.json");
 
-        this.fileMock
-            .Setup(x => x.OpenRead(this.appInfoServiceMock.Object.ConfigFilePath))
-            .Returns(() =>
-                new MemoryStream(
-                    Encoding.UTF8.GetBytes(
-                        JsonSerializer.Serialize(this.configMock))));
+        this.readMemoryStream = new MockFileSystemStream(
+            Encoding.UTF8.GetBytes(JsonSerializer.Serialize(this.configMock)),
+            this.appInfoServiceMock.Object.ConfigFilePath);
+
+        this.saveMemoryStream = new MockFileSystemStream(
+            this.appInfoServiceMock.Object.ConfigFilePath);
 
         this.fileMock
-            .Setup(x => x.Create(this.appInfoServiceMock.Object.ConfigFilePath))
+            .Setup(x => x.OpenRead(this.readMemoryStream.Name))
+            .Returns(() => this.readMemoryStream);
+
+        this.fileMock
+            .Setup(x => x.Create(this.saveMemoryStream.Name))
             .Returns(this.saveMemoryStream);
 
         this.fileMock
@@ -139,11 +145,10 @@ public class ConfigServiceTests
     public void GetConfigOrNull_CantDeserialize_Throws()
     {
         this.fileMock
-            .Setup(x => x.OpenRead(this.appInfoServiceMock.Object.ConfigFilePath))
-            .Returns(() =>
-                new MemoryStream(
-                    Encoding.UTF8.GetBytes(
-                        "This is not json")));
+            .Setup(x => x.OpenRead(this.readMemoryStream.Name))
+            .Returns(() => new MockFileSystemStream(
+                "This is not json"u8.ToArray(),
+                this.readMemoryStream.Name));
 
         Assert.ThrowsAny<Exception>(() => this.sut.GetConfigOrNull());
     }
@@ -373,5 +378,28 @@ public class ConfigServiceTests
 
         return serializedProperties.All(property =>
             Equals(property.GetValue(left), property.GetValue(right)));
+    }
+
+    private class MockFileSystemStream : FileSystemStream
+    {
+        public MockFileSystemStream(MemoryStream baseMemoryStream, string? path)
+            : base(baseMemoryStream, path, true)
+        {
+            this.BaseMemoryStream = baseMemoryStream;
+        }
+
+        public MockFileSystemStream(byte[] buffer, string? path)
+            : this(new MemoryStream(buffer), path)
+        {
+        }
+
+        public MockFileSystemStream(string? path)
+            : this(new MemoryStream(), path)
+        {
+        }
+
+        private MemoryStream BaseMemoryStream { get; }
+
+        public byte[] ToArray() => this.BaseMemoryStream.ToArray();
     }
 }
