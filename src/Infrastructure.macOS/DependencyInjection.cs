@@ -18,6 +18,7 @@ public static class DependencyInjection
     private static void AddServices(this IServiceCollection services)
     {
         services.AddSingleton<IAppInfoService, AppInfoService>();
+        services.AddSingleton<IGameControllerService, OpenTKGameControllerService>();
         services.AddSingleton<INetStatPortsService, NetStatPortsService>();
     }
 

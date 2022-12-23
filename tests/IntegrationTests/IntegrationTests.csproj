@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework Condition="$([MSBuild]::IsOSPlatform('Windows'))">net7.0-windows</TargetFramework>
-        <TargetFramework Condition="$([MSBuild]::IsOSPlatform('OSX'))">net7.0-macos</TargetFramework>
+        <TargetFramework Condition="$([MSBuild]::IsOSPlatform('Windows'))">net7.0-windows10.0.17763.0</TargetFramework>
+        <TargetFramework Condition="$([MSBuild]::IsOSPlatform('OSX'))">net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>nullable</WarningsAsErrors>
         <IsPackable>false</IsPackable>
@@ -12,6 +12,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
+        <PackageReference Include="OpenTK.Windowing.Desktop" Version="4.7.5" />
         <PackageReference Include="xunit" Version="2.4.2" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

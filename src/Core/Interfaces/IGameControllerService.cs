@@ -1,4 +1,4 @@
-﻿namespace AutoGame.Infrastructure.Interfaces;
+﻿namespace AutoGame.Core.Interfaces;
 
 using System;
 

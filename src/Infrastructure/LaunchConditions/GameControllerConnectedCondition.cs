@@ -2,7 +2,6 @@
 
 using System;
 using AutoGame.Core.Interfaces;
-using AutoGame.Infrastructure.Interfaces;
 
 internal sealed class GameControllerConnectedCondition : IGameControllerConnectedCondition
 {

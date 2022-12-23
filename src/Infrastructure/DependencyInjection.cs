@@ -2,7 +2,6 @@
 
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Services;
-using AutoGame.Infrastructure.Interfaces;
 using AutoGame.Infrastructure.LaunchConditions;
 using AutoGame.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +18,6 @@ public static class DependencyInjection
     {
         services.AddSingleton<IDateTimeService, DateTimeService>();
         services.AddSingleton<IDialogService, DialogService>();
-        services.AddSingleton<IGameControllerService, GameControllerService>();
         services.AddSingleton<IProcessService, ProcessService>();
         services.AddSingleton<IRuntimeInformation, RuntimeInformationWrapper>();
         services.AddSingleton<ISleepService, SleepService>();
