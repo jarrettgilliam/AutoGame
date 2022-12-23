@@ -16,7 +16,7 @@ using AutoGame.Core.Services;
 internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 {
     private const string ParsecLogFileName = "log.txt";
-    
+
     private readonly object checkConditionLock = new();
     private bool wasConnected;
     private IFileSystemWatcher? parsecLogWatcher;
@@ -56,14 +56,14 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     {
         this.StopWatchingParsecLogFile();
         this.wasConnected = false;
-        
+
     }
 
     private void WatchParsecLogFile()
     {
         this.FileSystem.Directory.CreateDirectory(this.AppInfoService.ParsecLogDirectory);
 
-        this.parsecLogWatcher = this.FileSystem.FileSystemWatcher.CreateNew(
+        this.parsecLogWatcher = this.FileSystem.FileSystemWatcher.New(
             this.AppInfoService.ParsecLogDirectory, ParsecLogFileName);
 
         this.parsecLogWatcher.Changed += this.OnParsecLogWatcherEvent;

@@ -74,7 +74,7 @@ public class ParsecConnectedConditionTests
             .Returns(this.fileSystemWatcherFactoryMock.Object);
 
         this.fileSystemWatcherFactoryMock
-            .Setup(x => x.CreateNew(ParsecLogDirectory, ParsecLogFileName))
+            .Setup(x => x.New(ParsecLogDirectory, ParsecLogFileName))
             .Returns(this.fileSystemWatcherMock.Object);
 
         this.pathMock

@@ -51,14 +51,37 @@ public partial class MainWindow : CoreWindow
     private void OnOpened(object? sender, EventArgs e)
     {
         this.Opened -= this.OnOpened;
+
+        this.SetOrHideCustomTitleBar();
+
         Task.Delay(1).ContinueWith(
             _ => this.ViewModel?.LoadedCommand.Execute(null),
             TaskScheduler.FromCurrentSynchronizationContext());
     }
 
+    /// <summary>
+    /// Sets the custom title bar on Windows, hides it for other OS's. The custom title bar
+    /// adds an icon to the top left of the application.
+    /// </summary>
+    private void SetOrHideCustomTitleBar()
+    {
+        // The `TitleBar` will never be null on Windows, always null on Mac/Linux.
+        if (this.TitleBar is not null)
+        {
+            this.TitleBar.ExtendViewIntoTitleBar = true;
+            this.SetTitleBar(this.TitleBarHost);
+            this.TitleBarHost.Margin = new Thickness(0, 0, this.TitleBar.SystemOverlayRightInset, 0);
+        }
+        else
+        {
+            this.TitleBarHost.IsVisible = false;
+        }
+    }
+
+    // Copied from Window.cs
+    // This is here to work around an issue in CoreWindow
     protected override Size MeasureOverride(Size availableSize)
     {
-        // Copied from Window.cs
         SizeToContent sizeToContent = this.SizeToContent;
         Size clientSize = this.ClientSize;
         Size constraint = clientSize;
