@@ -3,7 +3,7 @@ try
     $version = $args[0]
     $github_token = $args[1]
     $srcPath = "$PSScriptRoot\..\src"
-    $slnPath = "$srcPath\AutoGame.sln"
+    $slnPath = "$PSScriptRoot\..\AutoGame.sln"
     $installerProjectPath = "$srcPath\Installer\Installer.vdproj"
     $installerReleaseDir = "$srcPath\Installer\Release"
     $startPath = $PWD
@@ -16,7 +16,7 @@ try
         Write-Error "Version was not specified"
         exit 1
     }
-    
+
     $version = $version.TrimStart('v');
 
     # Make sure the working directory is clean
@@ -65,13 +65,13 @@ try
 
     # Find Visual Studio
     $devenv = & vswhere.exe '-property' productPath
-    
+
     # Build the solution
     Start-Process -FilePath $devenv -ArgumentList "$slnPath /rebuild Release /project Installer" -Wait
 
     # Rename the output *.msi file
     Rename-Item "$installerReleaseDir\AutoGame_Setup.msi" "AutoGame_Setup_$version.msi"
-    
+
     # Create a GitHub release
     if (![string]::IsNullOrWhiteSpace($github_token))
     {
