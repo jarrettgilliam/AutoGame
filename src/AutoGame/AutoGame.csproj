@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework Condition="$([MSBuild]::IsOSPlatform('Windows'))">net7.0-windows10.0.17763.0</TargetFramework>
@@ -10,6 +10,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <AssemblyName>AutoGame</AssemblyName>
         <RootNamespace>AutoGame</RootNamespace>
+        <ApplicationIcon>Assets/AutoGame.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
