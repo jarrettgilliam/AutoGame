@@ -17,8 +17,32 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="*,Auto">
-        <StackPanel Grid.Row="0" Margin="5,5,5,0">
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Custom Title Bar (Windows Only) -->
+        <Grid Grid.Row="0"
+              Background="Transparent"
+              Name="TitleBarHost"
+              ColumnDefinitions="Auto,*"
+              Height="32">
+
+            <Image Grid.Column="0"
+                   Margin="10,0,10,0"
+                   VerticalAlignment="Center"
+                   IsHitTestVisible="False"
+                   Source="/Assets/AutoGame.png"
+                   Width="19" Height="19"
+                   Name="WindowIcon" />
+
+            <TextBlock Grid.Column="1"
+                       Text="{Binding Title, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                       FontSize="12"
+                       IsHitTestVisible="False"
+                       VerticalAlignment="Center" />
+        </Grid>
+
+        <!-- Configuration Form -->
+        <StackPanel Grid.Row="1" Margin="5,5,5,0">
             <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto">
 
                 <TextBlock
@@ -99,7 +123,9 @@
                 VerticalContentAlignment="Center" />
 
         </StackPanel>
-        <StackPanel Grid.Row="1" Margin="5,0,5,5" Orientation="Horizontal" HorizontalAlignment="Right">
+
+        <!-- Button Panel -->
+        <StackPanel Grid.Row="2" Margin="5,0,5,5" Orientation="Horizontal" HorizontalAlignment="Right">
             <StackPanel.Styles>
                 <Style Selector="Button">
                     <Setter Property="Margin" Value="5" />
