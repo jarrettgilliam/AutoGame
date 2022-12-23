@@ -1,4 +1,4 @@
-﻿"DeployProject"
+"DeployProject"
 {
 "VSVersion" = "3:800"
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
@@ -15,7 +15,7 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_2C1E483903FD4FCBA53EF82FB0D21A06"
+        "MsmKey" = "8:_1D6E1F41FFE64FF5BC677012D9549DC0"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -106,7 +106,7 @@
                 {
                 "Name" = "8:.NET Core"
                 "Message" = "8:[VSDNETCOREMSG]"
-                "FrameworkVersion" = "8:6.0"
+                "FrameworkVersion" = "8:7.0"
                 "AllowLaterVersions" = "11:FALSE"
                 "InstallUrl" = "8:https://dotnet.microsoft.com/download/dotnet-core/[NetCoreVerMajorDotMinor]"
                 "IsNETCore" = "11:TRUE"
@@ -202,7 +202,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:Automatically start your favorite game launcher at just the right moment!"
         "ARPURLINFOABOUT" = "8:https://github.com/jarrettgilliam/AutoGame"
-        "ARPPRODUCTICON" = "8:_2C1E483903FD4FCBA53EF82FB0D21A06"
+        "ARPPRODUCTICON" = "8:_1D6E1F41FFE64FF5BC677012D9549DC0"
         "ARPIconIndex" = "3:32512"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -305,7 +305,7 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_53F201CEB6304C08BEBBF3D79E337013"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_464E817F4FE246A9B6AD75770C2AEEDB"
             {
             "Name" = "8:AutoGame"
             "Arguments" = "8:"
@@ -313,13 +313,13 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:32512"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_2C1E483903FD4FCBA53EF82FB0D21A06"
+            "Target" = "8:_1D6E1F41FFE64FF5BC677012D9549DC0"
             "Folder" = "8:_59812DC902ED4B27B403BD90E3ACE2CD"
             "WorkingFolder" = "8:_93D681D956BC4AC3B85B06D8784811D8"
-            "Icon" = "8:_2C1E483903FD4FCBA53EF82FB0D21A06"
+            "Icon" = "8:_1D6E1F41FFE64FF5BC677012D9549DC0"
             "Feature" = "8:"
             }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_C0358755DC1947879EC32744546905A6"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_5797EEEAB2D247AE82E623CD95DAECC6"
             {
             "Name" = "8:AutoGame"
             "Arguments" = "8:"
@@ -327,10 +327,10 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:32512"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_2C1E483903FD4FCBA53EF82FB0D21A06"
+            "Target" = "8:_1D6E1F41FFE64FF5BC677012D9549DC0"
             "Folder" = "8:_BE1E38880B574A76ACE33022933783BC"
             "WorkingFolder" = "8:_93D681D956BC4AC3B85B06D8784811D8"
-            "Icon" = "8:_2C1E483903FD4FCBA53EF82FB0D21A06"
+            "Icon" = "8:_1D6E1F41FFE64FF5BC677012D9549DC0"
             "Feature" = "8:"
             }
         }
@@ -732,9 +732,9 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_2C1E483903FD4FCBA53EF82FB0D21A06"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_1D6E1F41FFE64FF5BC677012D9549DC0"
             {
-            "SourcePath" = "8:..\\AutoGame\\obj\\Release\\net6.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\AutoGame\\obj\\Release\\net7.0-windows10.0.17763.0\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_93D681D956BC4AC3B85B06D8784811D8"
@@ -754,7 +754,7 @@
             "ProjectOutputGroupRegister" = "3:1"
             "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:PublishItems"
-            "OutputProjectGuid" = "8:{EC2AEEE9-FA85-449B-B0B1-BEF83CAAEDE5}"
+            "OutputProjectGuid" = "8:{27208B88-2563-4BCD-9761-C22D24DA00E0}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
