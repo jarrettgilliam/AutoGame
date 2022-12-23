@@ -1,12 +1,12 @@
-﻿namespace AutoGame.Infrastructure.Services;
+﻿namespace AutoGame.Infrastructure.macOS.Services;
 
 using System;
 using System.Linq;
-using AutoGame.Infrastructure.Interfaces;
+using AutoGame.Core.Interfaces;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-internal sealed class GameControllerService : IGameControllerService, IDisposable
+internal sealed class OpenTKGameControllerService : IGameControllerService, IDisposable
 {
     private const int MAX_JOYSTICKS = 16;
 
@@ -59,7 +59,7 @@ internal sealed class GameControllerService : IGameControllerService, IDisposabl
     }
 
     /// <summary>
-    /// Copied from <see cref="OpenTK.Windowing.Desktop.Joysticks"/> 
+    /// Copied from <see cref="OpenTK.Windowing.Desktop.Joysticks"/>
     /// </summary>
     private static class Joysticks
     {
