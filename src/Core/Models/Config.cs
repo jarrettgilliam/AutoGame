@@ -14,6 +14,7 @@ public class Config : ObservableObject, INotifyDataErrorInfo
     private readonly Dictionary<string, IEnumerable<string>> allErrors = new();
     private bool isDirty;
     private bool enableTraceLogging;
+    private bool startMinimized = true;
     private string? softwareKey;
     private string? softwarePath;
     private string? softwareArguments;
@@ -35,6 +36,12 @@ public class Config : ObservableObject, INotifyDataErrorInfo
     {
         get => this.enableTraceLogging;
         set => this.SetProperty(ref this.enableTraceLogging, value);
+    }
+
+    public bool StartMinimized
+    {
+        get => this.startMinimized;
+        set => this.SetProperty(ref this.startMinimized, value);
     }
 
     public string? SoftwareKey
