@@ -46,21 +46,14 @@ public class AutoGameServiceTests
 
         this.sut = new AutoGameService(
             this.loggingServiceMock.Object,
-            new ISoftwareManager[]
-            {
-                this.softwareMock1.Object,
-                this.softwareMock2.Object
-            },
+            new SoftwareCollection(
+                new ISoftwareManager[]
+                {
+                    this.softwareMock1.Object,
+                    this.softwareMock2.Object
+                }),
             this.gameControllerConnectedConditionMock.Object,
             this.parsecConnectedConditionMock.Object);
-    }
-
-    [Fact]
-    public void AvailableSoftware_PassedList_Matches()
-    {
-        Assert.Collection(this.sut.AvailableSoftware,
-            s => Assert.Equal(s, this.softwareMock1.Object),
-            s => Assert.Equal(s, this.softwareMock2.Object));
     }
 
     [Fact]
@@ -125,22 +118,6 @@ public class AutoGameServiceTests
 
         this.parsecConnectedConditionMock.VerifyRemove(x => x.ConditionMet -= It.IsAny<EventHandler>(), Times.Once);
         this.parsecConnectedConditionMock.Verify(x => x.StopMonitoring(), Times.Once);
-    }
-
-    [Fact]
-    public void GetSoftwareByKeyOrNull_ValidKey_ReturnsMatchingSoftware()
-    {
-        ISoftwareManager? actual = this.sut.GetSoftwareByKeyOrNull(this.softwareMock2.Object.Key);
-
-        Assert.Equal(this.softwareMock2.Object, actual);
-    }
-
-    [Fact]
-    public void GetSoftwareByKeyOrNull_InvalidKey_ReturnsNull()
-    {
-        ISoftwareManager? actual = this.sut.GetSoftwareByKeyOrNull("badKey");
-
-        Assert.Null(actual);
     }
 
     [Fact]

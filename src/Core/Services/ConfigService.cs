@@ -1,7 +1,6 @@
 ﻿namespace AutoGame.Core.Services;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -15,16 +14,19 @@ public class ConfigService : IConfigService
     public ConfigService(
         IAppInfoService appInfo,
         IFileSystem fileSystem,
-        IRuntimeInformation runtimeInformation)
+        IRuntimeInformation runtimeInformation,
+        ISoftwareCollection availableSoftware)
     {
         this.AppInfo = appInfo;
         this.FileSystem = fileSystem;
         this.RuntimeInformation = runtimeInformation;
+        this.AvailableSoftware = availableSoftware;
     }
 
     private IAppInfoService AppInfo { get; }
-    protected IFileSystem FileSystem { get; }
+    private IFileSystem FileSystem { get; }
     private IRuntimeInformation RuntimeInformation { get; }
+    private ISoftwareCollection AvailableSoftware { get; }
 
     public Config? GetConfigOrNull()
     {
@@ -54,8 +56,11 @@ public class ConfigService : IConfigService
         config.IsDirty = false;
     }
 
-    public Config CreateDefault(ISoftwareManager? software) =>
-        new()
+    public Config CreateDefault()
+    {
+        ISoftwareManager? software = this.AvailableSoftware.FirstOrDefault();
+
+        return new()
         {
             Version = 1,
             StartMinimized = true,
@@ -65,12 +70,13 @@ public class ConfigService : IConfigService
             LaunchWhenGameControllerConnected = true,
             LaunchWhenParsecConnected = true
         };
+    }
 
-    public void Validate(Config config, IEnumerable<ISoftwareManager> knownSoftware)
+    public void Validate(Config config)
     {
         config.ClearAllErrors();
 
-        ISoftwareManager? softwareManager = knownSoftware.FirstOrDefault(x => x.Key == config.SoftwareKey);
+        ISoftwareManager? softwareManager = this.AvailableSoftware.GetSoftwareByKeyOrNull(config.SoftwareKey);
 
         if (softwareManager is null)
         {
@@ -114,8 +120,10 @@ public class ConfigService : IConfigService
         return string.Equals(defaultExecutable, softwareExecutable);
     }
 
-    public void Upgrade(Config config, ISoftwareManager? software)
+    public void Upgrade(Config config)
     {
+        ISoftwareManager? software = this.AvailableSoftware.GetSoftwareByKeyOrNull(config.SoftwareKey);
+
         if (config.Version == 0)
         {
             if (string.IsNullOrEmpty(config.SoftwareArguments))

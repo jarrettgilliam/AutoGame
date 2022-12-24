@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
+using AutoGame.Core.Services;
 using AutoGame.ViewModels;
 using Newtonsoft.Json;
 
@@ -21,6 +22,7 @@ public class MainWindowViewModelTests
     private readonly Mock<IFileSystem> fileSystemMock = new();
     private readonly Mock<IPath> pathMock = new();
     private readonly Mock<IDialogService> dialogServiceMock = new();
+    private readonly Mock<SoftwareCollection> softwareCollectionMock;
 
     private const string SoftwareKey = "SteamBigPicture";
     private const string ExecutableName = "steam.exe";
@@ -61,28 +63,20 @@ public class MainWindowViewModelTests
             .Returns(() => this.savedConfigMock);
 
         this.configServiceMock
-            .Setup(x => x.CreateDefault(It.IsAny<ISoftwareManager>()))
+            .Setup(x => x.CreateDefault())
             .Returns(() =>
                 JsonConvert.DeserializeObject<Config>(
                     JsonConvert.SerializeObject(this.defaultConfigMock))!);
 
         this.configServiceMock
-            .Setup(x => x.Validate(It.IsAny<Config>(), It.IsAny<IEnumerable<ISoftwareManager>>()))
-            .Callback<Config, IEnumerable<ISoftwareManager>>((config, _) =>
+            .Setup(x => x.Validate(It.IsAny<Config>()))
+            .Callback<Config>(config =>
             {
                 if (!this.canApplyConfiguration)
                 {
                     config.AddError("property", "Error message");
                 }
             });
-
-        this.autoGameServiceMock
-            .Setup(x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()))
-            .Returns(this.softwareManagerMock.Object);
-
-        this.autoGameServiceMock
-            .SetupGet(x => x.AvailableSoftware)
-            .Returns(new[] { this.softwareManagerMock.Object });
 
         this.softwareManagerMock
             .Setup(x => x.FindSoftwarePathOrDefault())
@@ -99,6 +93,14 @@ public class MainWindowViewModelTests
         this.softwareManagerMock
             .SetupGet(x => x.Key)
             .Returns(SoftwareKey);
+
+        this.softwareCollectionMock = new(
+            new object[]
+            {
+                new[] { this.softwareManagerMock.Object }
+            });
+
+        this.softwareCollectionMock.CallBase = true;
 
         this.dialogServiceMock
             .Setup(x => x.ShowOpenFileDialog(It.IsAny<OpenFileDialogParms>()))
@@ -122,11 +124,12 @@ public class MainWindowViewModelTests
             this.configServiceMock.Object,
             this.autoGameServiceMock.Object,
             this.fileSystemMock.Object,
-            this.dialogServiceMock.Object);
+            this.dialogServiceMock.Object,
+            this.softwareCollectionMock.Object);
     }
 
     [Theory]
-    [InlineData(nameof(MainWindowViewModel.AutoGameService))]
+    [InlineData(nameof(MainWindowViewModel.AvailableSoftware))]
     public void Property_IsPublic(string propertyName)
     {
         PropertyInfo? prop = typeof(MainWindowViewModel)
@@ -143,13 +146,13 @@ public class MainWindowViewModelTests
         List<string?> propertyChanges = new();
         this.sut.PropertyChanged += (_, e) => propertyChanges.Add(e.PropertyName);
         this.configServiceMock.Verify(
-            x => x.CreateDefault(It.IsAny<ISoftwareManager>()),
+            x => x.CreateDefault(),
             Times.Exactly(1));
 
         this.sut.LoadedCommand.Execute(null);
 
         this.configServiceMock.Verify(
-            x => x.CreateDefault(It.IsAny<ISoftwareManager>()),
+            x => x.CreateDefault(),
             Times.Exactly(2));
 
         Assert.Equal(1, propertyChanges.Count(p => p == nameof(this.sut.Config)));
@@ -199,11 +202,11 @@ public class MainWindowViewModelTests
         List<string?> propertyChanges = new();
         this.sut.PropertyChanged += (_, e) => propertyChanges.Add(e.PropertyName);
 
-        this.configServiceMock.Verify(x => x.CreateDefault(It.IsAny<ISoftwareManager>()), Times.Once);
+        this.configServiceMock.Verify(x => x.CreateDefault(), Times.Once);
 
         this.sut.LoadedCommand.Execute(null);
 
-        this.configServiceMock.Verify(x => x.CreateDefault(It.IsAny<ISoftwareManager>()), Times.Once);
+        this.configServiceMock.Verify(x => x.CreateDefault(), Times.Once);
         Assert.Equal(1, propertyChanges.Count(p => p == nameof(this.sut.Config)));
     }
 
@@ -285,9 +288,7 @@ public class MainWindowViewModelTests
     [Fact]
     public async Task OnBrowseSoftwarePath_SoftwareNotFound_DontShowDialog()
     {
-        this.autoGameServiceMock
-            .Setup(x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()))
-            .Returns<ISoftwareManager>(null);
+        this.softwareCollectionMock.Object.Clear();
 
         await this.sut.BrowseSoftwarePathCommand.ExecuteAsync(null);
 
@@ -326,7 +327,7 @@ public class MainWindowViewModelTests
         this.sut.CancelCommand.Execute(null);
 
         this.configServiceMock.Verify(
-            x => x.Validate(It.IsAny<Config>(), It.IsAny<IEnumerable<ISoftwareManager>>()),
+            x => x.Validate(It.IsAny<Config>()),
             Times.Once);
     }
 
@@ -343,12 +344,7 @@ public class MainWindowViewModelTests
     public void TryLoadConfig_UpgradesConfig()
     {
         this.sut.CancelCommand.Execute(null);
-
-        this.configServiceMock
-            .Verify(x => x.Upgrade(
-                    this.savedConfigMock,
-                    this.softwareManagerMock.Object),
-                Times.Once);
+        this.configServiceMock.Verify(x => x.Upgrade(this.savedConfigMock), Times.Once);
     }
 
     [Fact]
@@ -409,7 +405,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnConfigSoftwareKeyChanged_SoftwareKeyChanged_UpdateSoftwarePath()
+    public void OnConfigPropertyChanged_SoftwareKeyChanged_UpdateSoftwarePath()
     {
         this.savedConfigMock.SoftwareKey = null;
         this.savedConfigMock.SoftwarePath = null;
@@ -421,7 +417,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnConfigSoftwareKeyChanged_SoftwareKeyChanged_UpdateSoftwareArguments()
+    public void OnConfigPropertyChanged_SoftwareKeyChanged_UpdateSoftwareArguments()
     {
         this.savedConfigMock.SoftwareKey = null;
         this.savedConfigMock.SoftwareArguments = null;
@@ -435,7 +431,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnConfigSoftwareKeyChanged_OtherChanged_DoNothing()
+    public void OnConfigPropertyChanged_OtherChanged_DoNothing()
     {
         this.sut.Config = this.savedConfigMock;
         this.savedConfigMock.SoftwareKey = null;
@@ -447,28 +443,28 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnConfigSoftwareKeyChanged_Startup_Subscribed()
+    public void OnConfigPropertyChanged_Startup_Subscribed()
     {
         this.sut.Config.SoftwareKey = "NewKey";
 
-        this.autoGameServiceMock.Verify(
+        this.softwareCollectionMock.Verify(
             x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()),
             Times.AtLeastOnce);
     }
 
     [Fact]
-    public void OnConfigSoftwareKeyChanged_Changed_SubscriptionMoved()
+    public void OnConfigPropertyChanged_SoftwareKeyChanged_SubscriptionMoved()
     {
         Config oldConfig = this.sut.Config;
         this.sut.Config = this.savedConfigMock;
 
-        this.autoGameServiceMock.Verify(
+        this.softwareCollectionMock.Verify(
             x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()),
             Times.Once);
 
         oldConfig.SoftwareKey = "NewKey";
 
-        this.autoGameServiceMock.Verify(
+        this.softwareCollectionMock.Verify(
             x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()),
             Times.Once);
     }

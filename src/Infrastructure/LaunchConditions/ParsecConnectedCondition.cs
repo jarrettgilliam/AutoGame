@@ -11,7 +11,6 @@ using System.Threading;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
-using AutoGame.Core.Services;
 
 internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 {

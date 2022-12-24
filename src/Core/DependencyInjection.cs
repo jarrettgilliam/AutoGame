@@ -11,5 +11,6 @@ public static class DependencyInjection
         services.AddSingleton<IAutoGameService, AutoGameService>();
         services.AddSingleton<IConfigService, ConfigService>();
         services.AddSingleton<ILoggingService, LoggingService>();
+        services.AddSingleton<ISoftwareCollection, SoftwareCollection>();
     }
 }

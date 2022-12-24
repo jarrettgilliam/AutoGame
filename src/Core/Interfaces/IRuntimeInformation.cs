@@ -1,4 +1,4 @@
-namespace AutoGame.Core.Services;
+namespace AutoGame.Core.Interfaces;
 
 using System.Runtime.InteropServices;
 

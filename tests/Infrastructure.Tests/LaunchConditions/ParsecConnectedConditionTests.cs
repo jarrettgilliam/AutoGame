@@ -7,7 +7,6 @@ using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
-using AutoGame.Core.Services;
 using AutoGame.Infrastructure.LaunchConditions;
 
 public class ParsecConnectedConditionTests

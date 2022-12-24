@@ -103,7 +103,8 @@ public class ConfigServiceTests
         this.sut = new ConfigService(
             this.appInfoServiceMock.Object,
             this.fileSystemMock.Object,
-            this.runtimeInformationMock.Object);
+            this.runtimeInformationMock.Object,
+            new SoftwareCollection(new[] { this.softwareMock.Object }));
     }
 
     [Fact]
@@ -231,7 +232,12 @@ public class ConfigServiceTests
             }
         });
 
-        this.sut = new ConfigService(this.appInfoServiceMock.Object, fsMock, this.runtimeInformationMock.Object);
+        this.sut = new ConfigService(
+            this.appInfoServiceMock.Object,
+            fsMock,
+            this.runtimeInformationMock.Object,
+            new SoftwareCollection(new[] { this.softwareMock.Object }));
+
         this.sut.Save(this.configMock);
 
         string configFileText = fsMock.File.ReadAllText(
@@ -243,13 +249,13 @@ public class ConfigServiceTests
     [Fact]
     public void CreateDefault_Config_NotNull()
     {
-        Assert.NotNull(this.sut.CreateDefault(this.softwareMock.Object));
+        Assert.NotNull(this.sut.CreateDefault());
     }
 
     [Fact]
     public void CreateDefault_Config_MatchesFirstSoftware()
     {
-        Config config = this.sut.CreateDefault(this.softwareMock.Object);
+        Config config = this.sut.CreateDefault();
 
         Assert.Equal(
             this.softwareMock.Object.Key,
@@ -267,11 +273,11 @@ public class ConfigServiceTests
     [Fact]
     public void CreateDefault_Config_SetsVersion()
     {
-        Config config = this.sut.CreateDefault(this.softwareMock.Object);
+        Config config = this.sut.CreateDefault();
 
         int defaultVersion = config.Version;
 
-        this.sut.Upgrade(config, this.softwareMock.Object);
+        this.sut.Upgrade(config);
 
         Assert.Equal(defaultVersion, config.Version);
     }
@@ -279,7 +285,7 @@ public class ConfigServiceTests
     [Fact]
     public void Validate_ValidConfig_NoErrors()
     {
-        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
+        this.sut.Validate(this.configMock);
         Assert.False(this.configMock.HasErrors);
     }
 
@@ -287,7 +293,7 @@ public class ConfigServiceTests
     public void Validate_EmptySoftwarePath_ConfigErrors()
     {
         this.configMock.SoftwarePath = string.Empty;
-        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
+        this.sut.Validate(this.configMock);
         Assert.True(this.configMock.HasErrors);
     }
 
@@ -295,7 +301,7 @@ public class ConfigServiceTests
     public void Validate_SoftwarePathDoesntExist_ConfigErrors()
     {
         this.fileMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
-        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
+        this.sut.Validate(this.configMock);
         Assert.True(this.configMock.HasErrors);
     }
 
@@ -303,7 +309,7 @@ public class ConfigServiceTests
     public void Validate_BadSoftwareKey_ConfigErrors()
     {
         this.configMock.SoftwareKey = "BadKey";
-        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
+        this.sut.Validate(this.configMock);
         Assert.True(this.configMock.HasErrors);
     }
 
@@ -311,7 +317,7 @@ public class ConfigServiceTests
     public void Validate_SoftwarePathWrongSoftware_ConfigErrors()
     {
         this.configMock.SoftwarePath = "/path/to/wrongExecutable";
-        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
+        this.sut.Validate(this.configMock);
         Assert.True(this.configMock.HasErrors);
     }
 
@@ -320,7 +326,7 @@ public class ConfigServiceTests
     {
         this.softwareMock.Setup(x => x.FindSoftwarePathOrDefault()).Returns("");
         this.configMock.SoftwarePath = "/path/to/anyExecutable";
-        this.sut.Validate(this.configMock, new[] { this.softwareMock.Object });
+        this.sut.Validate(this.configMock);
         Assert.False(this.configMock.HasErrors);
     }
 
@@ -328,7 +334,7 @@ public class ConfigServiceTests
     public void Upgrade_Version0To1_SetsVersion()
     {
         this.configMock.Version = 0;
-        this.sut.Upgrade(this.configMock, this.softwareMock.Object);
+        this.sut.Upgrade(this.configMock);
         Assert.Equal(1, this.configMock.Version);
     }
 
@@ -338,7 +344,7 @@ public class ConfigServiceTests
         this.configMock.Version = 0;
         this.configMock.SoftwareArguments = null;
 
-        this.sut.Upgrade(this.configMock, this.softwareMock.Object);
+        this.sut.Upgrade(this.configMock);
 
         Assert.Equal(
             this.softwareMock.Object.DefaultArguments,
@@ -358,7 +364,7 @@ public class ConfigServiceTests
             { oldPropertyName, extensionData.RootElement.GetProperty(oldPropertyName) }
         };
 
-        this.sut.Upgrade(this.configMock, this.softwareMock.Object);
+        this.sut.Upgrade(this.configMock);
 
         Assert.True(this.configMock.LaunchWhenGameControllerConnected);
         Assert.DoesNotContain(oldPropertyName, this.configMock.JsonExtensionData.Keys);

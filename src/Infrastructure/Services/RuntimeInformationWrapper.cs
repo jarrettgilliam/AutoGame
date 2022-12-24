@@ -1,7 +1,7 @@
 namespace AutoGame.Infrastructure.Services;
 
 using System.Runtime.InteropServices;
-using AutoGame.Core.Services;
+using AutoGame.Core.Interfaces;
 
 internal sealed class RuntimeInformationWrapper : IRuntimeInformation
 {

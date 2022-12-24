@@ -59,7 +59,7 @@
                     Margin="5"
                     VerticalContentAlignment="Center"
                     HorizontalAlignment="Stretch"
-                    Items="{Binding AutoGameService.AvailableSoftware}"
+                    Items="{Binding AvailableSoftware}"
                     SelectedItem="{Binding SelectedSoftware, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="interfaces:ISoftwareManager">
