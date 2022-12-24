@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 
@@ -15,7 +14,7 @@ internal sealed class AutoGameService : IAutoGameService
 
     public AutoGameService(
         ILoggingService loggingService,
-        IEnumerable<ISoftwareManager> availableSoftware,
+        ISoftwareCollection availableSoftware,
         IGameControllerConnectedCondition gameControllerConnectedCondition,
         IParsecConnectedCondition parsecConnectedCondition)
     {
@@ -28,12 +27,11 @@ internal sealed class AutoGameService : IAutoGameService
     private ILoggingService LoggingService { get; }
     private ILaunchCondition GameControllerConnectedCondition { get; }
     private ILaunchCondition ParsecConnectedCondition { get; }
-
-    public IEnumerable<ISoftwareManager> AvailableSoftware { get; }
+    private ISoftwareCollection AvailableSoftware { get; }
 
     public void ApplyConfiguration(Config config)
     {
-        this.appliedSoftware = this.GetSoftwareByKeyOrNull(config.SoftwareKey);
+        this.appliedSoftware = this.AvailableSoftware.GetSoftwareByKeyOrNull(config.SoftwareKey);
         this.appliedSoftwarePath = config.SoftwarePath;
         this.appliedSoftwareArguments = config.SoftwareArguments;
 
@@ -56,11 +54,6 @@ internal sealed class AutoGameService : IAutoGameService
             condition.ConditionMet += this.OnLaunchConditionMet;
             condition.StartMonitoring();
         }
-    }
-
-    public ISoftwareManager? GetSoftwareByKeyOrNull(string? softwareKey)
-    {
-        return this.AvailableSoftware.FirstOrDefault(s => s.Key == softwareKey);
     }
 
     public void Dispose()

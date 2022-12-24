@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Abstractions;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
@@ -28,18 +27,19 @@ public sealed partial class MainWindowViewModel : ObservableObject
         IConfigService configService,
         IAutoGameService autoGameService,
         IFileSystem fileSystem,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        ISoftwareCollection availableSoftware)
     {
         this.LoggingService = loggingService;
         this.ConfigService = configService;
         this.FileSystem = fileSystem;
         this.DialogService = dialogService;
         this.AutoGameService = autoGameService;
+        this.AvailableSoftware = availableSoftware;
 
         this.BrowseSoftwarePathCommand = new AsyncRelayCommand(this.BrowseSoftwarePath);
 
-        this.config = this.ConfigService.CreateDefault(
-            this.AutoGameService.AvailableSoftware.FirstOrDefault());
+        this.config = this.ConfigService.CreateDefault();
 
         this.config.PropertyChanged += this.OnConfigPropertyChanged;
     }
@@ -48,8 +48,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private IConfigService ConfigService { get; }
     private IFileSystem FileSystem { get; }
     private IDialogService DialogService { get; }
+    private IAutoGameService AutoGameService { get; }
 
-    public IAutoGameService AutoGameService { get; }
+    public ISoftwareCollection AvailableSoftware { get; }
 
     public IAsyncRelayCommand BrowseSoftwarePathCommand { get; }
 
@@ -64,7 +65,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
             {
                 oldValue.PropertyChanged -= this.OnConfigPropertyChanged;
                 value.PropertyChanged += this.OnConfigPropertyChanged;
-                this.SelectedSoftware = this.AutoGameService.GetSoftwareByKeyOrNull(value.SoftwareKey);
+                this.SelectedSoftware = this.AvailableSoftware.GetSoftwareByKeyOrNull(value.SoftwareKey);
             }
         }
     }
@@ -94,7 +95,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             if (this.TryLoadConfig())
             {
-                this.ConfigService.Validate(this.Config, this.AutoGameService.AvailableSoftware);
+                this.ConfigService.Validate(this.Config);
 
                 if (!this.Config.HasErrors)
                 {
@@ -106,8 +107,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
             {
                 // The configuration file doesn't exist so consider this initial setup.
                 // Create a default configuration without applying it yet and don't minimize.
-                this.Config = this.ConfigService.CreateDefault(
-                    this.AutoGameService.AvailableSoftware.FirstOrDefault());
+                this.Config = this.ConfigService.CreateDefault();
             }
         }
         catch (Exception ex)
@@ -120,7 +120,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         try
         {
-            ISoftwareManager? software = this.AutoGameService.GetSoftwareByKeyOrNull(this.Config.SoftwareKey);
+            ISoftwareManager? software = this.AvailableSoftware.GetSoftwareByKeyOrNull(this.Config.SoftwareKey);
 
             if (software is null)
             {
@@ -176,7 +176,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         try
         {
             this.TryLoadConfig();
-            this.ConfigService.Validate(this.Config, this.AutoGameService.AvailableSoftware);
+            this.ConfigService.Validate(this.Config);
             this.ShowWindow = false;
         }
         catch (Exception ex)
@@ -194,7 +194,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return false;
         }
 
-        this.ConfigService.Upgrade(c, this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey));
+        this.ConfigService.Upgrade(c);
         this.Config = c;
         this.LoggingService.EnableTraceLogging = c.EnableTraceLogging;
 
@@ -210,7 +210,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             if (this.Config.IsDirty)
             {
-                this.ConfigService.Validate(this.Config, this.AutoGameService.AvailableSoftware);
+                this.ConfigService.Validate(this.Config);
 
                 if (this.Config.HasErrors)
                 {
@@ -236,7 +236,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             if (e.PropertyName == nameof(this.Config.SoftwareKey) && sender is Config c)
             {
-                ISoftwareManager? s = this.AutoGameService.GetSoftwareByKeyOrNull(c.SoftwareKey);
+                ISoftwareManager? s = this.AvailableSoftware.GetSoftwareByKeyOrNull(c.SoftwareKey);
                 this.SelectedSoftware = s;
                 c.SoftwarePath = s?.FindSoftwarePathOrDefault();
                 c.SoftwareArguments = s?.DefaultArguments;

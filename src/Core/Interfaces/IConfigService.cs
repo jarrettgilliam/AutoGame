@@ -1,6 +1,5 @@
 ﻿namespace AutoGame.Core.Interfaces;
 
-using System.Collections.Generic;
 using AutoGame.Core.Models;
 
 public interface IConfigService
@@ -9,9 +8,9 @@ public interface IConfigService
 
     void Save(Config config);
 
-    Config CreateDefault(ISoftwareManager? software);
+    Config CreateDefault();
 
-    void Validate(Config config, IEnumerable<ISoftwareManager> knownSoftware);
+    void Validate(Config config);
 
-    void Upgrade(Config config, ISoftwareManager? software);
+    void Upgrade(Config config);
 }
