@@ -137,7 +137,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigFalse_CreatesDefaultConfiguration()
+    public void Loaded_TryLoadConfigFalse_CreatesDefaultConfiguration()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
         List<string?> propertyChanges = new();
@@ -156,7 +156,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigFalse_DoesntSaveConfiguration()
+    public void Loaded_TryLoadConfigFalse_DoesntSaveConfiguration()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
 
@@ -166,7 +166,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigFalse_DoesntApplyConfiguration()
+    public void Loaded_TryLoadConfigFalse_DoesntApplyConfiguration()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
 
@@ -176,7 +176,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigFalse_DoesntMinimize()
+    public void Loaded_TryLoadConfigFalse_DoesntMinimize()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
 
@@ -186,7 +186,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigTrue_AppliesConfiguration()
+    public void Loaded_TryLoadConfigTrue_AppliesConfiguration()
     {
         this.sut.LoadedCommand.Execute(null);
 
@@ -194,7 +194,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigTrue_DoesntLoadDefaultConfig()
+    public void Loaded_TryLoadConfigTrue_DoesntLoadDefaultConfig()
     {
         List<string?> propertyChanges = new();
         this.sut.PropertyChanged += (_, e) => propertyChanges.Add(e.PropertyName);
@@ -208,7 +208,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnLoaded_TryLoadConfigTrue_MinimizesWindow()
+    public void Loaded_TryLoadConfigTrue_MinimizesWindow()
     {
         this.sut.LoadedCommand.Execute(null);
 
@@ -216,9 +216,19 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnLoaded_TryApplyConfigurationFalse_DoesntMinimizeWindow()
+    public void Loaded_TryApplyConfigurationFalse_DoesntMinimizeWindow()
     {
         this.canApplyConfiguration = false;
+
+        this.sut.LoadedCommand.Execute(null);
+
+        Assert.True(this.sut.ShowWindow);
+    }
+
+    [Fact]
+    public void Loaded_StartMinimizedFalse_DoesntMinimizeWindow()
+    {
+        this.savedConfigMock.StartMinimized = false;
 
         this.sut.LoadedCommand.Execute(null);
 
@@ -287,7 +297,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnOK_CanApply_MinimizesWindow()
+    public void OK_CanApply_MinimizesWindow()
     {
         this.sut.ShowWindow = true;
         this.sut.OKCommand.Execute(null);
@@ -295,7 +305,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnOK_CannotApply_DoesntMinimizeWindow()
+    public void OK_CannotApply_DoesntMinimizeWindow()
     {
         this.canApplyConfiguration = false;
         this.sut.ShowWindow = true;
@@ -304,14 +314,14 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnCancel_RestoresConfig()
+    public void Cancel_RestoresConfig()
     {
         this.sut.CancelCommand.Execute(null);
         this.configServiceMock.Verify(x => x.GetConfigOrNull(), Times.Once);
     }
 
     [Fact]
-    public void OnCancel_ValidatesConfig()
+    public void Cancel_ValidatesConfig()
     {
         this.sut.CancelCommand.Execute(null);
 
@@ -342,7 +352,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnCancel_MinimizesWindow()
+    public void Cancel_MinimizesWindow()
     {
         this.sut.ShowWindow = true;
         this.sut.CancelCommand.Execute(null);
@@ -350,7 +360,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnApply_ConfigNotDirty_DoNothing()
+    public void Apply_ConfigNotDirty_DoNothing()
     {
         this.sut.Config = this.savedConfigMock;
         this.sut.Config.IsDirty = false;
@@ -363,7 +373,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnApply_ConfigIsDirty_ApplyConfig()
+    public void Apply_ConfigIsDirty_ApplyConfig()
     {
         this.sut.Config = this.savedConfigMock;
         this.sut.Config.IsDirty = true;
@@ -376,7 +386,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnApply_ConfigIsDirty_SaveConfig()
+    public void Apply_ConfigIsDirty_SaveConfig()
     {
         this.sut.Config = this.savedConfigMock;
         this.sut.Config.IsDirty = true;
@@ -388,7 +398,7 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
-    public void OnApply_ApplyFailed_DontSaveConfig()
+    public void Apply_ApplyFailed_DontSaveConfig()
     {
         this.canApplyConfiguration = false;
 

@@ -98,7 +98,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
                 if (!this.Config.HasErrors)
                 {
-                    this.ShowWindow = false;
+                    this.ShowWindow = !this.Config.StartMinimized;
                     this.AutoGameService.ApplyConfiguration(this.Config);
                 }
             }

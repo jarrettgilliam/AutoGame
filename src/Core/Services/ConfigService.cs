@@ -58,6 +58,7 @@ public class ConfigService : IConfigService
         new()
         {
             Version = 1,
+            StartMinimized = true,
             SoftwareKey = software?.Key,
             SoftwarePath = software?.FindSoftwarePathOrDefault(),
             SoftwareArguments = software?.DefaultArguments,
