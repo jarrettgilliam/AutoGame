@@ -91,9 +91,6 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         }
     }
 
-    private IDisposableList<IProcess> GetParsecdProcesses() =>
-        this.ProcessService.GetProcessesByName("parsecd");
-
     private void CheckConditionMet([CallerMemberName] string? source = null)
     {
         if (Monitor.TryEnter(this.checkConditionLock))
@@ -125,7 +122,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
     private bool GetIsConnected()
     {
-        using IDisposableList<IProcess> parsecProcs = this.GetParsecdProcesses();
+        using IDisposableList<IProcess> parsecProcs = this.ProcessService.GetProcessesByName("parsecd");
 
         return this.HasCorrectNumberOfActiveUDPPorts(parsecProcs);
     }
@@ -144,7 +141,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         return result;
     }
 
-    private bool IsParsecUDPPort(Port port, IList<IProcess> parsecProcs) =>
+    private bool IsParsecUDPPort(Port port, IEnumerable<IProcess> parsecProcs) =>
         port.Protocol == "UDP" && parsecProcs.Any(proc => proc.Id == port.ProcessId);
 
     private void Trace(Func<string> message, [CallerMemberName] string? member = null)

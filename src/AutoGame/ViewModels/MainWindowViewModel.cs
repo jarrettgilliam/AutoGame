@@ -16,11 +16,14 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private bool showWindow = true;
     private ISoftwareManager? selectedSoftware;
 
-    #nullable disable
+#nullable disable
+
     // This constructor exists only for auto completion in the axaml
     // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
-    internal MainWindowViewModel() { }
-    #nullable restore
+    internal MainWindowViewModel()
+    {
+    }
+#nullable restore
 
     public MainWindowViewModel(
         ILoggingService loggingService,
@@ -120,7 +123,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         try
         {
-            ISoftwareManager? software = this.AvailableSoftware.GetSoftwareByKeyOrNull(this.Config.SoftwareKey);
+            ISoftwareManager? software = this.SelectedSoftware;
 
             if (software is null)
             {
@@ -208,15 +211,14 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         try
         {
+            this.ConfigService.Validate(this.Config);
+            if (this.Config.HasErrors)
+            {
+                return false;
+            }
+
             if (this.Config.IsDirty)
             {
-                this.ConfigService.Validate(this.Config);
-
-                if (this.Config.HasErrors)
-                {
-                    return false;
-                }
-
                 this.AutoGameService.ApplyConfiguration(this.Config);
                 this.ConfigService.Save(this.Config);
             }
