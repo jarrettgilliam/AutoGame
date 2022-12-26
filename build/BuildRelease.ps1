@@ -20,7 +20,7 @@ try
     $version = $version.TrimStart('v');
 
     # Make sure the working directory is clean
-    $gitStatus = git status --porcelain
+    $gitStatus = git status --porcelain=2
 
     if (!$?)
     {
@@ -28,9 +28,9 @@ try
         exit 2
     }
 
-    if (![string]::IsNullOrWhiteSpace($gitStatus))
+    if ($gitStatus -match "^(?!1 [AM].)")
     {
-        Write-Error "The git working directory is not clean"
+        Write-Error "There are unstaged changes"
         exit 3
     }
 
@@ -84,7 +84,7 @@ try
     Write-Host "$installerReleaseDir\AutoGame_Setup_$version.msi"
 
     # Reset version changes
-    git reset --hard HEAD
+    git restore .
 }
 catch [System.Exception]
 {
