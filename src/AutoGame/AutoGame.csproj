@@ -48,4 +48,11 @@
     <ItemGroup>
         <InternalsVisibleTo Include="$(AssemblyName).IntegrationTests" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\App.axaml.cs">
+        <DependentUpon>App.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
 </Project>

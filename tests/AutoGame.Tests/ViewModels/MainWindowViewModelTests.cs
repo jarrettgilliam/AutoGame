@@ -315,6 +315,18 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void OK_HasErrorsButNotDirty_DoesntMinimizeWindow()
+    {
+        this.canApplyConfiguration = false;
+        this.savedConfigMock.IsDirty = false;
+
+        this.sut.LoadedCommand.Execute(null);
+        this.sut.OKCommand.Execute(null);
+
+        Assert.True(this.sut.ShowWindow);
+    }
+
+    [Fact]
     public void Cancel_RestoresConfig()
     {
         this.sut.CancelCommand.Execute(null);
