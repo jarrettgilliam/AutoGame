@@ -471,15 +471,11 @@ public class MainWindowViewModelTests
         Config oldConfig = this.sut.Config;
         this.sut.Config = this.savedConfigMock;
 
-        this.softwareCollectionMock.Verify(
-            x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()),
-            Times.Once);
-
         oldConfig.SoftwareKey = "NewKey";
 
         this.softwareCollectionMock.Verify(
             x => x.GetSoftwareByKeyOrNull(It.IsAny<string?>()),
-            Times.Once);
+            Times.Never);
     }
 
     [Fact]

@@ -10,7 +10,7 @@ using FluentAvalonia.UI.Controls;
 public partial class MainWindow : CoreWindow
 {
     public static readonly StyledProperty<bool> ShowWindowProperty =
-        AvaloniaProperty.Register<Window, bool>(nameof(ShowWindow), true);
+        AvaloniaProperty.Register<MainWindow, bool>(nameof(ShowWindow), true);
 
     public MainWindow()
     {
