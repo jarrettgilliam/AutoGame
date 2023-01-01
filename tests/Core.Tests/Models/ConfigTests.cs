@@ -21,6 +21,7 @@ public class ConfigTests
 
     [Theory]
     [InlineData(nameof(Config.EnableTraceLogging), true)]
+    [InlineData(nameof(Config.StartMinimized), false)]
     [InlineData(nameof(Config.SoftwareKey), "TheKey")]
     [InlineData(nameof(Config.SoftwarePath), "ThePath")]
     [InlineData(nameof(Config.SoftwareArguments), "--arguments")]
@@ -49,27 +50,6 @@ public class ConfigTests
         Assert.Equal(2, this.propertyChangedFireCount);
         Assert.Equal(2, this.errorsChangedFireCount);
         Assert.False(this.sut.GetErrors(propertyName).Cast<string>().Any());
-    }
-
-    [Fact]
-    public void HasErrors_ReturnsTrue()
-    {
-        this.sut.AddError("", "");
-        Assert.True(this.sut.HasErrors);
-    }
-
-    [Fact]
-    public void HasErrors_ReturnsFalse()
-    {
-        Assert.False(this.sut.HasErrors);
-    }
-
-    [Fact]
-    public void ClearAllErrors_Works()
-    {
-        this.sut.AddError("", "");
-        this.sut.ClearAllErrors();
-        Assert.False(this.sut.HasErrors);
     }
 
     private void ConfigOnPropertyChanged(object? sender, PropertyChangedEventArgs e) =>

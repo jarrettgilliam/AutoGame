@@ -105,7 +105,7 @@ public class MainWindowViewModelTests
         this.dialogServiceMock
             .Setup(x => x.ShowOpenFileDialog(It.IsAny<OpenFileDialogParms>()))
             .Callback((OpenFileDialogParms parms) => { this.openFileDialogParms = parms; })
-            .Returns(() => Task.FromResult(this.fileSelected ? this.savedConfigMock.SoftwarePath : null));
+            .ReturnsAsync(() => this.fileSelected ? this.savedConfigMock.SoftwarePath : null);
 
         this.fileSystemMock
             .SetupGet(x => x.Path)
@@ -268,6 +268,7 @@ public class MainWindowViewModelTests
     {
         Assert.Equal(this.defaultConfigMock.SoftwarePath, this.sut.Config.SoftwarePath);
 
+        this.sut.LoadedCommand.Execute(null);
         this.fileSelected = true;
         await this.sut.BrowseSoftwarePathCommand.ExecuteAsync(null);
 
