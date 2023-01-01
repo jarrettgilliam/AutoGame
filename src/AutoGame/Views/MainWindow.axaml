@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:interfaces="clr-namespace:AutoGame.Core.Interfaces;assembly=AutoGame.Core"
+        xmlns:converter="clr-namespace:AutoGame.Converters"
         xmlns:ui="using:FluentAvalonia.UI.Controls"
         mc:Ignorable="d" d:DesignHeight="315" d:DesignWidth="625"
         x:Class="AutoGame.Views.MainWindow"
@@ -44,6 +45,11 @@
         <!-- Configuration Form -->
         <StackPanel Grid.Row="1" Margin="5,5,5,0">
             <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto">
+                <Grid.Resources>
+                    <converter:SoftwareKeyToManagerConverter
+                        x:Key="SoftwareKeyToManagerConverter"
+                        AvailableSoftware="{Binding AvailableSoftware}" />
+                </Grid.Resources>
 
                 <TextBlock
                     Grid.Row="0"
@@ -60,7 +66,8 @@
                     VerticalContentAlignment="Center"
                     HorizontalAlignment="Stretch"
                     Items="{Binding AvailableSoftware}"
-                    SelectedItem="{Binding SelectedSoftware, Mode=TwoWay}">
+                    SelectedItem="{Binding Config.SoftwareKey, Mode=TwoWay,
+                        Converter={StaticResource SoftwareKeyToManagerConverter}}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="interfaces:ISoftwareManager">
                             <TextBlock Text="{Binding Description}" />

@@ -14,7 +14,6 @@ public sealed partial class MainWindowViewModel : ObservableObject
 {
     private Config config;
     private bool showWindow = true;
-    private ISoftwareManager? selectedSoftware;
 
 #nullable disable
 
@@ -68,7 +67,6 @@ public sealed partial class MainWindowViewModel : ObservableObject
             {
                 oldValue.PropertyChanged -= this.OnConfigPropertyChanged;
                 value.PropertyChanged += this.OnConfigPropertyChanged;
-                this.SelectedSoftware = this.AvailableSoftware.GetSoftwareByKeyOrNull(value.SoftwareKey);
             }
         }
     }
@@ -77,18 +75,6 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         get => this.showWindow;
         set => this.SetProperty(ref this.showWindow, value);
-    }
-
-    public ISoftwareManager? SelectedSoftware
-    {
-        get => this.selectedSoftware;
-        set
-        {
-            if (this.SetProperty(ref this.selectedSoftware, value))
-            {
-                this.Config.SoftwareKey = value?.Key;
-            }
-        }
     }
 
     [RelayCommand]
@@ -123,7 +109,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         try
         {
-            ISoftwareManager? software = this.SelectedSoftware;
+            ISoftwareManager? software = this.AvailableSoftware.GetSoftwareByKeyOrNull(this.Config.SoftwareKey);
 
             if (software is null)
             {
@@ -239,7 +225,6 @@ public sealed partial class MainWindowViewModel : ObservableObject
             if (e.PropertyName == nameof(this.Config.SoftwareKey) && sender is Config c)
             {
                 ISoftwareManager? s = this.AvailableSoftware.GetSoftwareByKeyOrNull(c.SoftwareKey);
-                this.SelectedSoftware = s;
                 c.SoftwarePath = s?.FindSoftwarePathOrDefault();
                 c.SoftwareArguments = s?.DefaultArguments;
             }
