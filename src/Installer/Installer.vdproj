@@ -101,12 +101,11 @@
                 {
                 "Name" = "8:.NET Core"
                 "Message" = "8:[VSDNETCOREMSG]"
-                "FrameworkVersion" = "8:7.0 "
                 "AllowLaterVersions" = "11:FALSE"
-                "InstallUrl" = "8:https://dotnet.microsoft.com/download/dotnet-core/[NetCoreVerMajorDotMinor]"
+                "InstallUrl" = "8:"
                 "IsNETCore" = "11:TRUE"
-                "Architecture" = "2:2"
-                "Runtime" = "2:2"
+                "Architecture" = "2:0"
+                "Runtime" = "2:0"
                 }
             }
         }
@@ -729,7 +728,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_1D6E1F41FFE64FF5BC677012D9549DC0"
             {
-            "SourcePath" = "8:..\\AutoGame\\obj\\Release\\net7.0-windows10.0.17763.0\\apphost.exe"
+            "SourcePath" = "8:..\\AutoGame\\obj\\Debug\\net7.0-windows10.0.17763.0\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_93D681D956BC4AC3B85B06D8784811D8"
@@ -751,6 +750,7 @@
             "OutputGroupCanonicalName" = "8:PublishItems"
             "OutputProjectGuid" = "8:{27208B88-2563-4BCD-9761-C22D24DA00E0}"
             "ShowKeyOutput" = "11:TRUE"
+            "PublishProfilePath" = "8:Properties\\PublishProfiles\\FolderProfile.pubxml"
                 "ExcludeFilters"
                 {
                 }
