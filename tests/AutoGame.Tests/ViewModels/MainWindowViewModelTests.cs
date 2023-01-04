@@ -117,7 +117,7 @@ public class MainWindowViewModelTests
 
         this.pathMock
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
-            .Returns<string>(Path.GetDirectoryName!);
+            .Returns<string>(Path.GetDirectoryName);
 
         this.sut = new MainWindowViewModel(
             this.loggingServiceMock.Object,
@@ -136,7 +136,7 @@ public class MainWindowViewModelTests
             .GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
 
         Assert.NotNull(prop);
-        Assert.True(prop!.CanRead);
+        Assert.True(prop.CanRead);
     }
 
     [Fact]
