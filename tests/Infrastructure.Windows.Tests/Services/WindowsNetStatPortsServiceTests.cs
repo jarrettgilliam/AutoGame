@@ -48,7 +48,7 @@ public class NetStatPortsServiceTests
         }
     };
 
-    private uint getExtendedUdpTableReturnValue = 0;
+    private uint getExtendedUdpTableReturnValue;
 
     public NetStatPortsServiceTests()
     {

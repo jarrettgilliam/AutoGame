@@ -117,7 +117,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
             }
 
             string defaultPath = software.FindSoftwarePathOrDefault();
-            string? executable = this.FileSystem.Path.GetFileName(defaultPath);
+            string executable = this.FileSystem.Path.GetFileName(defaultPath);
 
             var parms = new OpenFileDialogParms
             {

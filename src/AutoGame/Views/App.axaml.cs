@@ -1,4 +1,4 @@
-namespace AutoGame;
+namespace AutoGame.Views;
 
 using System;
 using System.IO.Abstractions;
@@ -7,7 +7,6 @@ using AutoGame.Core;
 using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure;
 using AutoGame.ViewModels;
-using AutoGame.Views;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;

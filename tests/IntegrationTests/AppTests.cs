@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoGame.Core.Interfaces;
 using AutoGame.ViewModels;
+using AutoGame.Views;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTK.Windowing.Desktop;
 

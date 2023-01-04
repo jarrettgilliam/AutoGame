@@ -109,14 +109,14 @@ public class ConfigService : IConfigService
         }
 
         string defaultPath = softwareManager.FindSoftwarePathOrDefault();
-        string? defaultExecutable = this.FileSystem.Path.GetFileName(defaultPath);
+        string defaultExecutable = this.FileSystem.Path.GetFileName(defaultPath);
 
         if (string.IsNullOrEmpty(defaultExecutable))
         {
             return true;
         }
 
-        string? softwareExecutable = this.FileSystem.Path.GetFileName(softwarePath);
+        string softwareExecutable = this.FileSystem.Path.GetFileName(softwarePath);
         return string.Equals(defaultExecutable, softwareExecutable);
     }
 
