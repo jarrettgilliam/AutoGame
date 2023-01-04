@@ -166,7 +166,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             this.TryLoadConfig();
             this.ConfigService.Validate(this.Config);
-            this.ShowWindow = false;
+
+            if (!this.Config.HasErrors)
+            {
+                this.ShowWindow = false;
+            }
         }
         catch (Exception ex)
         {
