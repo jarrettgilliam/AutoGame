@@ -345,6 +345,16 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void Cancel_Doesnt_Minimize_With_Errors()
+    {
+        this.savedConfigMock.AddError(nameof(Config.SoftwarePath), "test error");
+
+        this.sut.CancelCommand.Execute(null);
+
+        Assert.True(this.sut.ShowWindow);
+    }
+
+    [Fact]
     public void TryLoadConfig_SetsTraceLogging()
     {
         this.sut.CancelCommand.Execute(null);
