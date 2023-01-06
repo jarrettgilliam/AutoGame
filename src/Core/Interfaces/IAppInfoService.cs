@@ -1,5 +1,7 @@
 ﻿namespace AutoGame.Core.Interfaces;
 
+using System.Collections.Generic;
+
 public interface IAppInfoService
 {
     string AppDataFolder { get; }
@@ -7,6 +9,6 @@ public interface IAppInfoService
     string ConfigFilePath { get; }
 
     string LogFilePath { get; }
-    
-    string ParsecLogDirectory { get; }
+
+    IEnumerable<string> ParsecLogDirectories { get; }
 }

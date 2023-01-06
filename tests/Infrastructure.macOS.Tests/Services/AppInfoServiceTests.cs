@@ -1,11 +1,8 @@
-﻿namespace AutoGame.Infrastructure.Windows.Tests.Services;
+﻿namespace AutoGame.Infrastructure.macOS.Tests.Services;
 
-using System;
 using System.IO;
 using System.IO.Abstractions;
-using AutoGame.Infrastructure.Windows.Services;
-using Moq;
-using Xunit;
+using AutoGame.Infrastructure.macOS.Services;
 
 public class AppInfoServiceTests
 {
@@ -21,6 +18,14 @@ public class AppInfoServiceTests
                 It.IsAny<string>()))
             .Returns<string, string>(Path.Join);
 
+        this.pathMock
+            .Setup(x => x.Join(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()))
+            .Returns<string, string, string, string>(Path.Join);
+
         this.fileSystemMock
             .SetupGet(x => x.Path)
             .Returns(this.pathMock.Object);
@@ -34,8 +39,7 @@ public class AppInfoServiceTests
     {
         Assert.Equal(
             this.sut.AppDataFolder,
-            Directory.GetParent(
-                this.sut.ConfigFilePath)?.FullName);
+            Path.GetDirectoryName(this.sut.ConfigFilePath));
     }
 
     [Fact]
@@ -43,17 +47,6 @@ public class AppInfoServiceTests
     {
         Assert.Equal(
             this.sut.AppDataFolder,
-            Directory.GetParent(
-                this.sut.LogFilePath)?.FullName);
-    }
-
-    [Fact]
-    public void ParsecLogDirectories_Has_CorrectEntries()
-    {
-        // These paths were copied from:
-        // https://support.parsec.app/hc/en-us/articles/360003145951-Accessing-Your-Advanced-Settings
-        Assert.Collection(this.sut.ParsecLogDirectories,
-            x => Assert.Equal(x, Environment.ExpandEnvironmentVariables(@"%appdata%\Parsec")),
-            x => Assert.Equal(x, Environment.ExpandEnvironmentVariables(@"%programdata%\Parsec")));
+            Path.GetDirectoryName(this.sut.LogFilePath));
     }
 }

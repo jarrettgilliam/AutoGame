@@ -17,14 +17,17 @@ public class ParsecConnectedConditionTests
     private readonly ParsecConnectedCondition sut;
     private readonly Mock<ILoggingService> loggingServiceMock = new();
     private readonly Mock<INetStatPortsService> netStatPortsServiceMock = new();
-    private readonly Mock<ISleepService> sleepServiceMock = new();
     private readonly Mock<IProcessService> processServiceMock = new();
     private readonly Mock<IProcess> processMock = new();
     private readonly Mock<IFileSystem> fileSystemMock = new();
     private readonly Mock<IPath> pathMock = new();
     private readonly Mock<IDirectory> directoryMock = new();
+    private readonly Mock<IFile> fileMock = new();
     private readonly Mock<IFileSystemWatcherFactory> fileSystemWatcherFactoryMock = new();
-    private readonly Mock<IFileSystemWatcher> fileSystemWatcherMock = new();
+
+    private readonly List<Mock<IFileSystemWatcher>> fileSystemWatcherMocks = new();
+
+    private readonly Mock<IFileSystemWatcher> fileSystemWatcherMock1 = new();
     private readonly Mock<IAppInfoService> appInfoServiceMock = new();
     private readonly Mock<IRuntimeInformation> runtimeInformationMock = new();
 
@@ -32,8 +35,11 @@ public class ParsecConnectedConditionTests
 
     private const string ParsecLogFileName = "log.txt";
 
-    private static readonly string ParsecLogDirectory =
-        Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Parsec");
+    private static readonly IList<string> ParsecLogDirectories = new[]
+    {
+        Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Parsec"),
+        Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Parsec")
+    };
 
     private bool suppressConditionMet;
 
@@ -69,12 +75,27 @@ public class ParsecConnectedConditionTests
             .Returns(this.directoryMock.Object);
 
         this.fileSystemMock
+            .SetupGet(x => x.File)
+            .Returns(this.fileMock.Object);
+
+        this.fileSystemMock
             .SetupGet(x => x.FileSystemWatcher)
             .Returns(this.fileSystemWatcherFactoryMock.Object);
 
-        this.fileSystemWatcherFactoryMock
-            .Setup(x => x.New(ParsecLogDirectory, ParsecLogFileName))
-            .Returns(this.fileSystemWatcherMock.Object);
+        this.fileMock
+            .Setup(x => x.Exists(It.IsAny<string?>()))
+            .Returns(true);
+
+        foreach (string parsecLogDirectory in ParsecLogDirectories)
+        {
+            var fswm = new Mock<IFileSystemWatcher>();
+
+            this.fileSystemWatcherFactoryMock
+                .Setup(x => x.New(parsecLogDirectory, ParsecLogFileName))
+                .Returns(fswm.Object);
+
+            this.fileSystemWatcherMocks.Add(fswm);
+        }
 
         this.pathMock
             .Setup(x => x.Join(
@@ -83,8 +104,8 @@ public class ParsecConnectedConditionTests
             .Returns<string, string>(Path.Join);
 
         this.appInfoServiceMock
-            .SetupGet(x => x.ParsecLogDirectory)
-            .Returns(ParsecLogDirectory);
+            .SetupGet(x => x.ParsecLogDirectories)
+            .Returns(ParsecLogDirectories);
 
         this.runtimeInformationMock
             .Setup(x => x.IsOSPlatform(OSPlatform.Windows))
@@ -170,22 +191,7 @@ public class ParsecConnectedConditionTests
 
         Assert.Equal(1, helper.FiredCount);
 
-        this.fileSystemWatcherMock.Raise(x => x.Changed += null,
-            new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""));
-
-        Assert.Equal(1, helper.FiredCount);
-    }
-
-    [Fact]
-    public void DisplaySettingsChanged_Fires_ConditionMet()
-    {
-        this.suppressConditionMet = true;
-        using var helper = new LaunchConditionTestHelper(this.sut);
-        this.suppressConditionMet = false;
-
-        Assert.Equal(0, helper.FiredCount);
-
-        this.fileSystemWatcherMock.Raise(x => x.Changed += null,
+        this.fileSystemWatcherMocks[0].Raise(x => x.Changed += null,
             new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""));
 
         Assert.Equal(1, helper.FiredCount);
@@ -200,20 +206,37 @@ public class ParsecConnectedConditionTests
 
         Assert.Equal(0, helper.FiredCount);
 
-        this.fileSystemWatcherMock.VerifySet(x => x.EnableRaisingEvents = true, Times.Once);
+        foreach (Mock<IFileSystemWatcher> fswm in this.fileSystemWatcherMocks)
+        {
+            fswm.VerifySet(x => x.EnableRaisingEvents = true, Times.Once);
 
-        this.fileSystemWatcherMock.Raise(x => x.Changed += null,
-            new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""));
+            fswm.Raise(x => x.Changed += null,
+                new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""));
+        }
 
         Assert.Equal(1, helper.FiredCount);
     }
 
     [Fact]
-    public void WatchParsecLogFile_CreatesDirectory()
+    public void WatchParsecLogFiles_Doesnt_Create_Directory()
     {
         using var helper = new LaunchConditionTestHelper(this.sut);
 
-        this.directoryMock.Verify(x => x.CreateDirectory(ParsecLogDirectory), Times.Once);
+        this.directoryMock.Verify(x => x.CreateDirectory(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public void WatchParsecLogFiles_Doesnt_Watch_Nonexistent_File()
+    {
+        this.fileMock
+            .Setup(x => x.Exists(It.IsAny<string?>()))
+            .Returns(false);
+
+        using var helper = new LaunchConditionTestHelper(this.sut);
+
+        this.fileSystemWatcherFactoryMock.Verify(
+            x => x.New(It.IsAny<string>(), It.IsAny<string>()),
+            Times.Never);
     }
 
     [Fact]
@@ -222,10 +245,12 @@ public class ParsecConnectedConditionTests
         this.sut.StartMonitoring();
         this.sut.StopMonitoring();
 
-        this.fileSystemWatcherMock.VerifyRemove(
-            x => x.Changed -= It.IsAny<FileSystemEventHandler>(), Times.Once);
+        foreach (Mock<IFileSystemWatcher> fswm in this.fileSystemWatcherMocks)
+        {
+            fswm.VerifyRemove(x => x.Changed -= It.IsAny<FileSystemEventHandler>(), Times.Once);
+            fswm.Verify(x => x.Dispose(), Times.Once);
+        }
 
-        this.fileSystemWatcherMock.Verify(x => x.Dispose(), Times.Once);
     }
 
     [Fact]
