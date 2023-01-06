@@ -1,6 +1,7 @@
 ﻿namespace AutoGame.Infrastructure.Windows.Services;
 
 using System;
+using System.Collections.Generic;
 using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
@@ -13,8 +14,7 @@ internal sealed class AppInfoService : IAppInfoService
 
         this.AppDataFolder =
             this.FileSystem.Path.Join(
-                Environment.GetFolderPath(
-                    Environment.SpecialFolder.LocalApplicationData),
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 nameof(AutoGame));
 
         this.ConfigFilePath =
@@ -27,16 +27,20 @@ internal sealed class AppInfoService : IAppInfoService
                 this.AppDataFolder,
                 "Log.txt");
 
-        this.ParsecLogDirectory =
+        this.ParsecLogDirectories = new[]
+        {
             this.FileSystem.Path.Join(
-                Environment.GetFolderPath(
-                    Environment.SpecialFolder.ApplicationData),
-                "Parsec");
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "Parsec"),
+            this.FileSystem.Path.Join(
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                "Parsec")
+        };
     }
 
     private IFileSystem FileSystem { get; }
     public string AppDataFolder { get; }
     public string ConfigFilePath { get; }
     public string LogFilePath { get; }
-    public string ParsecLogDirectory { get; }
+    public IEnumerable<string> ParsecLogDirectories { get; }
 }

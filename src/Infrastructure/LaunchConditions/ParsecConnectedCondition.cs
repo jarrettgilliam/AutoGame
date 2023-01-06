@@ -17,8 +17,8 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     private const string ParsecLogFileName = "log.txt";
 
     private readonly object checkConditionLock = new();
+    private readonly List<IFileSystemWatcher> parsecLogWatchers = new();
     private bool wasConnected;
-    private IFileSystemWatcher? parsecLogWatcher;
 
     public ParsecConnectedCondition(
         ILoggingService loggingService,
@@ -47,36 +47,41 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
     public void StartMonitoring()
     {
-        this.WatchParsecLogFile();
+        this.WatchParsecLogFiles();
         this.CheckConditionMet();
     }
 
     public void StopMonitoring()
     {
-        this.StopWatchingParsecLogFile();
+        this.StopWatchingParsecLogFiles();
         this.wasConnected = false;
-
     }
 
-    private void WatchParsecLogFile()
+    private void WatchParsecLogFiles()
     {
-        this.FileSystem.Directory.CreateDirectory(this.AppInfoService.ParsecLogDirectory);
-
-        this.parsecLogWatcher = this.FileSystem.FileSystemWatcher.New(
-            this.AppInfoService.ParsecLogDirectory, ParsecLogFileName);
-
-        this.parsecLogWatcher.Changed += this.OnParsecLogWatcherEvent;
-        this.parsecLogWatcher.EnableRaisingEvents = true;
-    }
-
-    private void StopWatchingParsecLogFile()
-    {
-        if (this.parsecLogWatcher != null)
+        foreach (string directory in this.AppInfoService.ParsecLogDirectories)
         {
-            this.parsecLogWatcher.Changed -= this.OnParsecLogWatcherEvent;
-            this.parsecLogWatcher.Dispose();
-            this.parsecLogWatcher = null;
+            if (this.FileSystem.File.Exists(this.FileSystem.Path.Join(directory, ParsecLogFileName)))
+            {
+                IFileSystemWatcher watcher = this.FileSystem.FileSystemWatcher.New(directory, ParsecLogFileName);
+
+                watcher.Changed += this.OnParsecLogWatcherEvent;
+                watcher.EnableRaisingEvents = true;
+
+                this.parsecLogWatchers.Add(watcher);
+            }
         }
+    }
+
+    private void StopWatchingParsecLogFiles()
+    {
+        foreach (IFileSystemWatcher watcher in this.parsecLogWatchers)
+        {
+            watcher.Changed -= this.OnParsecLogWatcherEvent;
+            watcher.Dispose();
+        }
+
+        this.parsecLogWatchers.Clear();
     }
 
     private void OnParsecLogWatcherEvent(object sender, FileSystemEventArgs e)
