@@ -33,9 +33,24 @@ internal sealed class SteamBigPictureManager : ISoftwareManager
 
     public string DefaultArguments => "-start steam://open/bigpicture -fulldesktopres";
 
-    // From: https://www.displayfusion.com/ScriptedFunctions/View/?ID=b21d08ca-438a-41e5-8b9d-0125b07a2abc
-    public bool IsRunning(string softwarePath) =>
-        this.User32Service.FindWindow("CUIEngineWin32", "Steam") != IntPtr.Zero;
+    public bool IsRunning(string softwarePath)
+    {
+        // Original Steam Big Picture
+        // From: https://www.displayfusion.com/ScriptedFunctions/View/?ID=b21d08ca-438a-41e5-8b9d-0125b07a2abc
+        if (this.User32Service.FindWindow("CUIEngineWin32", "Steam") != IntPtr.Zero)
+        {
+            return true;
+        }
+
+        // New Steam Big Picture (Steam Deck UI)
+        // Found using Spy++ https://learn.microsoft.com/en-us/visualstudio/debugger/how-to-start-spy-increment
+        if (this.User32Service.FindWindow("SDL_app", "SP") != IntPtr.Zero)
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     public void Start(string softwarePath, string? softwareArguments) =>
         this.ProcessService.Start(softwarePath, softwareArguments).Dispose();
