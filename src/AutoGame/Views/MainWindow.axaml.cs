@@ -1,7 +1,6 @@
 namespace AutoGame.Views;
 
 using System;
-using System.Threading.Tasks;
 using AutoGame.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
@@ -53,10 +52,7 @@ public partial class MainWindow : CoreWindow
         this.Opened -= this.OnOpened;
 
         this.SetOrHideCustomTitleBar();
-
-        Task.Delay(1).ContinueWith(
-            _ => this.ViewModel?.LoadedCommand.Execute(null),
-            TaskScheduler.FromCurrentSynchronizationContext());
+        this.ViewModel?.LoadedCommand.Execute(null);
     }
 
     /// <summary>
