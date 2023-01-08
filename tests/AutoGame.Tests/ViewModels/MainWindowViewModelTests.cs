@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 public class MainWindowViewModelTests
 {
     private readonly MainWindowViewModel sut;
+
     private readonly Mock<ILoggingService> loggingServiceMock = new();
     private readonly Mock<IConfigService> configServiceMock = new();
     private readonly Mock<IAutoGameService> autoGameServiceMock = new();
@@ -22,6 +23,7 @@ public class MainWindowViewModelTests
     private readonly Mock<IFileSystem> fileSystemMock = new();
     private readonly Mock<IPath> pathMock = new();
     private readonly Mock<IDialogService> dialogServiceMock = new();
+    private readonly Mock<IUpdateCheckingService> updateCheckingServiceMock = new();
     private readonly Mock<SoftwareCollection> softwareCollectionMock;
 
     private const string SoftwareKey = "SteamBigPicture";
@@ -119,12 +121,17 @@ public class MainWindowViewModelTests
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
             .Returns<string>(Path.GetDirectoryName);
 
+        this.updateCheckingServiceMock
+            .Setup(x => x.GetUpdateInfo())
+            .Returns(Task.FromResult(new UpdateInfo()));
+
         this.sut = new MainWindowViewModel(
             this.loggingServiceMock.Object,
             this.configServiceMock.Object,
             this.autoGameServiceMock.Object,
             this.fileSystemMock.Object,
             this.dialogServiceMock.Object,
+            this.updateCheckingServiceMock.Object,
             this.softwareCollectionMock.Object);
     }
 
@@ -236,6 +243,24 @@ public class MainWindowViewModelTests
         this.sut.LoadedCommand.Execute(null);
 
         Assert.True(this.sut.ShowWindow);
+    }
+
+    [Fact]
+    public void Loaded_Gets_UpdateInfo()
+    {
+        this.sut.LoadedCommand.Execute(null);
+
+        this.updateCheckingServiceMock.Verify(x => x.GetUpdateInfo(), Times.Once);
+    }
+
+    [Fact]
+    public void Loaded_Doesnt_Get_UpdateInfo()
+    {
+        this.savedConfigMock.CheckForUpdates = false;
+
+        this.sut.LoadedCommand.Execute(null);
+
+        this.updateCheckingServiceMock.Verify(x => x.GetUpdateInfo(), Times.Never);
     }
 
     [Fact]

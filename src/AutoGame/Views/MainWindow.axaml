@@ -132,29 +132,39 @@
         </StackPanel>
 
         <!-- Button Panel -->
-        <StackPanel Grid.Row="2" Margin="5,0,5,5" Orientation="Horizontal" HorizontalAlignment="Right">
-            <StackPanel.Styles>
+        <Grid Grid.Row="2" Margin="5,0,5,5" ColumnDefinitions="*,Auto,Auto,Auto">
+            <Grid.Styles>
                 <Style Selector="Button">
                     <Setter Property="Margin" Value="5" />
                     <Setter Property="MinWidth" Value="75" />
                 </Style>
-            </StackPanel.Styles>
+            </Grid.Styles>
+
+            <ui:HyperlinkButton
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                IsVisible="{Binding UpdateInfo.IsAvailable, FallbackValue=false}"
+                Content="{Binding UpdateInfo.NewVersion, StringFormat='Version {0} is available'}"
+                NavigateUri="{Binding UpdateInfo.Link}" />
 
             <Button
+                Grid.Column="1"
                 Content="OK"
                 Command="{Binding OKCommand}"
                 IsDefault="True" />
 
             <Button
+                Grid.Column="2"
                 Content="Cancel"
                 Command="{Binding CancelCommand}"
                 IsCancel="True" />
 
             <Button
+                Grid.Column="3"
                 Content="Apply"
                 Command="{Binding ApplyCommand}"
                 IsEnabled="{Binding Config.IsDirty}" />
 
-        </StackPanel>
+        </Grid>
     </Grid>
 </Window>

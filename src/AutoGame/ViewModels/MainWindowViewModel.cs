@@ -14,6 +14,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 {
     private Config config;
     private bool showWindow = true;
+    private UpdateInfo? updateInfo;
 
 #nullable disable
 
@@ -30,6 +31,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         IAutoGameService autoGameService,
         IFileSystem fileSystem,
         IDialogService dialogService,
+        IUpdateCheckingService updateCheckingService,
         ISoftwareCollection availableSoftware)
     {
         this.LoggingService = loggingService;
@@ -37,6 +39,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         this.FileSystem = fileSystem;
         this.DialogService = dialogService;
         this.AutoGameService = autoGameService;
+        this.UpdateCheckingService = updateCheckingService;
         this.AvailableSoftware = availableSoftware;
 
         this.BrowseSoftwarePathCommand = new AsyncRelayCommand(this.BrowseSoftwarePath);
@@ -51,6 +54,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private IFileSystem FileSystem { get; }
     private IDialogService DialogService { get; }
     private IAutoGameService AutoGameService { get; }
+    private IUpdateCheckingService UpdateCheckingService { get; }
 
     public ISoftwareCollection AvailableSoftware { get; }
 
@@ -77,6 +81,12 @@ public sealed partial class MainWindowViewModel : ObservableObject
         set => this.SetProperty(ref this.showWindow, value);
     }
 
+    public UpdateInfo? UpdateInfo
+    {
+        get => this.updateInfo;
+        set => this.SetProperty(ref this.updateInfo, value);
+    }
+
     [RelayCommand]
     private void Loaded()
     {
@@ -97,6 +107,12 @@ public sealed partial class MainWindowViewModel : ObservableObject
                 // The configuration file doesn't exist so consider this initial setup.
                 // Create a default configuration without applying it yet and don't minimize.
                 this.Config = this.ConfigService.CreateDefault();
+            }
+
+            if (this.Config.CheckForUpdates)
+            {
+                this.UpdateCheckingService.GetUpdateInfo().ContinueWith(
+                    t => this.UpdateInfo = t.Result);
             }
         }
         catch (Exception ex)

@@ -9,5 +9,5 @@ public interface ILoggingService : IDisposable
 
     void Log(string message, LogLevel level);
 
-    void LogException(string message, Exception exception);
+    void LogException(string message, Exception exception, LogLevel logLevel = LogLevel.Error);
 }
