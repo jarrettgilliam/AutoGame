@@ -10,6 +10,7 @@ public class Config : ObservableObjectWithErrorInfo
     private bool isDirty;
     private bool enableTraceLogging;
     private bool startMinimized = true;
+    private bool checkForUpdates = true;
     private string? softwareKey;
     private string? softwarePath;
     private string? softwareArguments;
@@ -33,6 +34,12 @@ public class Config : ObservableObjectWithErrorInfo
     {
         get => this.startMinimized;
         set => this.SetProperty(ref this.startMinimized, value);
+    }
+
+    public bool CheckForUpdates
+    {
+        get => this.checkForUpdates;
+        set => this.SetProperty(ref this.checkForUpdates, value);
     }
 
     public string? SoftwareKey

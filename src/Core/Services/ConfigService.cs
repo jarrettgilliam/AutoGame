@@ -64,6 +64,7 @@ public class ConfigService : IConfigService
         {
             Version = 1,
             StartMinimized = true,
+            CheckForUpdates = true,
             SoftwareKey = software?.Key,
             SoftwarePath = software?.FindSoftwarePathOrDefault(),
             SoftwareArguments = software?.DefaultArguments,
@@ -122,12 +123,11 @@ public class ConfigService : IConfigService
 
     public void Upgrade(Config config)
     {
-        ISoftwareManager? software = this.AvailableSoftware.GetSoftwareByKeyOrNull(config.SoftwareKey);
-
         if (config.Version == 0)
         {
             if (string.IsNullOrEmpty(config.SoftwareArguments))
             {
+                ISoftwareManager? software = this.AvailableSoftware.GetSoftwareByKeyOrNull(config.SoftwareKey);
                 config.SoftwareArguments = software?.DefaultArguments;
             }
 

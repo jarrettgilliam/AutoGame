@@ -22,6 +22,7 @@ public class ConfigTests
     [Theory]
     [InlineData(nameof(Config.EnableTraceLogging), true)]
     [InlineData(nameof(Config.StartMinimized), false)]
+    [InlineData(nameof(Config.CheckForUpdates), false)]
     [InlineData(nameof(Config.SoftwareKey), "TheKey")]
     [InlineData(nameof(Config.SoftwarePath), "ThePath")]
     [InlineData(nameof(Config.SoftwareArguments), "--arguments")]

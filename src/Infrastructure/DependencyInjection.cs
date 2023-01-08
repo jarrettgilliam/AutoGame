@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddSingleton<IProcessService, ProcessService>();
         services.AddSingleton<IRuntimeInformation, RuntimeInformationWrapper>();
         services.AddSingleton<ISleepService, SleepService>();
+        services.AddSingleton<IUpdateCheckingService, UpdateCheckingService>();
     }
 
     private static void AddLaunchConditions(this IServiceCollection services)

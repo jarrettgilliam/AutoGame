@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
+using System.Reflection;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 
@@ -36,6 +37,9 @@ internal sealed class AppInfoService : IAppInfoService
                 Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
                 "Parsec")
         };
+
+        this.CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version
+            ?? throw new InvalidOperationException("Unable get current application version");
     }
 
     private IFileSystem FileSystem { get; }
@@ -43,4 +47,5 @@ internal sealed class AppInfoService : IAppInfoService
     public string ConfigFilePath { get; }
     public string LogFilePath { get; }
     public IEnumerable<string> ParsecLogDirectories { get; }
+    public Version CurrentVersion { get; }
 }

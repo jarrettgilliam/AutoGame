@@ -62,6 +62,9 @@ public class App : Application
         services.AddCore();
         services.AddInfrastructure();
         services.AddPlatformInfrastructure();
+
+        var github = new Octokit.GitHubClient(new Octokit.ProductHeaderValue(nameof(AutoGame)));
+        services.AddSingleton(github.Repository.Release);
     }
 
     private void OnCurrentDomainUnhandledException(object? sender, UnhandledExceptionEventArgs e) =>
