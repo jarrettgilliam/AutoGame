@@ -138,6 +138,18 @@ public class LoggingServiceTests
             Times.Once);
     }
 
+    [Theory]
+    [InlineData(LogLevel.Trace)]
+    [InlineData(LogLevel.Warning)]
+    public void LogException_Doesnt_ShowsMessageBox(LogLevel logLevel)
+    {
+        this.sut.LogException("message", new Exception("exception"), logLevel);
+
+        this.dialogServiceMock.Verify(
+            x => x.ShowMessageBox(It.IsAny<MessageBoxParms>()),
+            Times.Never);
+    }
+
     [Fact]
     public void Dispose_Works()
     {
