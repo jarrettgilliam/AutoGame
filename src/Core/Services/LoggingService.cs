@@ -59,7 +59,11 @@ internal sealed class LoggingService : ILoggingService
 
     public void LogException(string message, Exception exception, LogLevel logLevel = LogLevel.Error)
     {
-        this.ShowExceptionDialog(message, exception);
+        if (logLevel == LogLevel.Error)
+        {
+            this.ShowExceptionDialog(message, exception);
+        }
+
         this.Log($"{message}: {exception}", logLevel);
     }
 
