@@ -4,6 +4,7 @@ using System;
 using AutoGame.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using FluentAvalonia.UI.Controls;
 
 public partial class MainWindow : CoreWindow
@@ -52,7 +53,10 @@ public partial class MainWindow : CoreWindow
         this.Opened -= this.OnOpened;
 
         this.SetOrHideCustomTitleBar();
-        this.ViewModel?.LoadedCommand.Execute(null);
+
+        Dispatcher.UIThread.Post(
+            () => this.ViewModel?.LoadedCommand.Execute(null),
+            DispatcherPriority.ApplicationIdle);
     }
 
     /// <summary>
