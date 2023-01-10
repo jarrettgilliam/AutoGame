@@ -43,6 +43,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         this.AvailableSoftware = availableSoftware;
 
         this.BrowseSoftwarePathCommand = new AsyncRelayCommand(this.BrowseSoftwarePath);
+        this.LoadedCommand = new AsyncRelayCommand(this.Loaded);
 
         this.config = this.ConfigService.CreateDefault();
 
@@ -59,6 +60,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public ISoftwareCollection AvailableSoftware { get; }
 
     public IAsyncRelayCommand BrowseSoftwarePathCommand { get; }
+
+    public IAsyncRelayCommand LoadedCommand { get; }
 
     public Config Config
     {
@@ -87,8 +90,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         set => this.SetProperty(ref this.updateInfo, value);
     }
 
-    [RelayCommand]
-    private void Loaded()
+    private async Task Loaded()
     {
         try
         {
@@ -111,8 +113,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
             if (this.Config.CheckForUpdates)
             {
-                this.UpdateCheckingService.GetUpdateInfo().ContinueWith(
-                    t => this.UpdateInfo = t.Result);
+                this.UpdateInfo = await this.UpdateCheckingService.GetUpdateInfo();
             }
         }
         catch (Exception ex)
