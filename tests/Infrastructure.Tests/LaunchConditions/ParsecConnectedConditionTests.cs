@@ -24,10 +24,7 @@ public class ParsecConnectedConditionTests
     private readonly Mock<IDirectory> directoryMock = new();
     private readonly Mock<IFile> fileMock = new();
     private readonly Mock<IFileSystemWatcherFactory> fileSystemWatcherFactoryMock = new();
-
     private readonly List<Mock<IFileSystemWatcher>> fileSystemWatcherMocks = new();
-
-    private readonly Mock<IFileSystemWatcher> fileSystemWatcherMock1 = new();
     private readonly Mock<IAppInfoService> appInfoServiceMock = new();
     private readonly Mock<IRuntimeInformation> runtimeInformationMock = new();
 
