@@ -2,26 +2,26 @@
 
 using System;
 using System.Threading.Tasks;
-using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using Octokit;
+using Serilog;
 
 internal sealed class UpdateCheckingService : IUpdateCheckingService
 {
     public UpdateCheckingService(
         IReleasesClient releasesClient,
         IAppInfoService appInfoService,
-        ILoggingService loggingService)
+        ILogger logger)
     {
         this.ReleasesClient = releasesClient;
         this.AppInfoService = appInfoService;
-        this.LoggingService = loggingService;
+        this.Logger = logger;
     }
 
     private IReleasesClient ReleasesClient { get; }
     private IAppInfoService AppInfoService { get; }
-    private ILoggingService LoggingService { get; }
+    private ILogger Logger { get; }
 
     public async Task<UpdateInfo> GetUpdateInfo()
     {
@@ -44,7 +44,7 @@ internal sealed class UpdateCheckingService : IUpdateCheckingService
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("Unable to get update information", ex, LogLevel.Warning);
+            this.Logger.Warning(ex, "Unable to get update information");
         }
 
         return new UpdateInfo();

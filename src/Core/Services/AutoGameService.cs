@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
+using Serilog;
 
 internal sealed class AutoGameService : IAutoGameService
 {
@@ -13,18 +14,18 @@ internal sealed class AutoGameService : IAutoGameService
     private IList<ILaunchCondition>? appliedLaunchConditions;
 
     public AutoGameService(
-        ILoggingService loggingService,
+        ILogger logger,
         ISoftwareCollection availableSoftware,
         IGameControllerConnectedCondition gameControllerConnectedCondition,
         IParsecConnectedCondition parsecConnectedCondition)
     {
-        this.LoggingService = loggingService;
+        this.Logger = logger;
         this.AvailableSoftware = availableSoftware;
         this.GameControllerConnectedCondition = gameControllerConnectedCondition;
         this.ParsecConnectedCondition = parsecConnectedCondition;
     }
 
-    private ILoggingService LoggingService { get; }
+    private ILogger Logger { get; }
     private ILaunchCondition GameControllerConnectedCondition { get; }
     private ILaunchCondition ParsecConnectedCondition { get; }
     private ISoftwareCollection AvailableSoftware { get; }
@@ -92,7 +93,7 @@ internal sealed class AutoGameService : IAutoGameService
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling launch condition met", ex);
+            this.Logger.Error(ex, "handling launch condition met");
         }
     }
 }

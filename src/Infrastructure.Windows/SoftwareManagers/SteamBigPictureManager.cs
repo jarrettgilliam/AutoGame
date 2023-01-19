@@ -4,24 +4,25 @@ using System;
 using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.Windows.Interfaces;
+using Serilog;
 
 internal sealed class SteamBigPictureManager : ISoftwareManager
 {
     public SteamBigPictureManager(
-        ILoggingService loggingService,
+        ILogger logger,
         IUser32Service user32Service,
         IFileSystem fileSystem,
         IProcessService processService,
         IRegistryService registryService)
     {
-        this.LoggingService = loggingService;
+        this.Logger = logger;
         this.User32Service = user32Service;
         this.FileSystem = fileSystem;
         this.ProcessService = processService;
         this.RegistryService = registryService;
     }
 
-    private ILoggingService LoggingService { get; }
+    private ILogger Logger { get; }
     private IUser32Service User32Service { get; }
     private IFileSystem FileSystem { get; }
     private IProcessService ProcessService { get; }
@@ -76,7 +77,7 @@ internal sealed class SteamBigPictureManager : ISoftwareManager
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("finding the path to steam", ex);
+            this.Logger.Error(ex, "finding the path to steam");
         }
 
         return defaultSteamPath;

@@ -1,39 +1,39 @@
-﻿namespace AutoGame.Infrastructure.Windows.Services;
+﻿// ReSharper disable once CheckNamespace
+
+namespace AutoGame.Infrastructure;
 
 using System;
 using System.Collections.Generic;
-using System.IO.Abstractions;
+using System.IO;
 using System.Reflection;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 
-internal sealed class AppInfoService : IAppInfoService
+public sealed class AppInfoService : IAppInfoService
 {
-    public AppInfoService(IFileSystem fileSystem)
+    public AppInfoService()
     {
-        this.FileSystem = fileSystem;
-
         this.AppDataFolder =
-            this.FileSystem.Path.Join(
+            Path.Join(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 nameof(AutoGame));
 
         this.ConfigFilePath =
-            this.FileSystem.Path.Join(
+            Path.Join(
                 this.AppDataFolder,
                 nameof(Config) + ".json");
 
         this.LogFilePath =
-            this.FileSystem.Path.Join(
+            Path.Join(
                 this.AppDataFolder,
                 "Log.txt");
 
         this.ParsecLogDirectories = new[]
         {
-            this.FileSystem.Path.Join(
+            Path.Join(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "Parsec"),
-            this.FileSystem.Path.Join(
+            Path.Join(
                 Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
                 "Parsec")
         };
@@ -42,7 +42,6 @@ internal sealed class AppInfoService : IAppInfoService
             ?? throw new InvalidOperationException("Unable get current application version");
     }
 
-    private IFileSystem FileSystem { get; }
     public string AppDataFolder { get; }
     public string ConfigFilePath { get; }
     public string LogFilePath { get; }

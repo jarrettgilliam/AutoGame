@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using Avalonia;
@@ -18,6 +17,7 @@ using MessageBox.Avalonia.DTO;
 using MessageBox.Avalonia.Enums;
 using MessageBox.Avalonia.ViewModels;
 using MessageBox.Avalonia.Views;
+using Serilog.Events;
 
 internal sealed class DialogService : IDialogService
 {
@@ -68,12 +68,11 @@ internal sealed class DialogService : IDialogService
         _ = this.GetMessageBoxStandardWindow(stdParms).Show();
     }
 
-    private Icon GetIconForLogLevel(LogLevel level) =>
-        level switch
-        {
-            LogLevel.Trace => Icon.Info,
-            LogLevel.Error => Icon.Error,
-            _ => default
+    private Icon GetIconForLogLevel(LogEventLevel level) =>
+        level switch {
+            < LogEventLevel.Warning => Icon.Info,
+            LogEventLevel.Warning => Icon.Warning,
+            > LogEventLevel.Warning => Icon.Error
         };
 
     // Copied from MessageBoxManager and added a call to ForceWin32WindowToTheme

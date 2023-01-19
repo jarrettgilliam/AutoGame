@@ -8,9 +8,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
-using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
+using Serilog;
+using Serilog.Events;
 
 internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 {
@@ -21,14 +22,14 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     private bool wasConnected;
 
     public ParsecConnectedCondition(
-        ILoggingService loggingService,
+        ILogger logger,
         INetStatPortsService netStatPortsService,
         IProcessService processService,
         IFileSystem fileSystem,
         IAppInfoService appInfoService,
         IRuntimeInformation runtimeInformation)
     {
-        this.LoggingService = loggingService;
+        this.Logger = logger;
         this.NetStatPortsService = netStatPortsService;
         this.ProcessService = processService;
         this.FileSystem = fileSystem;
@@ -38,7 +39,7 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
     public event EventHandler? ConditionMet;
 
-    private ILoggingService LoggingService { get; }
+    private ILogger Logger { get; }
     private INetStatPortsService NetStatPortsService { get; }
     private IProcessService ProcessService { get; }
     private IFileSystem FileSystem { get; }
@@ -92,11 +93,11 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling a Parsec log file event", ex);
+            this.Logger.Error(ex, "handling a Parsec log file event");
         }
     }
 
-    private void CheckConditionMet([CallerMemberName] string? source = null)
+    private void CheckConditionMet([CallerMemberName] string? caller = null)
     {
         if (Monitor.TryEnter(this.checkConditionLock))
         {
@@ -111,10 +112,16 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
                     this.ConditionMet?.Invoke(this, EventArgs.Empty);
                 }
 
-                this.Trace(() => $"from {source}; " +
-                                 $"{nameof(isConnected)}={isConnected}; " +
-                                 $"{nameof(this.wasConnected)}={this.wasConnected}; " +
-                                 $"{nameof(fired)}={fired}");
+                if (this.Logger.IsEnabled(LogEventLevel.Debug))
+                {
+                    this.Logger
+                        .ForContext(isConnected)
+                        .ForContext(this.wasConnected)
+                        .ForContext(fired)
+                        .ForContext<ParsecConnectedCondition>()
+                        .ForContextSourceMember()
+                        .Debug("called from {caller}", caller);
+                }
 
                 this.wasConnected = isConnected;
             }
@@ -142,18 +149,17 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
             ? count > 2
             : count == 1;
 
-        this.Trace(() => $"found {count} ports; returned {result}");
+        if (this.Logger.IsEnabled(LogEventLevel.Debug))
+        {
+            this.Logger
+                .ForContext<ParsecConnectedCondition>()
+                .ForContextSourceMember()
+                .Debug("found {count} ports; returned {result}", count, result);
+        }
+
         return result;
     }
 
     private bool IsParsecUDPPort(Port port, IEnumerable<IProcess> parsecProcs) =>
         port.Protocol == "UDP" && parsecProcs.Any(proc => proc.Id == port.ProcessId);
-
-    private void Trace(Func<string> message, [CallerMemberName] string? member = null)
-    {
-        if (this.LoggingService.EnableTraceLogging)
-        {
-            this.LoggingService.Log($"{nameof(ParsecConnectedCondition)}.{member} {message()}", LogLevel.Trace);
-        }
-    }
 }

@@ -4,11 +4,12 @@ using System;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Core.Services;
+using Serilog;
 
 public class AutoGameServiceTests
 {
     private readonly AutoGameService sut;
-    private readonly Mock<ILoggingService> loggingServiceMock = new();
+    private readonly Mock<ILogger> loggerMock = new();
     private readonly Mock<ISoftwareManager> softwareMock1 = new();
     private readonly Mock<ISoftwareManager> softwareMock2 = new();
     private readonly Mock<IGameControllerConnectedCondition> gameControllerConnectedConditionMock = new();
@@ -45,7 +46,7 @@ public class AutoGameServiceTests
         };
 
         this.sut = new AutoGameService(
-            this.loggingServiceMock.Object,
+            this.loggerMock.Object,
             new SoftwareCollection(
                 new ISoftwareManager[]
                 {

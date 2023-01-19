@@ -2,31 +2,15 @@
 
 using System;
 using System.IO;
-using System.IO.Abstractions;
-using AutoGame.Infrastructure.Windows.Services;
-using Moq;
 using Xunit;
 
 public class AppInfoServiceTests
 {
     private readonly AppInfoService sut;
-    private readonly Mock<IFileSystem> fileSystemMock = new();
-    private readonly Mock<IPath> pathMock = new();
 
     public AppInfoServiceTests()
     {
-        this.pathMock
-            .Setup(x => x.Join(
-                It.IsAny<string>(),
-                It.IsAny<string>()))
-            .Returns<string, string>(Path.Join);
-
-        this.fileSystemMock
-            .SetupGet(x => x.Path)
-            .Returns(this.pathMock.Object);
-
-        this.sut = new AppInfoService(
-            this.fileSystemMock.Object);
+        this.sut = new AppInfoService();
     }
 
     [Fact]

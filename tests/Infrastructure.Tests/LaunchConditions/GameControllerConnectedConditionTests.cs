@@ -3,11 +3,12 @@
 using System;
 using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.LaunchConditions;
+using Serilog;
 
 public class GameControllerConnectedConditionTests
 {
     private readonly GameControllerConnectedCondition sut;
-    private readonly Mock<ILoggingService> loggingServiceMock = new();
+    private readonly Mock<ILogger> loggerMock = new();
     private readonly Mock<IGameControllerService> gameControllerServiceMock = new();
 
     private bool hasAnyGameControllers = true;
@@ -19,7 +20,7 @@ public class GameControllerConnectedConditionTests
             .Returns(() => this.hasAnyGameControllers);
 
         this.sut = new GameControllerConnectedCondition(
-            this.loggingServiceMock.Object,
+            this.loggerMock.Object,
             this.gameControllerServiceMock.Object);
     }
 
