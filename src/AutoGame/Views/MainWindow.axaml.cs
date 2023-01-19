@@ -54,9 +54,18 @@ public partial class MainWindow : CoreWindow
 
         this.SetOrHideCustomTitleBar();
 
-        Dispatcher.UIThread.Post(
-            () => this.ViewModel?.LoadedCommand.Execute(null),
-            DispatcherPriority.ApplicationIdle);
+        // If `LoadedCommand` is called immediately in macOS, the app crashes.
+        // If `LoadedCommand` is called on application idle in Windows, the UI doesn't render correctly
+        if (this.IsWindows)
+        {
+            this.ViewModel?.LoadedCommand.Execute(null);
+        }
+        else
+        {
+            Dispatcher.UIThread.Post(
+                () => this.ViewModel?.LoadedCommand.Execute(null),
+                DispatcherPriority.ApplicationIdle);
+        }
     }
 
     /// <summary>
