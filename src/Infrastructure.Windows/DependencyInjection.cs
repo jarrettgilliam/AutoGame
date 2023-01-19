@@ -7,6 +7,9 @@ using AutoGame.Infrastructure.Windows.Interfaces;
 using AutoGame.Infrastructure.Windows.Services;
 using AutoGame.Infrastructure.Windows.SoftwareManagers;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.EventLog;
 
 public static class DependencyInjection
 {
@@ -32,5 +35,20 @@ public static class DependencyInjection
         services.AddSingleton<ISoftwareManager, SteamBigPictureManager>();
         services.AddSingleton<ISoftwareManager, PlayniteFullscreenManager>();
         services.AddSingleton<ISoftwareManager, OtherSoftwareManager>();
+    }
+
+    public static LoggerConfiguration WriteToPlatformSystemLog(
+        this LoggerConfiguration loggerConfiguration,
+        string outputTemplate)
+    {
+        return loggerConfiguration.WriteTo.EventLog(
+            source: nameof(AutoGame),
+            eventIdProvider: new EventIdOneProvider(),
+            outputTemplate: outputTemplate);
+    }
+
+    private class EventIdOneProvider : IEventIdProvider
+    {
+        public ushort ComputeEventId(LogEvent logEvent) => 1;
     }
 }

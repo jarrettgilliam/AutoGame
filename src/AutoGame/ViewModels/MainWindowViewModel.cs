@@ -9,6 +9,9 @@ using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 
 public sealed partial class MainWindowViewModel : ObservableObject
 {
@@ -26,7 +29,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 #nullable restore
 
     public MainWindowViewModel(
-        ILoggingService loggingService,
+        ILogger logger,
+        LoggingLevelSwitch loggingLevelSwitch,
         IConfigService configService,
         IAutoGameService autoGameService,
         IFileSystem fileSystem,
@@ -34,7 +38,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
         IUpdateCheckingService updateCheckingService,
         ISoftwareCollection availableSoftware)
     {
-        this.LoggingService = loggingService;
+        this.Logger = logger;
+        this.LoggingLevelSwitch = loggingLevelSwitch;
         this.ConfigService = configService;
         this.FileSystem = fileSystem;
         this.DialogService = dialogService;
@@ -50,7 +55,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
         this.config.PropertyChanged += this.OnConfigPropertyChanged;
     }
 
-    private ILoggingService LoggingService { get; }
+    private ILogger Logger { get; }
+    private LoggingLevelSwitch LoggingLevelSwitch { get; }
     private IConfigService ConfigService { get; }
     private IFileSystem FileSystem { get; }
     private IDialogService DialogService { get; }
@@ -118,7 +124,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling application loaded", ex);
+            this.Logger.Error(ex, "handling application loaded");
         }
     }
 
@@ -156,7 +162,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("browsing for a software path", ex);
+            this.Logger.Error(ex, "browsing for a software path");
         }
     }
 
@@ -172,7 +178,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling OK", ex);
+            this.Logger.Error(ex, "handling OK");
         }
     }
 
@@ -191,7 +197,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling Cancel", ex);
+            this.Logger.Error(ex, "handling Cancel");
         }
     }
 
@@ -206,7 +212,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         this.ConfigService.Upgrade(c);
         this.Config = c;
-        this.LoggingService.EnableTraceLogging = c.EnableTraceLogging;
+        this.LoggingLevelSwitch.MinimumLevel = c.EnableTraceLogging
+            ? LogEventLevel.Verbose
+            : LogEventLevel.Information;
 
         return true;
     }
@@ -234,7 +242,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling Apply", ex);
+            this.Logger.Error(ex, "handling Apply");
             return false;
         }
     }
@@ -252,7 +260,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling config property changed", ex);
+            this.Logger.Error(ex, "handling config property changed");
         }
     }
 }

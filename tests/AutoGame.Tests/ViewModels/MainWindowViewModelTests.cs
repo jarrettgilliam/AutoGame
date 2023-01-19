@@ -11,12 +11,15 @@ using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Core.Services;
 using AutoGame.ViewModels;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 
 public class MainWindowViewModelTests
 {
     private readonly MainWindowViewModel sut;
 
-    private readonly Mock<ILoggingService> loggingServiceMock = new();
+    private readonly Mock<ILogger> loggerMock = new();
     private readonly Mock<IConfigService> configServiceMock = new();
     private readonly Mock<IAutoGameService> autoGameServiceMock = new();
     private readonly Mock<ISoftwareManager> softwareManagerMock = new();
@@ -25,6 +28,7 @@ public class MainWindowViewModelTests
     private readonly Mock<IDialogService> dialogServiceMock = new();
     private readonly Mock<IUpdateCheckingService> updateCheckingServiceMock = new();
     private readonly Mock<SoftwareCollection> softwareCollectionMock;
+    private readonly LoggingLevelSwitch loggingLevelSwitch = new();
 
     private const string SoftwareKey = "SteamBigPicture";
     private const string ExecutableName = "steam.exe";
@@ -126,7 +130,8 @@ public class MainWindowViewModelTests
             .Returns(Task.FromResult(new UpdateInfo()));
 
         this.sut = new MainWindowViewModel(
-            this.loggingServiceMock.Object,
+            this.loggerMock.Object,
+            this.loggingLevelSwitch,
             this.configServiceMock.Object,
             this.autoGameServiceMock.Object,
             this.fileSystemMock.Object,
@@ -382,10 +387,11 @@ public class MainWindowViewModelTests
     [Fact]
     public void TryLoadConfig_SetsTraceLogging()
     {
+        this.loggingLevelSwitch.MinimumLevel = LogEventLevel.Warning;
+
         this.sut.CancelCommand.Execute(null);
 
-        this.loggingServiceMock.VerifySet(
-            x => x.EnableTraceLogging = true, Times.Once());
+        Assert.Equal(LogEventLevel.Verbose, this.loggingLevelSwitch.MinimumLevel);
     }
 
     [Fact]

@@ -6,6 +6,7 @@ using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.macOS.Services;
 using AutoGame.Infrastructure.macOS.SoftwareManagers;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 public static class DependencyInjection
 {
@@ -25,5 +26,12 @@ public static class DependencyInjection
     private static void AddSoftwareManagers(this IServiceCollection services)
     {
         services.AddSingleton<ISoftwareManager, SteamBigPictureManager>();
+    }
+
+    public static LoggerConfiguration WriteToPlatformSystemLog(
+        this LoggerConfiguration loggerConfiguration,
+        string outputTemplate)
+    {
+        return loggerConfiguration;
     }
 }

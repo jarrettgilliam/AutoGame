@@ -1,9 +1,9 @@
-﻿using Avalonia;
+﻿namespace AutoGame;
+
 using System;
-
-namespace AutoGame;
-
 using AutoGame.Views;
+using Avalonia;
+using Serilog;
 
 internal class Program
 {
@@ -11,8 +11,24 @@ internal class Program
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
+    public static int Main(string[] args)
+    {
+        try
+        {
+            SerilogConfiguration.ConfigureInitialLogger();
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "in main method");
+            return 1;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()

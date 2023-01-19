@@ -7,6 +7,7 @@ using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.Windows.Interfaces;
 using AutoGame.Infrastructure.Windows.SoftwareManagers;
 using Moq;
+using Serilog;
 using Xunit;
 
 public class SteamBigPictureManagerTests
@@ -15,7 +16,7 @@ public class SteamBigPictureManagerTests
     private const string SOFTWARE_PATH = $"/default/path/to/{SOFTWARE_NAME}.exe";
 
     private readonly SteamBigPictureManager sut;
-    private readonly Mock<ILoggingService> loggingServiceMock = new();
+    private readonly Mock<ILogger> loggerMock = new();
     private readonly Mock<IUser32Service> user32ServiceMock = new();
     private readonly Mock<IFileSystem> fileSystemMock = new();
     private readonly Mock<IPath> pathMock = new();
@@ -45,7 +46,7 @@ public class SteamBigPictureManagerTests
             .Returns(this.processMock.Object);
 
         this.sut = new SteamBigPictureManager(
-            this.loggingServiceMock.Object,
+            this.loggerMock.Object,
             this.user32ServiceMock.Object,
             this.fileSystemMock.Object,
             this.processServiceMock.Object,

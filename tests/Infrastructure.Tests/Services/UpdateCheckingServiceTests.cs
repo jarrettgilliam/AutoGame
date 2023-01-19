@@ -2,11 +2,11 @@
 
 using System;
 using System.Threading.Tasks;
-using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Infrastructure.Services;
 using Octokit;
+using Serilog;
 
 public class UpdateCheckingServiceTests
 {
@@ -14,7 +14,7 @@ public class UpdateCheckingServiceTests
 
     private readonly Mock<IReleasesClient> releasesClientMock = new();
     private readonly Mock<IAppInfoService> appInfoServiceMock = new();
-    private readonly Mock<ILoggingService> loggingServiceMock = new();
+    private readonly Mock<ILogger> loggerMock = new();
 
     private string mockTagName = "v2.0.1";
     private string mockHtmlUrl = string.Empty;
@@ -55,7 +55,7 @@ public class UpdateCheckingServiceTests
         this.sut = new UpdateCheckingService(
             this.releasesClientMock.Object,
             this.appInfoServiceMock.Object,
-            this.loggingServiceMock.Object);
+            this.loggerMock.Object);
     }
 
     [Fact]
@@ -128,8 +128,8 @@ public class UpdateCheckingServiceTests
 
         await this.sut.GetUpdateInfo();
 
-        this.loggingServiceMock.Verify(
-                x => x.LogException(It.IsAny<string>(), It.IsAny<Exception>(), LogLevel.Warning),
+        this.loggerMock.Verify(
+                x => x.Warning(It.IsAny<Exception?>(), It.IsAny<string>()),
                 Times.Once);
     }
 }

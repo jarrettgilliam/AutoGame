@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Infrastructure.LaunchConditions;
+using Serilog;
 
 public class ParsecConnectedConditionTests
 {
@@ -15,7 +16,7 @@ public class ParsecConnectedConditionTests
     private const int OTHER_PROC_ID = 8888;
 
     private readonly ParsecConnectedCondition sut;
-    private readonly Mock<ILoggingService> loggingServiceMock = new();
+    private readonly Mock<ILogger> loggerMock = new();
     private readonly Mock<INetStatPortsService> netStatPortsServiceMock = new();
     private readonly Mock<IProcessService> processServiceMock = new();
     private readonly Mock<IProcess> processMock = new();
@@ -109,7 +110,7 @@ public class ParsecConnectedConditionTests
             .Returns(true);
 
         this.sut = new ParsecConnectedCondition(
-            this.loggingServiceMock.Object,
+            this.loggerMock.Object,
             this.netStatPortsServiceMock.Object,
             this.processServiceMock.Object,
             this.fileSystemMock.Object,

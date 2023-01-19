@@ -17,6 +17,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<IDateTimeService, DateTimeService>();
         services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<IMessageBoxSink, MessageBoxSink>();
         services.AddSingleton<IProcessService, ProcessService>();
         services.AddSingleton<IRuntimeInformation, RuntimeInformationWrapper>();
         services.AddSingleton<ISleepService, SleepService>();

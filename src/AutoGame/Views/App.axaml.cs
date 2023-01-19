@@ -4,7 +4,6 @@ using System;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
 using AutoGame.Core;
-using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure;
 using AutoGame.ViewModels;
 using Avalonia;
@@ -14,6 +13,8 @@ using Avalonia.Markup.Xaml;
 using FluentAvalonia.Styling;
 using FluentAvalonia.UI.Media;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Core;
 
 public class App : Application
 {
@@ -24,6 +25,7 @@ public class App : Application
         ServiceCollection services = new();
         this.ConfigureServices(services);
         this.serviceProvider = services.BuildServiceProvider();
+        SerilogConfiguration.ConfigureFullLogger(this.serviceProvider);
         this.DataContext = new AppViewModel();
     }
 
@@ -34,26 +36,19 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        try
-        {
-            AppDomain.CurrentDomain.UnhandledException += this.OnCurrentDomainUnhandledException;
-            TaskScheduler.UnobservedTaskException += this.OnTaskSchedulerUnobservedTaskException;
+        AppDomain.CurrentDomain.UnhandledException += this.OnCurrentDomainUnhandledException;
+        TaskScheduler.UnobservedTaskException += this.OnTaskSchedulerUnobservedTaskException;
 
-            if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
-            {
-                lifetime.MainWindow = this.serviceProvider.GetService<MainWindow>();
-                this.ApplyTheme(lifetime.MainWindow);
-            }
-
-            base.OnFrameworkInitializationCompleted();
-        }
-        catch (Exception ex)
+        if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
         {
-            this.LogExceptionAndExit("during startup", ex);
+            lifetime.MainWindow = this.serviceProvider.GetService<MainWindow>();
+            this.ApplyTheme(lifetime.MainWindow);
         }
+
+        base.OnFrameworkInitializationCompleted();
     }
 
-    public void ConfigureServices(IServiceCollection services)
+    private void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
@@ -65,29 +60,24 @@ public class App : Application
 
         var github = new Octokit.GitHubClient(new Octokit.ProductHeaderValue(nameof(AutoGame)));
         services.AddSingleton(github.Repository.Release);
+
+        services.AddSingleton<LoggingLevelSwitch>();
+        services.AddTransient<ILogger>(_ => Log.Logger);
     }
 
     private void OnCurrentDomainUnhandledException(object? sender, UnhandledExceptionEventArgs e) =>
-        this.LogExceptionAndExit("app domain unhandled exception", e.ExceptionObject as Exception);
+        this.LogExceptionAndExit(e.ExceptionObject as Exception, "app domain unhandled exception");
 
     private void OnTaskSchedulerUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e) =>
-        this.LogExceptionAndExit("task scheduler unhandled exception", e.Exception);
+        this.LogExceptionAndExit(e.Exception, "task scheduler unhandled exception");
 
-    private void LogExceptionAndExit(string message, Exception? exception)
+    private void LogExceptionAndExit(Exception? exception, string message)
     {
         exception ??= new Exception("Unknown exception");
 
-        var loggingService = this.serviceProvider.GetService<ILoggingService>();
+        Log.Fatal(exception, message);
 
-        if (loggingService is not null)
-        {
-            loggingService.LogException(message, exception);
-        }
-        else
-        {
-            Console.Error.WriteLine(message);
-            Console.Error.WriteLine(exception.ToString());
-        }
+        Log.CloseAndFlush();
 
         Environment.Exit(1);
     }

@@ -2,22 +2,23 @@
 
 using System;
 using AutoGame.Core.Interfaces;
+using Serilog;
 
 internal sealed class GameControllerConnectedCondition : IGameControllerConnectedCondition
 {
     private readonly object checkConditionLock = new();
 
     public GameControllerConnectedCondition(
-        ILoggingService loggingService,
+        ILogger logger,
         IGameControllerService gameControllerService)
     {
-        this.LoggingService = loggingService;
+        this.Logger = logger;
         this.GameControllerService = gameControllerService;
     }
 
     public event EventHandler? ConditionMet;
 
-    private ILoggingService LoggingService { get; }
+    private ILogger Logger { get; }
     private IGameControllerService GameControllerService { get; }
 
     public void StartMonitoring()
@@ -34,7 +35,7 @@ internal sealed class GameControllerConnectedCondition : IGameControllerConnecte
         }
         catch (Exception ex)
         {
-            this.LoggingService.LogException("handling game controller added", ex);
+            this.Logger.Error(ex, "handling game controller added");
         }
     }
 
