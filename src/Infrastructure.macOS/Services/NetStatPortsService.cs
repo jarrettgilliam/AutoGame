@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.RegularExpressions;
+using AutoGame.Core.Enums;
 using AutoGame.Core.Exceptions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
@@ -44,7 +45,7 @@ internal sealed class NetStatPortsService : INetStatPortsService
 
         string output = process.StandardOutput.ReadToEnd();
         string errorText = process.StandardError.ReadToEnd();
-        
+
         process.WaitForExit();
 
         if (process.ExitCode != 0)
@@ -75,7 +76,7 @@ internal sealed class NetStatPortsService : INetStatPortsService
             uint.TryParse(match.Groups["pid"].Value, out uint processId))
         {
             port = new Port(
-                "UDP",
+                NetworkProtocol.UDP,
                 localAddress,
                 localPort,
                 processId);
@@ -86,7 +87,7 @@ internal sealed class NetStatPortsService : INetStatPortsService
         port = default;
         return false;
     }
-    
+
     private bool TryParseIpAddress(string s, [NotNullWhen(true)] out IPAddress? ipAddress)
     {
         if (s == "*")

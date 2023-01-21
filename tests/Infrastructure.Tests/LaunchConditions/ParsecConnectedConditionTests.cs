@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Runtime.InteropServices;
+using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using AutoGame.Infrastructure.LaunchConditions;
@@ -29,7 +30,7 @@ public class ParsecConnectedConditionTests
     private readonly Mock<IAppInfoService> appInfoServiceMock = new();
     private readonly Mock<IRuntimeInformation> runtimeInformationMock = new();
 
-    private readonly List<Port> netstatPorts;
+    private readonly List<Port> udpPorts;
 
     private const string ParsecLogFileName = "log.txt";
 
@@ -43,16 +44,16 @@ public class ParsecConnectedConditionTests
 
     public ParsecConnectedConditionTests()
     {
-        this.netstatPorts = new List<Port>
+        this.udpPorts = new List<Port>
         {
-            new() { Protocol = "UDP", ProcessId = PARSECD_PROC_ID },
-            new() { Protocol = "UDP", ProcessId = PARSECD_PROC_ID },
-            new() { Protocol = "UDP", ProcessId = PARSECD_PROC_ID }
+            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID },
+            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID },
+            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID }
         };
 
         this.netStatPortsServiceMock
             .Setup(x => x.GetUdpPorts())
-            .Returns(this.netstatPorts);
+            .Returns(this.udpPorts);
 
         this.processMock
             .SetupGet(x => x.Id)
@@ -137,7 +138,7 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void NetStatNoPorts_DoesntFire_ConditionMet()
     {
-        this.netstatPorts.Clear();
+        this.udpPorts.Clear();
 
         using var helper = new LaunchConditionTestHelper(this.sut);
 
@@ -147,9 +148,9 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void NetStatTwoPorts_DoesntFire_ConditionMet()
     {
-        this.netstatPorts.RemoveAt(2);
+        this.udpPorts.RemoveAt(2);
 
-        Assert.Equal(2, this.netstatPorts.Count);
+        Assert.Equal(2, this.udpPorts.Count);
 
         using var helper = new LaunchConditionTestHelper(this.sut);
 
@@ -159,22 +160,9 @@ public class ParsecConnectedConditionTests
     [Fact]
     public void NetStatProcessIdMismatch_DoesntFire_ConditionMet()
     {
-        for (int i = 0; i < this.netstatPorts.Count; i++)
+        for (int i = 0; i < this.udpPorts.Count; i++)
         {
-            this.netstatPorts[i] = this.netstatPorts[i] with { ProcessId = OTHER_PROC_ID };
-        }
-
-        using var helper = new LaunchConditionTestHelper(this.sut);
-
-        Assert.Equal(0, helper.FiredCount);
-    }
-
-    [Fact]
-    public void NetStatNoUDPPorts_DoesntFire_ConditionMet()
-    {
-        for (int i = 0; i < this.netstatPorts.Count; i++)
-        {
-            this.netstatPorts[i] = this.netstatPorts[i] with { Protocol = "TCP" };
+            this.udpPorts[i] = this.udpPorts[i] with { ProcessId = OTHER_PROC_ID };
         }
 
         using var helper = new LaunchConditionTestHelper(this.sut);

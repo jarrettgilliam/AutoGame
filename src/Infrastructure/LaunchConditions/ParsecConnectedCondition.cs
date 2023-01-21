@@ -136,14 +136,14 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     {
         using IDisposableList<IProcess> parsecProcs = this.ProcessService.GetProcessesByName("parsecd");
 
-        return this.HasCorrectNumberOfActiveUDPPorts(parsecProcs);
+        return this.HasCorrectNumberOfActiveUDPPorts(parsecProcs.Select(p => (uint)p.Id).ToHashSet());
     }
 
-    private bool HasCorrectNumberOfActiveUDPPorts(IList<IProcess> parsecProcs)
+    private bool HasCorrectNumberOfActiveUDPPorts(IReadOnlySet<uint> parsecProcessIds)
     {
         IList<Port> ports = this.NetStatPortsService.GetUdpPorts();
 
-        int count = ports.Count(p => this.IsParsecUDPPort(p, parsecProcs));
+        int count = ports.Count(p => parsecProcessIds.Contains(p.ProcessId));
 
         bool result = this.RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? count > 2
@@ -159,7 +159,4 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
         return result;
     }
-
-    private bool IsParsecUDPPort(Port port, IEnumerable<IProcess> parsecProcs) =>
-        port.Protocol == "UDP" && parsecProcs.Any(proc => proc.Id == port.ProcessId);
 }

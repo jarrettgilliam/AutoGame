@@ -1,9 +1,10 @@
 ﻿namespace AutoGame.Core.Models;
 
 using System.Net;
+using AutoGame.Core.Enums;
 
 public readonly record struct Port(
-    string Protocol,
+    NetworkProtocol Protocol,
     IPAddress LocalAddress,
     uint LocalPort,
     uint ProcessId);
