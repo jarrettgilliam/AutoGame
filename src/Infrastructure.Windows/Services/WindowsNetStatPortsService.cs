@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using AutoGame.Core.Enums;
 using AutoGame.Core.Exceptions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
@@ -25,26 +26,29 @@ internal sealed class WindowsNetStatPortsService : INetStatPortsService
 
     public IList<Port> GetUdpPorts()
     {
-        List<Port> ports = new();
+        IList<MibUdpRowOwnerPid> v4ports = this.GetUdpV4Ports();
+        IList<MibUdp6RowOwnerPid> v6ports = this.GetUdpV6Ports();
 
-        ports.AddRange(this.GetUdpV4Ports().Cast<IPortRow>().Select(this.ToPort));
-        ports.AddRange(this.GetUdpV6Ports().Cast<IPortRow>().Select(this.ToPort));
+        List<Port> ports = new(v4ports.Count + v6ports.Count);
+
+        ports.AddRange(v4ports.Select(this.ToPort));
+        ports.AddRange(v6ports.Select(this.ToPort));
 
         return ports;
     }
 
-    private Port ToPort(IPortRow r) => new("UDP", r.LocalAddress, r.LocalPort, r.ProcessId);
+    private Port ToPort<T>(T r) where T : IPortRow =>
+        new(NetworkProtocol.UDP, r.LocalAddress, r.LocalPort, r.ProcessId);
 
-    private IEnumerable<MibUdpRowOwnerPid> GetUdpV4Ports() =>
+    private IList<MibUdpRowOwnerPid> GetUdpV4Ports() =>
         this.InternalGetPorts<MibUdpTableOwnerPid, MibUdpRowOwnerPid>(IpVersion.AF_INET);
 
-    private IEnumerable<MibUdp6RowOwnerPid> GetUdpV6Ports() =>
+    private IList<MibUdp6RowOwnerPid> GetUdpV6Ports() =>
         this.InternalGetPorts<MibUdp6TableOwnerPid, MibUdp6RowOwnerPid>(IpVersion.AF_INET6);
 
-    private IEnumerable<TRow> InternalGetPorts<TTable, TRow>(IpVersion ipVersion)
+    private IList<TRow> InternalGetPorts<TTable, TRow>(IpVersion ipVersion)
         where TTable : IPortTable<TRow>
     {
-        List<TRow> tableRows = new();
         int buffSize = 0;
 
         // how much memory do we need?
@@ -66,22 +70,22 @@ internal sealed class WindowsNetStatPortsService : INetStatPortsService
             // get the number of entries in the table
             var table = (TTable)Marshal.PtrToStructure(tcpTablePtr, typeof(TTable))!;
             int rowStructSize = Marshal.SizeOf(typeof(TRow));
-            uint numEntries = table.NumEntries;
+            List<TRow> tableRows = new List<TRow>((int)table.NumEntries);
 
             var rowPtr = (IntPtr)((long)tcpTablePtr + 4);
-            for (int i = 0; i < numEntries; i++)
+            for (int i = 0; i < table.NumEntries; i++)
             {
                 var tcpRow = (TRow)Marshal.PtrToStructure(rowPtr, typeof(TRow))!;
                 tableRows.Add(tcpRow);
                 rowPtr = (IntPtr)((long)rowPtr + rowStructSize); // next entry
             }
+
+            return tableRows;
         }
         finally
         {
             // Free the Memory
             Marshal.FreeHGlobal(tcpTablePtr);
         }
-
-        return tableRows;
     }
 }

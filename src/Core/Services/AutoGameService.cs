@@ -38,7 +38,7 @@ internal sealed class AutoGameService : IAutoGameService
 
         this.StopMonitoringAllLaunchConditions();
 
-        this.appliedLaunchConditions = new List<ILaunchCondition>();
+        this.appliedLaunchConditions = new List<ILaunchCondition>(2);
 
         if (config.LaunchWhenGameControllerConnected)
         {

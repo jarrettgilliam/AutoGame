@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
+using AutoGame.Core.Enums;
 using AutoGame.Core.Exceptions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
@@ -83,14 +84,14 @@ public class NetStatPortsServiceTests
     {
         Port inputPort = new()
         {
-            Protocol = "UDP",
+            Protocol = NetworkProtocol.UDP,
             LocalAddress = IPAddress.Parse("127.0.0.1"),
             LocalPort = 1120,
             ProcessId = 9999
         };
 
         this.standardOutputMock.AppendLine(
-            $"{inputPort.Protocol.ToLower()} 0 0 {inputPort.LocalAddress}.{inputPort.LocalPort} *.* 0 0 {inputPort.ProcessId}");
+            $"{inputPort.Protocol.ToString().ToLower()} 0 0 {inputPort.LocalAddress}.{inputPort.LocalPort} *.* 0 0 {inputPort.ProcessId}");
 
         this.standardOutputMock.AppendLine("This is not parsable");
 
