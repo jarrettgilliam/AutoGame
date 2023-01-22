@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
-using System.Net;
 using System.Runtime.InteropServices;
 using AutoGame.Core.Enums;
 using AutoGame.Core.Interfaces;
@@ -31,7 +30,7 @@ public class ParsecConnectedConditionTests
     private readonly Mock<IAppInfoService> appInfoServiceMock = new();
     private readonly Mock<IRuntimeInformation> runtimeInformationMock = new();
 
-    private List<Port> udpPorts;
+    private readonly List<Port> udpPorts;
 
     private const string ParsecLogFileName = "log.txt";
 
@@ -47,15 +46,14 @@ public class ParsecConnectedConditionTests
     {
         this.udpPorts = new List<Port>
         {
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("127.0.0.1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("127.0.0.1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("::1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("::1") }
+            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID },
+            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID },
+            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID }
         };
 
         this.netStatPortsServiceMock
             .Setup(x => x.GetUdpPorts())
-            .Returns(() => this.udpPorts);
+            .Returns(this.udpPorts);
 
         this.processMock
             .SetupGet(x => x.Id)
@@ -147,91 +145,15 @@ public class ParsecConnectedConditionTests
     }
 
     [Fact]
-    public void NetStatOneV4Port_DoesntFire_ConditionMet()
+    public void NetStatTwoPorts_DoesntFire_ConditionMet()
     {
-        this.udpPorts = new List<Port>
-        {
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("127.0.0.1") }
-        };
+        this.udpPorts.RemoveAt(2);
+
+        Assert.Equal(2, this.udpPorts.Count);
 
         using var helper = new LaunchConditionTestHelper(this.sut);
 
         Assert.Equal(0, helper.FiredCount);
-    }
-
-    [Fact]
-    public void NetStatOneV6Port_DoesntFire_ConditionMet()
-    {
-        this.udpPorts = new List<Port>
-        {
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("::1") }
-        };
-
-        using var helper = new LaunchConditionTestHelper(this.sut);
-
-        Assert.Equal(0, helper.FiredCount);
-    }
-
-    [Fact]
-    public void NetStatTwoV4Ports_Fires_ConditionMet()
-    {
-        this.udpPorts = new List<Port>
-        {
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("127.0.0.1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("127.0.0.1") }
-        };
-
-        using var helper = new LaunchConditionTestHelper(this.sut);
-
-        Assert.Equal(1, helper.FiredCount);
-    }
-
-    [Fact]
-    public void NetStatTwoV6Ports_Fires_ConditionMet()
-    {
-        this.udpPorts = new List<Port>
-        {
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("::1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("::1") }
-        };
-
-        using var helper = new LaunchConditionTestHelper(this.sut);
-
-        Assert.Equal(1, helper.FiredCount);
-    }
-
-    [Fact]
-    public void NetStatTwoV4TwoV6Ports_Fires_ConditionMet()
-    {
-        this.udpPorts = new List<Port>
-        {
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("127.0.0.1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("127.0.0.1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("::1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("::1") }
-        };
-
-        using var helper = new LaunchConditionTestHelper(this.sut);
-
-        Assert.Equal(1, helper.FiredCount);
-    }
-
-    [Fact]
-    public void NetStatThreeV4ThreeV6Ports_Fires_ConditionMet()
-    {
-        this.udpPorts = new List<Port>
-        {
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("127.0.0.1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("127.0.0.1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("127.0.0.1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("::1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("::1") },
-            new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID, LocalAddress = IPAddress.Parse("::1") }
-        };
-
-        using var helper = new LaunchConditionTestHelper(this.sut);
-
-        Assert.Equal(1, helper.FiredCount);
     }
 
     [Fact]

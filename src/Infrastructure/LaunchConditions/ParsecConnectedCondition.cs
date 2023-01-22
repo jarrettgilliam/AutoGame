@@ -156,6 +156,5 @@ public class ParsecConnectedCondition : IParsecConnectedCondition
     }
 
     protected virtual bool HasCorrectNumberOfActiveUdpPorts(Port[] parsecPorts) =>
-        parsecPorts.Count(x => x.LocalAddress.AddressFamily == AddressFamily.InterNetwork) >= 2 ||
-        parsecPorts.Count(x => x.LocalAddress.AddressFamily == AddressFamily.InterNetworkV6) >= 2;
+        parsecPorts.Length > 2;
 }
