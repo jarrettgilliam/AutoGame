@@ -5,15 +5,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
 using Serilog;
 using Serilog.Events;
 
-internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
+public class ParsecConnectedCondition : IParsecConnectedCondition
 {
     private const string ParsecLogFileName = "log.txt";
 
@@ -26,15 +26,13 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
         INetStatPortsService netStatPortsService,
         IProcessService processService,
         IFileSystem fileSystem,
-        IAppInfoService appInfoService,
-        IRuntimeInformation runtimeInformation)
+        IAppInfoService appInfoService)
     {
         this.Logger = logger;
         this.NetStatPortsService = netStatPortsService;
         this.ProcessService = processService;
         this.FileSystem = fileSystem;
         this.AppInfoService = appInfoService;
-        this.RuntimeInformation = runtimeInformation;
     }
 
     public event EventHandler? ConditionMet;
@@ -44,7 +42,6 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
     private IProcessService ProcessService { get; }
     private IFileSystem FileSystem { get; }
     private IAppInfoService AppInfoService { get; }
-    private IRuntimeInformation RuntimeInformation { get; }
 
     public void StartMonitoring()
     {
@@ -134,29 +131,31 @@ internal sealed class ParsecConnectedCondition : IParsecConnectedCondition
 
     private bool GetIsConnected()
     {
-        using IDisposableList<IProcess> parsecProcs = this.ProcessService.GetProcessesByName("parsecd");
+        Port[] parsecPorts = this.GetParsecUdpPorts();
 
-        return this.HasCorrectNumberOfActiveUDPPorts(parsecProcs.Select(p => (uint)p.Id).ToHashSet());
-    }
-
-    private bool HasCorrectNumberOfActiveUDPPorts(IReadOnlySet<uint> parsecProcessIds)
-    {
-        IList<Port> ports = this.NetStatPortsService.GetUdpPorts();
-
-        int count = ports.Count(p => parsecProcessIds.Contains(p.ProcessId));
-
-        bool result = this.RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? count > 2
-            : count == 1;
+        bool result = this.HasCorrectNumberOfActiveUdpPorts(parsecPorts);
 
         if (this.Logger.IsEnabled(LogEventLevel.Debug))
         {
             this.Logger
                 .ForContext<ParsecConnectedCondition>()
                 .ForContextSourceMember()
-                .Debug("found {count} ports; returned {result}", count, result);
+                .Debug("found {count} ports; returned {result}", parsecPorts.Length, result);
         }
 
         return result;
     }
+
+    private Port[] GetParsecUdpPorts()
+    {
+        using IDisposableList<IProcess> parsecProcs = this.ProcessService.GetProcessesByName("parsecd");
+        HashSet<uint> parsecProcessIds = parsecProcs.Select(p => (uint)p.Id).ToHashSet();
+
+        IList<Port> ports = this.NetStatPortsService.GetUdpPorts();
+        return ports.Where(p => parsecProcessIds.Contains(p.ProcessId)).ToArray();
+    }
+
+    protected virtual bool HasCorrectNumberOfActiveUdpPorts(Port[] parsecPorts) =>
+        parsecPorts.Count(x => x.LocalAddress.AddressFamily == AddressFamily.InterNetwork) >= 2 ||
+        parsecPorts.Count(x => x.LocalAddress.AddressFamily == AddressFamily.InterNetworkV6) >= 2;
 }
