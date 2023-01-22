@@ -1,3 +1,5 @@
+[![Build Release](https://github.com/jarrettgilliam/AutoGame/actions/workflows/BuildRelease.yml/badge.svg)](https://github.com/jarrettgilliam/AutoGame/actions/workflows/BuildRelease.yml)
+
 AutoGame
 ========
 
