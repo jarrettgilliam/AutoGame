@@ -34,6 +34,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<ISoftwareManager, SteamBigPictureManager>();
         services.AddSingleton<ISoftwareManager, PlayniteFullscreenManager>();
+        services.AddSingleton<ISoftwareManager, OneGameLauncherManager>();
         services.AddSingleton<ISoftwareManager, OtherSoftwareManager>();
     }
 
