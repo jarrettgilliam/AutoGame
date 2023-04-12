@@ -45,7 +45,7 @@ internal sealed class SteamBigPictureManager : ISoftwareManager
 
         // New Steam Big Picture (Steam Deck UI)
         // Found using Spy++ https://learn.microsoft.com/en-us/visualstudio/debugger/how-to-start-spy-increment
-        if (this.User32Service.FindWindow("SDL_app", "SP") != IntPtr.Zero)
+        if (this.User32Service.FindWindow("SDL_app", "Steam Big Picture Mode") != IntPtr.Zero)
         {
             return true;
         }
