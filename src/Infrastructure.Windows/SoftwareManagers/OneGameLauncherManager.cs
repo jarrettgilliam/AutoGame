@@ -10,24 +10,19 @@ using Serilog;
 internal sealed class OneGameLauncherManager : ISoftwareManager
 {
     public OneGameLauncherManager(
-        ILogger logger,
         IUser32Service user32Service,
-        IFileSystem fileSystem,
-        IProcessService processService,
-        IRegistryService registryService)
+        IProcessService processService
+       )
     {
-        this.Logger = logger;
         this.User32Service = user32Service;
-        this.FileSystem = fileSystem;
         this.ProcessService = processService;
-        this.RegistryService = registryService;
+
     }
 
-    private ILogger Logger { get; }
+
     private IUser32Service User32Service { get; }
-    private IFileSystem FileSystem { get; }
     private IProcessService ProcessService { get; }
-    private IRegistryService RegistryService { get; }
+
 
     public string Key => "OneGameLauncher";
 
@@ -35,17 +30,9 @@ internal sealed class OneGameLauncherManager : ISoftwareManager
 
     public string DefaultArguments => "shell:appsfolder\\62269AlexShats.OneGameLauncherBeta_gghb1w55myjr2!App";
 
-    public bool IsRunning(string softwarePath)
-    {
-         return   this.User32Service.FindWindow("CUIEngineWin32", "GameLauncherWidget") != IntPtr.Zero;
+    public bool IsRunning(string softwarePath) => this.User32Service.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)") != IntPtr.Zero;
 
-    }
+    public void Start(string softwarePath, string? softwareArguments) => this.ProcessService.Start(softwarePath, softwareArguments).Dispose();
 
-    public void Start(string softwarePath, string? softwareArguments) =>
-        this.ProcessService.Start(softwarePath, softwareArguments).Dispose();
-
-    public string FindSoftwarePathOrDefault()
-    {
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
-    }
+    public string FindSoftwarePathOrDefault() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
 }

@@ -15,14 +15,13 @@ public class OneGameLauncherManagerTests
     private const string SOFTWARE_NAME = "OneGameLauncher";
     private const string SOFTWARE_PATH = $"/default/path/to/{SOFTWARE_NAME}.exe";
 
-    private readonly OneGameLauncherManager sut;
-    private readonly Mock<ILogger> loggerMock = new();
+    private readonly OneGameLauncherManager sut; 
     private readonly Mock<IUser32Service> user32ServiceMock = new();
     private readonly Mock<IFileSystem> fileSystemMock = new();
     private readonly Mock<IPath> pathMock = new();
     private readonly Mock<IProcessService> processServiceMock = new();
     private readonly Mock<IProcess> processMock = new();
-    private readonly Mock<IRegistryService> registryServiceMock = new();
+  
 
     public OneGameLauncherManagerTests()
     {
@@ -45,12 +44,10 @@ public class OneGameLauncherManagerTests
             .Setup(x => x.Start(It.IsAny<string>(), It.IsAny<string?>()))
             .Returns(this.processMock.Object);
 
-        this.sut = new OneGameLauncherManager(
-            this.loggerMock.Object,
-            this.user32ServiceMock.Object,
-            this.fileSystemMock.Object,
-            this.processServiceMock.Object,
-            this.registryServiceMock.Object);
+        this.sut = new OneGameLauncherManager(         
+            this.user32ServiceMock.Object,         
+            this.processServiceMock.Object
+            );
     }
 
     [Fact]
@@ -77,7 +74,7 @@ public class OneGameLauncherManagerTests
     public void IsRunning_ReturnsTrue()
     {
         this.user32ServiceMock
-            .Setup(x => x.FindWindow("CUIEngineWin32", "GameLauncherWidget"))
+            .Setup(x => x.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)"))
             .Returns(IntPtr.MaxValue);
 
         Assert.True(this.sut.IsRunning(SOFTWARE_PATH));
@@ -87,7 +84,7 @@ public class OneGameLauncherManagerTests
     public void IsRunning_ReturnsFalse()
     {
         this.user32ServiceMock
-            .Setup(x => x.FindWindow("CUIEngineWin32", "GameLauncherWidget"))
+            .Setup(x => x.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)"))
             .Returns(IntPtr.Zero);
 
         Assert.False(this.sut.IsRunning(SOFTWARE_PATH));
