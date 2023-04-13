@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.Windows.Interfaces;
+using AutoGame.Infrastructure.Windows.Services;
 using Serilog;
 
 internal sealed class OneGameLauncherManager : ISoftwareManager
@@ -30,9 +31,28 @@ internal sealed class OneGameLauncherManager : ISoftwareManager
 
     public string DefaultArguments => "shell:appsfolder\\62269AlexShats.OneGameLauncherBeta_gghb1w55myjr2!App";
 
-    public bool IsRunning(string softwarePath) => this.User32Service.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)") != IntPtr.Zero;
+    private nint Window => this.User32Service.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)");
 
-    public void Start(string softwarePath, string? softwareArguments) => this.ProcessService.Start(softwarePath, softwareArguments).Dispose();
+    public void MaximizeWindow()
+    {
+        if (this.User32Service is WindowsUser32Service s && Window != IntPtr.Zero)
+        {
+            s.SetForegroundWindow(Window);
+            s.ShowWindowAsync(Window, 3);
+        }
+    }
+
+    public bool IsRunning(string softwarePath)
+    {
+        MaximizeWindow();
+        return Window != IntPtr.Zero;
+    }
+
+    public void Start(string softwarePath, string? softwareArguments)
+    {
+        ProcessService.Start(softwarePath, softwareArguments).Dispose();
+        MaximizeWindow();
+    }
 
     public string FindSoftwarePathOrDefault() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
 }

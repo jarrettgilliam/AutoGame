@@ -1,16 +1,21 @@
 ﻿namespace AutoGame.Infrastructure.Windows.Services;
 
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using AutoGame.Infrastructure.Windows.Interfaces;
 
 internal sealed class WindowsUser32Service : IUser32Service
 {
+     
     public IntPtr FindWindow(string? sClass, string sWindow) =>
         NativeMethods.FindWindow(sClass, sWindow);
 
     public IntPtr GetForegroundWindow() =>
         NativeMethods.GetForegroundWindow();
+
+    public bool ShowWindowAsync(IntPtr hWnd, int nCmdShow) =>
+        NativeMethods.ShowWindowAsync(hWnd, nCmdShow);
 
     public int SetForegroundWindow(IntPtr hWnd) =>
         NativeMethods.SetForegroundWindow(hWnd);
@@ -37,5 +42,12 @@ internal sealed class WindowsUser32Service : IUser32Service
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+      
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+
+
     }
 }
