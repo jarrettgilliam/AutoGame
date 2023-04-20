@@ -27,11 +27,11 @@ internal sealed class HeroicManager : ISoftwareManager
 
     public string Key => "Heroic";
 
-    public string Description => "Heroic Fullscreen";
+    public string Description => "Heroic Games Launcher Fullscreen";
 
     public string DefaultArguments => "--fullscreen";
      
-    public bool IsRunning(string softwarePath) => this.User32Service.FindWindow("ApplicationFrameWindow", "Heroic") != IntPtr.Zero;
+    public bool IsRunning(string softwarePath) => this.User32Service.FindWindow("Chrome_WidgetWin_1", "Heroic Games Launcher") != IntPtr.Zero;
 
     public void Start(string softwarePath, string? softwareArguments)=>    
         ProcessService.Start(softwarePath, softwareArguments).Dispose();        
