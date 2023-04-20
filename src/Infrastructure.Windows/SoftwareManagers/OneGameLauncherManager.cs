@@ -42,11 +42,7 @@ internal sealed class OneGameLauncherManager : ISoftwareManager
         }
     }
 
-    public bool IsRunning(string softwarePath)
-    {
-        MaximizeWindow();
-        return Window != IntPtr.Zero;
-    }
+    public bool IsRunning(string softwarePath) => Window == this.User32Service.GetForegroundWindow();
 
     public void Start(string softwarePath, string? softwareArguments)
     {
