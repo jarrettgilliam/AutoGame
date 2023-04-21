@@ -9,4 +9,9 @@ public interface IUser32Service
     int SetForegroundWindow(IntPtr hwnd);
     uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr ProcessId);
     bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+    public bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+
+
+
+
 }
