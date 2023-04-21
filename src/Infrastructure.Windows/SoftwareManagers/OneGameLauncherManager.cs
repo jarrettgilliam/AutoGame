@@ -31,23 +31,20 @@ internal sealed class OneGameLauncherManager : ISoftwareManager
 
     public string DefaultArguments => "shell:appsfolder\\62269AlexShats.OneGameLauncherBeta_gghb1w55myjr2!App";
 
-    private nint Window => this.User32Service.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)");
-
-    public void MaximizeWindow()
-    {
-        if (this.User32Service is WindowsUser32Service s && Window != IntPtr.Zero)
-        {
-            s.SetForegroundWindow(Window);
-            s.ShowWindowAsync(Window, 3);
-        }
-    }
+    private nint Window => this.User32Service.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)");    
 
     public bool IsRunning(string softwarePath) => Window == this.User32Service.GetForegroundWindow();
 
     public void Start(string softwarePath, string? softwareArguments)
     {
         ProcessService.Start(softwarePath, softwareArguments).Dispose();
-        MaximizeWindow();
+        var w = this.Window;
+        if (w != IntPtr.Zero)
+        {
+            this.User32Service.SetForegroundWindow(w);
+            this.User32Service.ShowWindowAsync(w, 3);
+        }
+
     }
 
     public string FindSoftwarePathOrDefault() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
