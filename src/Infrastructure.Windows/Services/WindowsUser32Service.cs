@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using AutoGame.Infrastructure.Windows.Enums;
 using AutoGame.Infrastructure.Windows.Interfaces;
 
 internal sealed class WindowsUser32Service : IUser32Service
@@ -12,9 +13,6 @@ internal sealed class WindowsUser32Service : IUser32Service
     public IntPtr GetForegroundWindow() =>
         NativeMethods.GetForegroundWindow();
 
-    public bool ShowWindowAsync(IntPtr hWnd, int nCmdShow) =>
-        NativeMethods.ShowWindowAsync(hWnd, nCmdShow);
-
     public int SetForegroundWindow(IntPtr hWnd) =>
         NativeMethods.SetForegroundWindow(hWnd);
 
@@ -23,6 +21,9 @@ internal sealed class WindowsUser32Service : IUser32Service
 
     public bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach) =>
         NativeMethods.AttachThreadInput(idAttach, idAttachTo, fAttach);
+
+    public bool ShowWindowAsync(IntPtr hWnd, ShowWindowCommands nCmdShow) =>
+        NativeMethods.ShowWindowAsync(hWnd, nCmdShow);
 
     private static class NativeMethods
     {
@@ -42,6 +43,6 @@ internal sealed class WindowsUser32Service : IUser32Service
         public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
 
         [DllImport("user32.dll")]
-        public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+        public static extern bool ShowWindowAsync(IntPtr hWnd, ShowWindowCommands nCmdShow);
     }
 }

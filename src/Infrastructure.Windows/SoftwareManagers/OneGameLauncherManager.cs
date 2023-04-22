@@ -9,14 +9,17 @@ internal sealed class OneGameLauncherManager : ISoftwareManager
 {
     public OneGameLauncherManager(
         IUser32Service user32Service,
-        IProcessService processService)
+        IProcessService processService,
+        IWindowService windowService)
     {
         this.User32Service = user32Service;
         this.ProcessService = processService;
+        this.WindowService = windowService;
     }
 
     private IUser32Service User32Service { get; }
     private IProcessService ProcessService { get; }
+    private IWindowService WindowService { get; }
 
     public string Key => "OneGameLauncher";
 
@@ -31,13 +34,7 @@ internal sealed class OneGameLauncherManager : ISoftwareManager
     public void Start(string softwarePath, string? softwareArguments)
     {
         this.ProcessService.Start(softwarePath, softwareArguments).Dispose();
-
-        IntPtr w = this.Window;
-        if (w != IntPtr.Zero)
-        {
-            this.User32Service.SetForegroundWindow(w);
-            this.User32Service.ShowWindowAsync(w, 3);
-        }
+        this.WindowService.RepeatTryMaximizeWindow(() => this.Window, TimeSpan.FromSeconds(5));
     }
 
     public string FindSoftwarePathOrDefault() =>

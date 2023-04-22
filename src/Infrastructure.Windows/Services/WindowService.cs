@@ -2,10 +2,13 @@
 
 using System;
 using AutoGame.Core.Interfaces;
+using AutoGame.Infrastructure.Windows.Enums;
 using AutoGame.Infrastructure.Windows.Interfaces;
 
 internal sealed class WindowService : IWindowService
 {
+    private static readonly TimeSpan SleepInterval = TimeSpan.FromMilliseconds(100);
+
     public WindowService(
         IUser32Service user32Service,
         IDateTimeService dateTimeService,
@@ -40,7 +43,6 @@ internal sealed class WindowService : IWindowService
 
     public bool RepeatTryForceForegroundWindowByTitle(string windowTitle, TimeSpan timeout)
     {
-        TimeSpan sleepInterval = TimeSpan.FromMilliseconds(100);
         DateTime start = this.DateTimeService.UtcNow;
 
         while (true)
@@ -62,9 +64,32 @@ internal sealed class WindowService : IWindowService
                 break;
             }
 
-            this.SleepService.Sleep(sleepInterval);
+            this.SleepService.Sleep(SleepInterval);
         }
 
         return false;
+    }
+
+    public void RepeatTryMaximizeWindow(Func<IntPtr> windowGetter, TimeSpan timeout)
+    {
+        DateTime start = this.DateTimeService.UtcNow;
+
+        while (true)
+        {
+            IntPtr window = windowGetter();
+
+            if (window != IntPtr.Zero)
+            {
+                this.User32Service.ShowWindowAsync(window, ShowWindowCommands.Maximize);
+                break;
+            }
+
+            if (this.DateTimeService.UtcNow - start >= timeout)
+            {
+                break;
+            }
+
+            this.SleepService.Sleep(SleepInterval);
+        }
     }
 }

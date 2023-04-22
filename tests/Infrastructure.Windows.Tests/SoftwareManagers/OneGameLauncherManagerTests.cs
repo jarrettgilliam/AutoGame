@@ -17,6 +17,7 @@ public class OneGameLauncherManagerTests
     private readonly Mock<IUser32Service> user32ServiceMock = new();
     private readonly Mock<IProcessService> processServiceMock = new();
     private readonly Mock<IProcess> processMock = new();
+    private readonly Mock<IWindowService> windowService = new();
 
     private readonly IntPtr oneGameLauncherWindow = new(1);
     private readonly IntPtr otherWindow = new(2);
@@ -33,8 +34,8 @@ public class OneGameLauncherManagerTests
 
         this.sut = new OneGameLauncherManager(
             this.user32ServiceMock.Object,
-            this.processServiceMock.Object
-        );
+            this.processServiceMock.Object,
+            this.windowService.Object);
     }
 
     [Fact]
