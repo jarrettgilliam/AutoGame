@@ -20,7 +20,7 @@ internal sealed class HeroicManager : ISoftwareManager
 
     public string Key => "Heroic";
 
-    public string Description => "Heroic Games Launcher Fullscreen";
+    public string Description => "Heroic Games Launcher";
 
     public string DefaultArguments => "--fullscreen";
 
