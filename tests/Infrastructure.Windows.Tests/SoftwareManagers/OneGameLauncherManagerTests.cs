@@ -2,12 +2,10 @@
 
 using System;
 using System.IO;
-using System.IO.Abstractions;
 using AutoGame.Core.Interfaces;
 using AutoGame.Infrastructure.Windows.Interfaces;
 using AutoGame.Infrastructure.Windows.SoftwareManagers;
 using Moq;
-using Serilog;
 using Xunit;
 
 public class OneGameLauncherManagerTests
@@ -15,39 +13,28 @@ public class OneGameLauncherManagerTests
     private const string SOFTWARE_NAME = "OneGameLauncher";
     private const string SOFTWARE_PATH = $"/default/path/to/{SOFTWARE_NAME}.exe";
 
-    private readonly OneGameLauncherManager sut; 
+    private readonly OneGameLauncherManager sut;
     private readonly Mock<IUser32Service> user32ServiceMock = new();
-    private readonly Mock<IFileSystem> fileSystemMock = new();
-    private readonly Mock<IPath> pathMock = new();
     private readonly Mock<IProcessService> processServiceMock = new();
     private readonly Mock<IProcess> processMock = new();
-  
+
+    private readonly IntPtr oneGameLauncherWindow = new(1);
+    private readonly IntPtr otherWindow = new(2);
 
     public OneGameLauncherManagerTests()
     {
-        this.pathMock
-            .Setup(x => x.Join(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>()))
-            .Returns<string, string, string>(Path.Join);
-
-        this.pathMock
-            .Setup(x => x.GetFullPath(It.IsAny<string>()))
-            .Returns<string>(path => path);
-
-        this.fileSystemMock
-            .SetupGet(x => x.Path)
-            .Returns(this.pathMock.Object);
-
         this.processServiceMock
             .Setup(x => x.Start(It.IsAny<string>(), It.IsAny<string?>()))
             .Returns(this.processMock.Object);
 
-        this.sut = new OneGameLauncherManager(         
-            this.user32ServiceMock.Object,         
+        this.user32ServiceMock
+            .Setup(x => x.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)"))
+            .Returns(this.oneGameLauncherWindow);
+
+        this.sut = new OneGameLauncherManager(
+            this.user32ServiceMock.Object,
             this.processServiceMock.Object
-            );
+        );
     }
 
     [Fact]
@@ -74,8 +61,8 @@ public class OneGameLauncherManagerTests
     public void IsRunning_ReturnsTrue()
     {
         this.user32ServiceMock
-            .Setup(x => x.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)"))
-            .Returns(IntPtr.MaxValue);
+            .Setup(x => x.GetForegroundWindow())
+            .Returns(this.oneGameLauncherWindow);
 
         Assert.True(this.sut.IsRunning(SOFTWARE_PATH));
     }
@@ -84,8 +71,8 @@ public class OneGameLauncherManagerTests
     public void IsRunning_ReturnsFalse()
     {
         this.user32ServiceMock
-            .Setup(x => x.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)"))
-            .Returns(IntPtr.Zero);
+            .Setup(x => x.GetForegroundWindow())
+            .Returns(this.otherWindow);
 
         Assert.False(this.sut.IsRunning(SOFTWARE_PATH));
     }
@@ -112,10 +99,8 @@ public class OneGameLauncherManagerTests
     [Fact]
     public void FindSoftwarePathOrDefault_ReturnsDefaultPath()
     {
-        string defaultSteamPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
-         
+        string defaultSteamPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
+
         Assert.Equal(defaultSteamPath, this.sut.FindSoftwarePathOrDefault());
     }
-
-     
 }
