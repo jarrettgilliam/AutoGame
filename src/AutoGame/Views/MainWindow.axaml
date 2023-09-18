@@ -8,6 +8,7 @@
         xmlns:ui="using:FluentAvalonia.UI.Controls"
         mc:Ignorable="d" d:DesignHeight="315" d:DesignWidth="625"
         x:Class="AutoGame.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/AutoGame.ico"
         Title="AutoGame"
         WindowStartupLocation="CenterScreen"
@@ -65,7 +66,7 @@
                     Margin="5"
                     VerticalContentAlignment="Center"
                     HorizontalAlignment="Stretch"
-                    Items="{Binding AvailableSoftware}"
+                    ItemsSource="{Binding AvailableSoftware}"
                     SelectedItem="{Binding Config.SoftwareKey, Mode=TwoWay,
                         Converter={StaticResource SoftwareKeyToManagerConverter}}">
                     <ComboBox.ItemTemplate>

@@ -147,7 +147,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
                 FileName = executable,
                 InitialDirectory = this.FileSystem.Path.GetDirectoryName(this.Config.SoftwarePath),
                 FilterName = software.Description,
-                FilterExtensions = new List<string> { "exe" }
+                FilterPatterns = new List<string> { string.IsNullOrEmpty(executable) ? "*.exe" : executable }
             };
 
             if (string.IsNullOrEmpty(parms.InitialDirectory))
