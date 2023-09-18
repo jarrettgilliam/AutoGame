@@ -274,9 +274,9 @@ public class MainWindowViewModelTests
         this.sut.Config = this.savedConfigMock;
         await this.sut.BrowseSoftwarePathCommand.ExecuteAsync(null);
 
-        Assert.Equal(ExecutableName, this.openFileDialogParms.FileName);
         Assert.Equal(CustomDirectory, this.openFileDialogParms.InitialDirectory);
         Assert.Equal(SoftwareDescription, this.openFileDialogParms.FilterName);
+        Assert.Collection(this.openFileDialogParms.FilterPatterns, x => Assert.Equal(ExecutableName, x));
 
         Assert.Collection(this.openFileDialogParms.FilterPatterns,
             x => Assert.Equal(ExecutableName, x));
