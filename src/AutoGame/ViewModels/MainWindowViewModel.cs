@@ -144,7 +144,6 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
             var parms = new OpenFileDialogParms
             {
-                FileName = executable,
                 InitialDirectory = this.FileSystem.Path.GetDirectoryName(this.Config.SoftwarePath),
                 FilterName = software.Description,
                 FilterPatterns = new List<string> { string.IsNullOrEmpty(executable) ? "*.exe" : executable }
