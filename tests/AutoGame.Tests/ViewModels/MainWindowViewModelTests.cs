@@ -278,8 +278,8 @@ public class MainWindowViewModelTests
         Assert.Equal(CustomDirectory, this.openFileDialogParms.InitialDirectory);
         Assert.Equal(SoftwareDescription, this.openFileDialogParms.FilterName);
 
-        Assert.Collection(this.openFileDialogParms.FilterExtensions,
-            x => Assert.Equal("exe", x));
+        Assert.Collection(this.openFileDialogParms.FilterPatterns,
+            x => Assert.Equal(ExecutableName, x));
     }
 
     [Fact]

@@ -10,6 +10,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using FluentAvalonia.Styling;
 using FluentAvalonia.UI.Media;
 using Microsoft.Extensions.DependencyInjection;
@@ -84,13 +85,13 @@ public class App : Application
 
     private void ApplyTheme(Window? window)
     {
-        if (AvaloniaLocator.Current.GetService<FluentAvaloniaTheme>() is { } theme)
+        if (Current?.Styles[0] is FluentAvaloniaTheme theme)
         {
             theme.ForceWin32WindowToTheme(window);
 
             Color2 color = Color2.FromRGB(27, 89, 0);
 
-            if (theme.RequestedTheme == FluentAvaloniaTheme.LightModeString)
+            if (this.ActualThemeVariant == ThemeVariant.Light)
             {
                 color = color.LightenPercent(1f);
             }

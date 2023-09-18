@@ -11,40 +11,50 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using FluentAvalonia.Styling;
-using MessageBox.Avalonia.BaseWindows.Base;
-using MessageBox.Avalonia.DTO;
-using MessageBox.Avalonia.Enums;
-using MessageBox.Avalonia.ViewModels;
-using MessageBox.Avalonia.Views;
+using Avalonia.Platform.Storage;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Dto;
+using MsBox.Avalonia.Enums;
 using Serilog.Events;
 
 internal sealed class DialogService : IDialogService
 {
     public async Task<string?> ShowOpenFileDialog(OpenFileDialogParms parms)
     {
-        var dialog = new OpenFileDialog
-        {
-            InitialFileName = parms.FileName,
-            Directory = parms.InitialDirectory,
-            Filters = new List<FileDialogFilter>
-            {
-                new()
-                {
-                    Name = parms.FilterName,
-                    Extensions = parms.FilterExtensions
-                }
-            }
-        };
-
-        if (!(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime))
+        if (Application.Current?.ApplicationLifetime is not
+            IClassicDesktopStyleApplicationLifetime { MainWindow.StorageProvider.CanOpen: true } lifetime)
         {
             return null;
         }
 
-        string[]? selectedFiles = await dialog.ShowAsync(lifetime.MainWindow).ConfigureAwait(false);
+        IStorageProvider storageProvider = lifetime.MainWindow.StorageProvider;
 
-        return selectedFiles?.FirstOrDefault();
+        FilePickerOpenOptions options = await this.GetFilePickerOpenOptions(parms, storageProvider);
+
+        IReadOnlyList<IStorageFile> result = await storageProvider.OpenFilePickerAsync(options).ConfigureAwait(false);
+
+        return result.FirstOrDefault()?.Path.LocalPath;
+    }
+
+    private async Task<FilePickerOpenOptions> GetFilePickerOpenOptions(OpenFileDialogParms parms, IStorageProvider storageProvider)
+    {
+        var options = new FilePickerOpenOptions();
+
+        if (parms.InitialDirectory != null)
+        {
+            options.SuggestedStartLocation =
+                await storageProvider.TryGetFolderFromPathAsync(parms.InitialDirectory).ConfigureAwait(false);
+        }
+
+        options.FileTypeFilter = new List<FilePickerFileType>
+        {
+            new(parms.FilterName)
+            {
+                Patterns = parms.FilterPatterns
+            }
+        };
+
+        return options;
     }
 
     public void ShowMessageBox(MessageBoxParms parms)
@@ -56,36 +66,18 @@ internal sealed class DialogService : IDialogService
             ButtonDefinitions = ButtonEnum.Ok,
             Icon = this.GetIconForLogLevel(parms.Icon),
             WindowStartupLocation = WindowStartupLocation.CenterScreen,
-            MaxWidth = 600
+            MaxWidth = 600,
+            WindowIcon = new WindowIcon(new Bitmap(AssetLoader.Open(new Uri("avares://AutoGame/Assets/AutoGame.ico"))))
         };
 
-        if (AvaloniaLocator.Current.GetService<IAssetLoader>() is { } assets)
-        {
-            stdParms.WindowIcon = new WindowIcon(
-                new Bitmap(assets.Open(new Uri(@"avares://AutoGame/Assets/AutoGame.ico"))));
-        }
-
-        _ = this.GetMessageBoxStandardWindow(stdParms).Show();
+        _ = MessageBoxManager.GetMessageBoxStandard(stdParms).ShowWindowAsync();
     }
 
     private Icon GetIconForLogLevel(LogEventLevel level) =>
-        level switch {
+        level switch
+        {
             < LogEventLevel.Warning => Icon.Info,
             LogEventLevel.Warning => Icon.Warning,
             > LogEventLevel.Warning => Icon.Error
         };
-
-    // Copied from MessageBoxManager and added a call to ForceWin32WindowToTheme
-    private IMsBoxWindow<ButtonResult> GetMessageBoxStandardWindow(MessageBoxStandardParams @params)
-    {
-        var boxStandardWindow = new MsBoxStandardWindow();
-
-        if (AvaloniaLocator.Current.GetService<FluentAvaloniaTheme>() is { } theme)
-        {
-            theme.ForceWin32WindowToTheme(boxStandardWindow);
-        }
-
-        boxStandardWindow.DataContext = new MsBoxStandardViewModel(@params, boxStandardWindow);
-        return new MsBoxWindowBase<MsBoxStandardWindow, ButtonResult>(boxStandardWindow);
-    }
 }
