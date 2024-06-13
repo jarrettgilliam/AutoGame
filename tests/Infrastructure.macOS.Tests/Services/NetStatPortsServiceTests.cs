@@ -109,7 +109,7 @@ public class NetStatPortsServiceTests
     {
         this.standardOutputMock.AppendLine(line);
         var ports = this.sut.GetUdpPorts();
-        Assert.Equal(1, ports.Count);
+        Assert.Single(ports);
     }
 
     [Theory]
@@ -117,10 +117,10 @@ public class NetStatPortsServiceTests
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("udp46")]
-    public void CannotParsePorts(string line)
+    public void CannotParsePorts(string? line)
     {
         this.standardOutputMock.AppendLine(line);
         var ports = this.sut.GetUdpPorts();
-        Assert.Equal(0, ports.Count);
+        Assert.Empty(ports);
     }
 }
