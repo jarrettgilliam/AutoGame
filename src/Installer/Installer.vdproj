@@ -836,7 +836,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_1D6E1F41FFE64FF5BC677012D9549DC0"
             {
-            "SourcePath" = "8:..\\AutoGame\\obj\\Release\\net7.0-windows10.0.17763.0\\win-x64\\apphost.exe"
+            "SourcePath" = "8:..\\AutoGame\\obj\\Release\\net8.0-windows10.0.17763.0\\win-x64\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_93D681D956BC4AC3B85B06D8784811D8"
