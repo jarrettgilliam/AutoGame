@@ -35,7 +35,7 @@ public class ConfigService : IConfigService
         try
         {
             using Stream s = this.FileSystem.File.OpenRead(this.AppInfo.ConfigFilePath);
-            config = JsonSerializer.Deserialize<Config>(s);
+            config = JsonSerializer.Deserialize(s, ConfigJsonSerializerContext.Default.Config);
             config!.IsDirty = false;
         }
         catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
@@ -50,8 +50,7 @@ public class ConfigService : IConfigService
         this.FileSystem.Directory.CreateDirectory(this.AppInfo.AppDataFolder);
 
         using Stream s = this.FileSystem.File.Create(this.AppInfo.ConfigFilePath);
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        JsonSerializer.Serialize(s, config, options);
+        JsonSerializer.Serialize(s, config, ConfigJsonSerializerContext.Default.Config);
 
         config.IsDirty = false;
     }
