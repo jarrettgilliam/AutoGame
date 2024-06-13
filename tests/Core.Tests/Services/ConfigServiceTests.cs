@@ -387,18 +387,18 @@ public class ConfigServiceTests
 
     private class MockFileSystemStream : FileSystemStream
     {
-        public MockFileSystemStream(MemoryStream baseMemoryStream, string? path)
+        public MockFileSystemStream(MemoryStream baseMemoryStream, string path)
             : base(baseMemoryStream, path, true)
         {
             this.BaseMemoryStream = baseMemoryStream;
         }
 
-        public MockFileSystemStream(byte[] buffer, string? path)
+        public MockFileSystemStream(byte[] buffer, string path)
             : this(new MemoryStream(buffer), path)
         {
         }
 
-        public MockFileSystemStream(string? path)
+        public MockFileSystemStream(string path)
             : this(new MemoryStream(), path)
         {
         }

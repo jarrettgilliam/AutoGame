@@ -16,7 +16,7 @@ public class UpdateCheckingServiceTests
     private readonly Mock<IAppInfoService> appInfoServiceMock = new();
     private readonly Mock<ILogger> loggerMock = new();
 
-    private string mockTagName = "v2.0.1";
+    private string? mockTagName = "v2.0.1";
     private string mockHtmlUrl = string.Empty;
 
     public UpdateCheckingServiceTests()
@@ -98,7 +98,7 @@ public class UpdateCheckingServiceTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("test")]
-    public async Task GetUpdateInfo_IsAvailable_Is_False(string tag)
+    public async Task GetUpdateInfo_IsAvailable_Is_False(string? tag)
     {
         this.mockTagName = tag;
 
