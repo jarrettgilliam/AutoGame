@@ -5,7 +5,7 @@ using AutoGame.Views;
 using Avalonia;
 using Serilog;
 
-internal class Program
+internal static class Program
 {
     [STAThread]
     public static int Main(string[] args)

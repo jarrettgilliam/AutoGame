@@ -40,6 +40,7 @@ public class ConfigService : IConfigService
         }
         catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
         {
+            // No config found, return null
         }
 
         return config;

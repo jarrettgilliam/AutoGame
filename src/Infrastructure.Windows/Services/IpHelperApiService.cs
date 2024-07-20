@@ -12,15 +12,14 @@ internal sealed class IpHelperApiService : IIpHelperApiService
         ref int pdwSize,
         bool sort,
         IpVersion ipVersion,
-        UdpTableClass tableClass,
-        uint reserved = 0) =>
+        UdpTableClass tableClass) =>
         NativeMethods.GetExtendedUdpTable(
             pUdpTable,
             ref pdwSize,
             sort,
             ipVersion,
             tableClass,
-            reserved);
+            0);
 
     private static class NativeMethods
     {

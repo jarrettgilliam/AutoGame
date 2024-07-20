@@ -58,8 +58,7 @@ public class NetStatPortsServiceTests
                 ref It.Ref<int>.IsAny,
                 It.IsAny<bool>(),
                 It.IsAny<IpVersion>(),
-                It.IsAny<UdpTableClass>(),
-                It.IsAny<uint>()))
+                It.IsAny<UdpTableClass>()))
             .Callback(this.GetExtendedUdpTableCallback)
             .Returns(() => this.getExtendedUdpTableReturnValue);
 
@@ -112,8 +111,7 @@ public class NetStatPortsServiceTests
         ref int pdwSize,
         bool sort,
         IpVersion ipVersion,
-        UdpTableClass tableClass,
-        uint reserved)
+        UdpTableClass tableClass)
     {
         if (tableClass != UdpTableClass.UDP_TABLE_OWNER_PID)
         {

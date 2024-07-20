@@ -20,8 +20,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private UpdateInfo? updateInfo;
 
 #nullable disable
-
-    // This constructor exists only for auto completion in the axaml
+    // This constructor exists only for auto-completion in the axaml
     // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
     internal MainWindowViewModel()
     {
@@ -151,7 +150,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
             if (string.IsNullOrEmpty(parms.InitialDirectory))
             {
-                parms.InitialDirectory = this.FileSystem.Path.GetDirectoryName(defaultPath);
+                parms = parms with { InitialDirectory = this.FileSystem.Path.GetDirectoryName(defaultPath) };
             }
 
             if (await this.DialogService.ShowOpenFileDialog(parms) is { } selectedFileName)
