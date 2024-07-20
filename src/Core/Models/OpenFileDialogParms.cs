@@ -2,9 +2,9 @@
 
 using System.Collections.Generic;
 
-public struct OpenFileDialogParms
+public readonly record struct OpenFileDialogParms
 {
-    public string? InitialDirectory { get; set; }
-    public string? FilterName { get; set; }
-    public List<string> FilterPatterns { get; set; }
+    public string? InitialDirectory { get; init; }
+    public string? FilterName { get; init; }
+    public List<string> FilterPatterns { get; init; }
 }

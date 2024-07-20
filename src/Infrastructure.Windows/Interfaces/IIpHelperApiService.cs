@@ -10,6 +10,5 @@ public interface IIpHelperApiService
         ref int pdwSize,
         bool sort,
         IpVersion ipVersion,
-        UdpTableClass tableClass,
-        uint reserved = 0);
+        UdpTableClass tableClass);
 }

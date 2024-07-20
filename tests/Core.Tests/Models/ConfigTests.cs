@@ -8,7 +8,7 @@ using AutoGame.Core.Models;
 
 public class ConfigTests
 {
-    private Config sut;
+    private readonly Config sut;
     private int propertyChangedFireCount;
     private int errorsChangedFireCount;
 
