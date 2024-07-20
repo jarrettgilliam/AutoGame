@@ -76,7 +76,7 @@ try
     if (![string]::IsNullOrWhiteSpace($github_token))
     {
         $env:GITHUB_TOKEN = $github_token;
-        hub release create --draft --message "AutoGame v${version}" --attach "$installerReleaseDir\AutoGame_Setup_$version.msi" "v${version}"
+        gh release create --draft --title "AutoGame v${version}" --generate-notes "v${version}" "$installerReleaseDir\AutoGame_Setup_$version.msi"
         Remove-Item Env:\GITHUB_TOKEN
     }
 
