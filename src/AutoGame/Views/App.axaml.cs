@@ -23,7 +23,7 @@ public class App : Application
 
     public App()
     {
-        ServiceCollection services = new();
+        ServiceCollection services = [];
         this.ConfigureServices(services);
         this.serviceProvider = services.BuildServiceProvider();
         SerilogConfiguration.ConfigureFullLogger(this.serviceProvider);

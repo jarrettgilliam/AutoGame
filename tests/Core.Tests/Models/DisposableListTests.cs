@@ -11,7 +11,7 @@ public class DisposableListTests
     [Fact]
     public void Constructor_PassedEnumerable_Matches()
     {
-        List<IDisposable> disposables = new() { this.disposableMock.Object };
+        List<IDisposable> disposables = [this.disposableMock.Object];
 
         var sut = new DisposableList<IDisposable>(disposables);
 

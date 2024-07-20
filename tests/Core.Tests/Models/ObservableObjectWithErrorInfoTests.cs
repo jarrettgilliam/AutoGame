@@ -7,7 +7,7 @@ using AutoGame.Core.Models;
 
 public class ObservableObjectWithErrorInfoTests
 {
-    private readonly List<string?> errorsChangedEvents = new();
+    private readonly List<string?> errorsChangedEvents = [];
 
     private readonly ObservableObjectWithErrorInfoImpl sut;
 

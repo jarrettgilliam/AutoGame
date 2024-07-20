@@ -101,10 +101,9 @@ public class MainWindowViewModelTests
             .Returns(SoftwareKey);
 
         this.softwareCollectionMock = new(
-            new object[]
-            {
-                new[] { this.softwareManagerMock.Object }
-            });
+        [
+            new[] { this.softwareManagerMock.Object }
+        ]);
 
         this.softwareCollectionMock.CallBase = true;
 
@@ -155,7 +154,7 @@ public class MainWindowViewModelTests
     public async Task Loaded_TryLoadConfigFalse_CreatesDefaultConfiguration()
     {
         this.configServiceMock.Setup(x => x.GetConfigOrNull()).Returns(() => null);
-        List<string?> propertyChanges = new();
+        List<string?> propertyChanges = [];
         this.sut.PropertyChanged += (_, e) => propertyChanges.Add(e.PropertyName);
         this.configServiceMock.Verify(
             x => x.CreateDefault(),
@@ -211,7 +210,7 @@ public class MainWindowViewModelTests
     [Fact]
     public async Task Loaded_TryLoadConfigTrue_DoesntLoadDefaultConfig()
     {
-        List<string?> propertyChanges = new();
+        List<string?> propertyChanges = [];
         this.sut.PropertyChanged += (_, e) => propertyChanges.Add(e.PropertyName);
 
         this.configServiceMock.Verify(x => x.CreateDefault(), Times.Once);

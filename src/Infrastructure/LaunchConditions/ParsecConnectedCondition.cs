@@ -17,7 +17,7 @@ public class ParsecConnectedCondition : IParsecConnectedCondition
     private const string ParsecLogFileName = "log.txt";
 
     private readonly object checkConditionLock = new();
-    private readonly List<IFileSystemWatcher> parsecLogWatchers = new();
+    private readonly List<IFileSystemWatcher> parsecLogWatchers = [];
     private bool wasConnected;
 
     public ParsecConnectedCondition(

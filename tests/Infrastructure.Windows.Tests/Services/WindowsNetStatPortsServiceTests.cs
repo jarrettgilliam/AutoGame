@@ -22,30 +22,30 @@ public class NetStatPortsServiceTests
     private readonly MibUdpTableOwnerPid UdpPortsIPv4 = new()
     {
         dwNumEntries = 1,
-        table = new[]
-        {
+        table =
+        [
             new MibUdpRowOwnerPid
             {
                 dwLocalAddr = 16777343, // 127.0.0.1
-                dwLocalPort = new byte[] { 7, 108, 0, 0 }, // 1900
+                dwLocalPort = [7, 108, 0, 0], // 1900
                 dwOwningPid = 4580
             }
-        }
+        ]
     };
 
     private readonly MibUdp6TableOwnerPid UdpPortsIPv6 = new()
     {
         dwNumEntries = 1,
-        table = new[]
-        {
+        table =
+        [
             new MibUdp6RowOwnerPid
             {
-                localAddr = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // ::1
+                localAddr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // ::1
                 dwLocalScopeId = 0,
-                dwLocalPort = new byte[] { 7, 108, 0, 0 }, // 1900
+                dwLocalPort = [7, 108, 0, 0], // 1900
                 dwOwningPid = 4580
             }
-        }
+        ]
     };
 
     private uint getExtendedUdpTableReturnValue;

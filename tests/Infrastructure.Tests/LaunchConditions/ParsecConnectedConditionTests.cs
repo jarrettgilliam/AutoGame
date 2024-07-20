@@ -26,7 +26,7 @@ public class ParsecConnectedConditionTests
     private readonly Mock<IDirectory> directoryMock = new();
     private readonly Mock<IFile> fileMock = new();
     private readonly Mock<IFileSystemWatcherFactory> fileSystemWatcherFactoryMock = new();
-    private readonly List<Mock<IFileSystemWatcher>> fileSystemWatcherMocks = new();
+    private readonly List<Mock<IFileSystemWatcher>> fileSystemWatcherMocks = [];
     private readonly Mock<IAppInfoService> appInfoServiceMock = new();
     private readonly Mock<IRuntimeInformation> runtimeInformationMock = new();
 
@@ -44,12 +44,12 @@ public class ParsecConnectedConditionTests
 
     public ParsecConnectedConditionTests()
     {
-        this.udpPorts = new List<Port>
-        {
+        this.udpPorts =
+        [
             new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID },
             new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID },
             new() { Protocol = NetworkProtocol.UDP, ProcessId = PARSECD_PROC_ID }
-        };
+        ];
 
         this.netStatPortsServiceMock
             .Setup(x => x.GetUdpPorts())
