@@ -1,20 +1,21 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:AutoGame.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:interfaces="clr-namespace:AutoGame.Core.Interfaces;assembly=AutoGame.Core"
-        xmlns:converter="clr-namespace:AutoGame.Converters"
-        xmlns:ui="using:FluentAvalonia.UI.Controls"
-        mc:Ignorable="d" d:DesignHeight="315" d:DesignWidth="625"
-        x:Class="AutoGame.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/AutoGame.ico"
-        Title="AutoGame"
-        WindowStartupLocation="CenterScreen"
-        ShowInTaskbar="{Binding ShowWindow, Mode=TwoWay}"
-        ShowWindow="{Binding ShowWindow, Mode=TwoWay}"
-        SizeToContent="Height" MaxWidth="630" CanResize="False">
+<fa:AppWindow xmlns="https://github.com/avaloniaui"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:vm="using:AutoGame.ViewModels"
+           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+           xmlns:interfaces="clr-namespace:AutoGame.Core.Interfaces;assembly=AutoGame.Core"
+           xmlns:converter="clr-namespace:AutoGame.Converters"
+           xmlns:ui="using:FluentAvalonia.UI.Controls"
+           xmlns:fa="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia"
+           mc:Ignorable="d" d:DesignHeight="315" d:DesignWidth="625"
+           x:Class="AutoGame.Views.MainWindow"
+           x:DataType="vm:MainWindowViewModel"
+           Icon="/Assets/AutoGame.ico"
+           Title="AutoGame"
+           WindowStartupLocation="CenterScreen"
+           ShowInTaskbar="{Binding ShowWindow, Mode=TwoWay}"
+           ShowWindow="{Binding ShowWindow, Mode=TwoWay}"
+           SizeToContent="Height" MaxWidth="630" CanResize="False" ShowAsDialog="True">
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
@@ -168,4 +169,4 @@
 
         </Grid>
     </Grid>
-</Window>
+</fa:AppWindow>
