@@ -1,7 +1,6 @@
 ﻿namespace AutoGame.Core.Tests.Services;
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
@@ -76,7 +75,9 @@ public sealed class LogWatcherServiceTests
             .Setup(x => x.New(LogFilePath))
             .Returns(this.fileSystemWatcherMock.Object);
 
-        this.sut = new LogWatcherService(this.fileSystemMock.Object, this.loggerMock.Object);
+        this.sut = new LogWatcherService(
+            this.fileSystemMock.Object,
+            this.loggerMock.Object);
     }
 
     [Fact]
@@ -87,8 +88,10 @@ public sealed class LogWatcherServiceTests
         this.sut.StartMonitoring(LogFilePath);
 
         // Assert
-        this.fileSystemWatcherFactoryMock.Verify(x => x.New(LogFilePath), Times.Once);
-        this.fileSystemWatcherMock.VerifySet(x => x.EnableRaisingEvents = true, Times.Once);
+        this.fileSystemWatcherFactoryMock
+            .Verify(x => x.New(LogFilePath), Times.Once);
+        this.fileSystemWatcherMock
+            .VerifySet(x => x.EnableRaisingEvents = true, Times.Once);
     }
 
     [Fact]
@@ -147,7 +150,7 @@ public sealed class LogWatcherServiceTests
 
         // Act
         this.logEntries.AddRange(newLogEntries);
-        this.fileSystemWatcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""));
+        this.RaiseLogChangedEvent();
 
         // Assert
         Assert.Equal(newLogEntries, receivedLogEntries);
@@ -169,7 +172,7 @@ public sealed class LogWatcherServiceTests
         ];
 
         // Act
-        this.fileSystemWatcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""));
+        this.RaiseLogChangedEvent();
 
         // Assert
         Assert.Equal(this.logEntries, receivedLogEntries);
@@ -182,7 +185,8 @@ public sealed class LogWatcherServiceTests
         this.sut.StartMonitoring(LogFilePath);
 
         List<string> receivedLogEntries = [];
-        this.sut.LogEntriesAdded += (_, entries) => receivedLogEntries.AddRange(entries);
+        this.sut.LogEntriesAdded +=
+            (_, entries) => receivedLogEntries.AddRange(entries);
 
         List<string> newLogEntries =
         [
@@ -193,7 +197,7 @@ public sealed class LogWatcherServiceTests
         // Act
         this.sut.StopMonitoring();
         this.logEntries.AddRange(newLogEntries);
-        this.fileSystemWatcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""));
+        this.RaiseLogChangedEvent();
 
         // Assert
         this.fileSystemWatcherMock.VerifySet(x => x.EnableRaisingEvents = false, Times.Once);
@@ -220,22 +224,29 @@ public sealed class LogWatcherServiceTests
             }
         };
 
-        Queue<SlowStreamReader> readers = new();
-        readers.Enqueue(new SlowStreamReader(new MemoryStream(Encoding.UTF8.GetBytes(string.Join(Environment.NewLine, this.logEntries)))));
-        readers.Enqueue(new SlowStreamReader(new MemoryStream(Encoding.UTF8.GetBytes(string.Join(Environment.NewLine, this.logEntries)))));
-
         this.fileMock
             .Setup(x => x.OpenText(LogFilePath))
-            .Returns(() => readers.Dequeue());
+            .Returns(() =>
+                new SlowStreamReader(
+                    new MemoryStream(
+                        Encoding.UTF8.GetBytes(
+                            string.Join(Environment.NewLine, this.logEntries)))));
 
         // Act
         await Task.WhenAll(
-            Task.Run(() => this.fileSystemWatcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""))),
-            Task.Run(() => this.fileSystemWatcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""))));
+            Task.Run(this.RaiseLogChangedEvent),
+            Task.Run(this.RaiseLogChangedEvent));
 
         // Assert
         Assert.Equal(this.logEntries.Count, receivedLogEntries.Count);
         Assert.Equal(this.logEntries, receivedLogEntries);
+    }
+
+    private void RaiseLogChangedEvent()
+    {
+        this.fileSystemWatcherMock.Raise(
+            x => x.Changed += null,
+            new FileSystemEventArgs(WatcherChangeTypes.Changed, "", ""));
     }
 
     private class SlowStreamReader : StreamReader

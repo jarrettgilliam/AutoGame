@@ -1,7 +1,6 @@
 ﻿namespace AutoGame.ViewModels;
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
