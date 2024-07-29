@@ -15,12 +15,15 @@ public static class DependencyInjection
 
     private static void AddServices(this IServiceCollection services)
     {
+        services.AddSingleton<IAutoGameService, AutoGameService>();
+        services.AddSingleton<IConfigService, ConfigService>();
         services.AddSingleton<IDateTimeService, DateTimeService>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<IMessageBoxSink, MessageBoxSink>();
         services.AddSingleton<IProcessService, ProcessService>();
         services.AddSingleton<IRuntimeInformation, RuntimeInformationWrapper>();
         services.AddSingleton<ISleepService, SleepService>();
+        services.AddSingleton<ISoftwareCollection, SoftwareCollection>();
         services.AddSingleton<IUpdateCheckingService, UpdateCheckingService>();
     }
 

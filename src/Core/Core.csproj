@@ -11,9 +11,7 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
         <PackageReference Include="Serilog" Version="4.0.0" />
-        <PackageReference Include="System.IO.Abstractions" Version="21.0.26" />
     </ItemGroup>
 
     <ItemGroup>

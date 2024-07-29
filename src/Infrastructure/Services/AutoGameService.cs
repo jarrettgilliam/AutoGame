@@ -1,4 +1,4 @@
-﻿namespace AutoGame.Core.Services;
+﻿namespace AutoGame.Infrastructure.Services;
 
 using System;
 using System.Collections.Generic;

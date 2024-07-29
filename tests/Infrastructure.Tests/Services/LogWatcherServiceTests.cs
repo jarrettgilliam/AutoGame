@@ -1,4 +1,4 @@
-﻿namespace AutoGame.Core.Tests.Services;
+﻿namespace AutoGame.Infrastructure.Tests.Services;
 
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.IO.Abstractions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoGame.Core.Services;
+using AutoGame.Infrastructure.Services;
 using Serilog;
 
 public sealed class LogWatcherServiceTests

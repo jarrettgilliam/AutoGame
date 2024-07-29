@@ -1,4 +1,4 @@
-﻿namespace AutoGame.Core.Tests.Services;
+﻿namespace AutoGame.Infrastructure.Tests.Services;
 
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Text;
 using System.Text.Json;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
-using AutoGame.Core.Services;
+using AutoGame.Infrastructure.Services;
 
 public class ConfigServiceTests
 {

@@ -55,7 +55,6 @@ public class App : Application
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<IFileSystem, FileSystem>();
 
-        services.AddCore();
         services.AddInfrastructure();
         services.AddPlatformInfrastructure();
 

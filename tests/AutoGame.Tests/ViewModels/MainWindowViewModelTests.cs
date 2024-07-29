@@ -9,7 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using AutoGame.Core.Interfaces;
 using AutoGame.Core.Models;
-using AutoGame.Core.Services;
+using AutoGame.Infrastructure.Services;
 using AutoGame.ViewModels;
 using Serilog;
 using Serilog.Core;

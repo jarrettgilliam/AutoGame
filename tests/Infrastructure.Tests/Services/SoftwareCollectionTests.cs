@@ -1,7 +1,7 @@
-﻿namespace AutoGame.Core.Tests.Services;
+﻿namespace AutoGame.Infrastructure.Tests.Services;
 
 using AutoGame.Core.Interfaces;
-using AutoGame.Core.Services;
+using AutoGame.Infrastructure.Services;
 
 public class SoftwareCollectionTests
 {

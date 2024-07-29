@@ -5,4 +5,4 @@ using System.Text.Json.Serialization;
 
 [JsonSourceGenerationOptions(WriteIndented = true, ReadCommentHandling = JsonCommentHandling.Skip)]
 [JsonSerializable(typeof(Config))]
-internal partial class ConfigJsonSerializerContext : JsonSerializerContext;
+public partial class ConfigJsonSerializerContext : JsonSerializerContext;
