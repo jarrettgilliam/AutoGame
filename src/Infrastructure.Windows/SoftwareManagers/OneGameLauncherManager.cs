@@ -27,7 +27,7 @@ internal sealed class OneGameLauncherManager : ISoftwareManager
 
     public string DefaultArguments => "shell:appsfolder\\62269AlexShats.OneGameLauncherBeta_gghb1w55myjr2!App";
 
-    private IntPtr Window => this.User32Service.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free) [DEPRECATED]");
+    private IntPtr Window => this.User32Service.FindWindow("ApplicationFrameWindow", "One Game Launcher (Free)");
 
     public bool IsRunning(string softwarePath) => this.Window == this.User32Service.GetForegroundWindow();
 
