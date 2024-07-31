@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddSingleton<ISoftwareManager, PlayniteFullscreenManager>();
         services.AddSingleton<ISoftwareManager, HeroicManager>();
         services.AddSingleton<ISoftwareManager, OneGameLauncherManager>();
+        services.AddSingleton<ISoftwareManager, OneGameLauncherProManager>();
         services.AddSingleton<ISoftwareManager, OtherSoftwareManager>();
     }
 
