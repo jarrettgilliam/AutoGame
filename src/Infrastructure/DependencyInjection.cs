@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddSingleton<ISleepService, SleepService>();
         services.AddSingleton<ISoftwareCollection, SoftwareCollection>();
         services.AddSingleton<IUpdateCheckingService, UpdateCheckingService>();
+        services.AddTransient<ILogWatcherService, LogWatcherService>();
     }
 
     private static void AddLaunchConditions(this IServiceCollection services)

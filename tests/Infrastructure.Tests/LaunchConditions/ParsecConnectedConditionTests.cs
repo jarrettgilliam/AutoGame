@@ -103,7 +103,7 @@ public class ParsecConnectedConditionTests
             .Returns<string, string>(Path.Join);
 
         this.appInfoServiceMock
-            .SetupGet(x => x.ParsecLogDirectories)
+            .SetupGet(x => x.ParsecLogFiles)
             .Returns(ParsecLogDirectories);
 
         this.runtimeInformationMock

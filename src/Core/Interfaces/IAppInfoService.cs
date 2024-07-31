@@ -11,7 +11,7 @@ public interface IAppInfoService
 
     string LogFilePath { get; }
 
-    IEnumerable<string> ParsecLogDirectories { get; }
+    IEnumerable<string> ParsecLogFiles { get; }
 
     Version CurrentVersion { get; }
 }

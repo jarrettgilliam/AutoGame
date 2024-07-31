@@ -31,13 +31,10 @@ public sealed class AppInfoService : IAppInfoService
                 this.AppDataFolder,
                 "Log.txt");
 
-        this.ParsecLogDirectories = new[]
+        this.ParsecLogFiles = new[]
         {
-            Path.Join(
-                Environment.GetFolderPath(
-                    Environment.SpecialFolder.Personal),
-                ".parsec"),
-            "/Users/Shared/.parsec"
+            Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".parsec", "log.txt"),
+            "/Users/Shared/.parsec/log.txt"
         };
 
         this.CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version
@@ -47,6 +44,6 @@ public sealed class AppInfoService : IAppInfoService
     public string AppDataFolder { get; }
     public string ConfigFilePath { get; }
     public string LogFilePath { get; }
-    public IEnumerable<string> ParsecLogDirectories { get; }
+    public IEnumerable<string> ParsecLogFiles { get; }
     public Version CurrentVersion { get; }
 }

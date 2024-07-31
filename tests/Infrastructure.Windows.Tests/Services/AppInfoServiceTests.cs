@@ -36,7 +36,7 @@ public class AppInfoServiceTests
     {
         // These paths were copied from:
         // https://support.parsec.app/hc/en-us/articles/360003145951-Accessing-Your-Advanced-Settings
-        Assert.Collection(this.sut.ParsecLogDirectories,
+        Assert.Collection(this.sut.ParsecLogFiles,
             x => Assert.Equal(x, Environment.ExpandEnvironmentVariables(@"%appdata%\Parsec")),
             x => Assert.Equal(x, Environment.ExpandEnvironmentVariables(@"%programdata%\Parsec")));
     }

@@ -21,7 +21,6 @@ public static class DependencyInjection
         services.AddSingleton<IAppInfoService, AppInfoService>();
         services.AddSingleton<IGameControllerService, OpenTKGameControllerService>();
         services.AddSingleton<INetStatPortsService, NetStatPortsService>();
-        services.AddSingleton<IParsecConnectedCondition, MacOSParsecConnectedCondition>();
     }
 
     private static void AddSoftwareManagers(this IServiceCollection services)
